@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="FlappyNator" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/SimpleGameEngine" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../SimpleGameEngine" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add directory="include" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/SimpleGameEngine" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="$(#glfw)/bin" />
+				<Option object_output="obj/Release/" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add directory="include" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add directory="$(#glfw.include)" />
+		</Compiler>
+		<Linker>
+			<Add library="GL" />
+			<Add library="GLEW" />
+			<Add library="pthread" />
+			<Add library="Xxf86vm" />
+			<Add library="sfml-graphics" />
+			<Add library="sfml-window" />
+			<Add library="sfml-system" />
+			<Add library="SOIL" />
+			<Add directory="$(#glfw.lib)" />
+		</Linker>
+		<Unit filename="include/engine.h" />
+		<Unit filename="include/flatterrain.h" />
+		<Unit filename="include/settings.h" />
+		<Unit filename="include/shaderprogram.h" />
+		<Unit filename="include/slide.h" />
+		<Unit filename="include/terrain.h" />
+		<Unit filename="src/engine.cpp" />
+		<Unit filename="src/flatterrain.cpp" />
+		<Unit filename="src/main.cpp" />
+		<Unit filename="src/settings.cpp" />
+		<Unit filename="src/slide.cpp" />
+		<Unit filename="src/terrain.cpp" />
+		<Unit filename="src/util/tiny_obj_loader.cpp" />
+		<Unit filename="src/util/tiny_obj_loader.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
