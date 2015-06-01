@@ -2,7 +2,7 @@
 #define ENGINE_H
 
 #define GLEW_STATIC
-//#define GLM_FORCE_RADIANS
+#define GLM_FORCE_RADIANS
 
 #include <GL/glew.h>
 #include <SFML/Window.hpp>
@@ -16,6 +16,7 @@
 #include "slide.h"
 #include "flatterrain.h"
 #include "../src/util/tiny_obj_loader.h"
+#include "player.h"
 
 class Engine
 {
@@ -34,16 +35,24 @@ class Engine
         // sliding window, eye, center, speed
         Slide slide;
         Terrain *terrain;
+
+        glm::mat4 projMatrix;
+        glm::mat4 viewMatrix;
+
+        std::vector<WorldObject> wobjs;
     public:
         Engine();
         virtual ~Engine();
 
         bool init();
+        bool initSun();
         void drawFrame();
+        void drawTerrain();
+        void drawWorldObjects();
         void mainLoop();
 
         // debug test
-        void loadObject(std::string path);
+        void loadObject(const std::string &path);
 
         void handleKeyEvent(sf::Event event);
 };

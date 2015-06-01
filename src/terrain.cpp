@@ -8,12 +8,16 @@ Terrain::Terrain()
 Terrain::~Terrain()
 {
     //dtor
+    glDeleteBuffers(1, &vbo);
+    glDeleteBuffers(1, &vboTexCoords);
 }
 
-GLuint Terrain::getVertexBuffer() {
+GLuint Terrain::getVertexBuffer()
+{
     return vbo;
 }
 
-GLuint Terrain::getTextureBuffer() {
+GLuint Terrain::getTextureBuffer()
+{
     return vboTexCoords;
 }

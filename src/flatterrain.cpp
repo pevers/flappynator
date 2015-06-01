@@ -47,6 +47,7 @@ bool FlatTerrain::generateTerrain(int width, int height)
     } else {
         // load textures
         glGenTextures(1, textures);
+        glBindTexture(GL_TEXTURE_2D, textures[0]);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
         SOIL_free_image_data(image);
 
