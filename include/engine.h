@@ -16,7 +16,7 @@
 #include "slide.h"
 #include "flatterrain.h"
 #include "../src/util/tiny_obj_loader.h"
-#include "player.h"
+#include "worldobject.h"
 
 class Engine
 {
