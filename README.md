@@ -2,4 +2,4 @@
 Flappy equiped with a Bazooka.
 
 # build
-sudo apt-get install libsoil-dev libglm-dev
+sudo apt-get install libsoil-dev libglm-dev libglew-dev libsfml-dev
