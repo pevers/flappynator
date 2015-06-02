@@ -15,5 +15,5 @@ namespace Settings
     glm::vec3 playerScale(0.5, 0.5, 0.5);
     float playerRotation = 0.5 * M_PI;
 
-    glm::vec3 sunPos(0.0f, -1.0f, 0.0f);
+    glm::vec3 sunDirection(5.0f, -1.0f, 0.0f);
 }

@@ -22,7 +22,7 @@ class FlatTerrain : public Terrain
         FlatTerrain();
         virtual ~FlatTerrain();
 
-        virtual bool generateTerrain(int width=1, int height=1);
+        virtual bool generateTerrain(unsigned int width=2, unsigned int height=2);
         virtual unsigned int getTerrainSize();
 };
 

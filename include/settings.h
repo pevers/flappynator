@@ -22,7 +22,7 @@ namespace Settings
     extern glm::vec3 playerScale;
     extern float playerRotation;
 
-    extern glm::vec3 sunPos;
+    extern glm::vec3 sunDirection;
 }
 
 #endif // SETTINGS_H

@@ -28,7 +28,6 @@ bool Engine::init()
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-    glEnable(GL_CULL_FACE);
 
     // Create Vertex Array Object
     glGenVertexArrays(1, &vao);
@@ -57,8 +56,8 @@ bool Engine::init()
     }
 
     // load terrain
-    terrain = new FlatTerrain();
-    terrain->generateTerrain(50, 20);
+    terrain = new SmoothTerrain();
+    terrain->generateTerrain(200, 200);
 
     // load test object
     wobjs.emplace_back(Settings::playerStart, Settings::playerScale, Settings::playerRotation, "resources/monkey.obj");
@@ -72,10 +71,10 @@ bool Engine::initSun()
     glUniform3f(color, 1.0f, 1.0f, 1.0f);
 
     GLuint intensity = glGetUniformLocation(shaderProgram, "sunLight.ambientIntensity");
-    glUniform1f(intensity, 0.75f);
+    glUniform1f(intensity, 0.70f);
 
     GLuint direction = glGetUniformLocation(shaderProgram, "sunLight.direction");
-    glUniform3f(direction, -glm::normalize(Settings::sunPos).x, -glm::normalize(Settings::sunPos).y, -glm::normalize(Settings::sunPos).z);
+    glUniform3f(direction, glm::normalize(Settings::sunDirection).x, glm::normalize(Settings::sunDirection).y, glm::normalize(Settings::sunDirection).z);
 
     return (color && intensity && direction);
 }
@@ -107,21 +106,26 @@ void Engine::drawTerrain()
     glUniformMatrix4fv(matrixID, 1, GL_FALSE, &MVP[0][0]);  // bind matrix to shader
 
     GLuint uniColor = glGetUniformLocation(shaderProgram, "overrideColor");
-    glUniform3f(uniColor, 1.0f, 1.0f, 1.0f);
 
+    // send vertex buffer
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, terrain->getVertexBuffer());
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-    GLint texAttrib = glGetAttribLocation(shaderProgram, "inCoord");
-    glEnableVertexAttribArray(texAttrib);
-    glBindBuffer(GL_ARRAY_BUFFER, terrain->getTextureBuffer());
-    glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    // send normal buffer
+    GLint normalAttrib = glGetAttribLocation(shaderProgram, "inNormal");
+    glEnableVertexAttribArray(normalAttrib);
+    glBindBuffer(GL_ARRAY_BUFFER, terrain->getNormalBuffer());
+    glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-    glDrawArrays(GL_TRIANGLES, 0, terrain->getTerrainSize());
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrain->getElementBuffer());
+
+    glUniform3f(uniColor, 0.129f, 0.698f, 0.02f);
+    glDrawElements(GL_TRIANGLES, terrain->getTerrainSize(), GL_UNSIGNED_INT, (void*)0);
 
     glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(texAttrib);
+    glDisableVertexAttribArray(normalAttrib);
+
 }
 
 void Engine::drawWorldObjects()
@@ -185,26 +189,6 @@ void Engine::mainLoop() {
         // swap buffers
         window.display();
     }
-}
-
-// tmp debug function
-void Engine::loadObject(const std::string &path)
-{
-    std::string err = tinyobj::LoadObj(shapes, material, path.c_str());
-    if (err.length()) {
-        std::cerr << err << std::endl;
-        return;
-    }
-
-    // succesfully loaded, load data into VBO
-    glGenBuffers(1, &vertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, shapes[0].mesh.positions.size() * sizeof(float), &shapes[0].mesh.positions[0], GL_STATIC_DRAW);
-
-    // create index buffer
-    glGenBuffers(1, &elementBuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, shapes[0].mesh.indices.size() * sizeof(unsigned int), &shapes[0].mesh.indices[0], GL_STATIC_DRAW);
 }
 
 void Engine::handleKeyEvent(sf::Event event)

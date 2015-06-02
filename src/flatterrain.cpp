@@ -14,7 +14,7 @@ FlatTerrain::~FlatTerrain()
 /**
  * Generates terrain equals the size height*width.
  */
-bool FlatTerrain::generateTerrain(int width, int height)
+bool FlatTerrain::generateTerrain(unsigned int width, unsigned int height)
 {
     std::cout << "running terrain generation ... ";
 

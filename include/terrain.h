@@ -11,16 +11,20 @@ class Terrain
     protected:
         GLuint vbo; // vertex buffer
         GLuint vboTexCoords;
+        GLuint elementBuffer;
+        GLuint normalBuffer;
     private:
     public:
         Terrain();
         virtual ~Terrain();
 
-        virtual bool generateTerrain(int width, int height) = 0;
+        virtual bool generateTerrain(unsigned int width, unsigned int height) = 0;
         virtual unsigned int getTerrainSize() = 0;
 
         GLuint getVertexBuffer();
         GLuint getTextureBuffer();
+        GLuint getElementBuffer();
+        GLuint getNormalBuffer();
 };
 
 #endif // TERRAIN_H

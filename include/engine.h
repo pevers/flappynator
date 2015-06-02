@@ -17,6 +17,7 @@
 #include "flatterrain.h"
 #include "../src/util/tiny_obj_loader.h"
 #include "worldobject.h"
+#include "smoothterrain.h"
 
 class Engine
 {
@@ -50,9 +51,6 @@ class Engine
         void drawTerrain();
         void drawWorldObjects();
         void mainLoop();
-
-        // debug test
-        void loadObject(const std::string &path);
 
         void handleKeyEvent(sf::Event event);
 };
