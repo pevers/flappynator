@@ -18,12 +18,17 @@ class FlatTerrain : public Terrain
         GLuint textures[1];
         int texWidth;
         int texHeight;
+        float mass;
+
     public:
         FlatTerrain();
         virtual ~FlatTerrain();
 
         virtual bool generateTerrain(int width=1, int height=1);
         virtual unsigned int getTerrainSize();
+
+        virtual void setMass(float mass);
+        virtual float getMass();
 };
 
 #endif // FLATTERRAIN_H

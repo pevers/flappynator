@@ -75,3 +75,13 @@ unsigned int FlatTerrain::getTerrainSize()
 {
     return vertices.size();
 }
+
+void FlatTerrain::setMass(float mass)
+{
+    this->mass = mass;
+}
+
+float FlatTerrain::getMass()
+{
+    return mass;
+}

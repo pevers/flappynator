@@ -66,6 +66,16 @@ float WorldObject::getRotation()
     return rotation;
 }
 
+void WorldObject::setMass(float mass)
+{
+    this->mass = mass;
+}
+
+float WorldObject::getMass()
+{
+    return mass;
+}
+
 bool WorldObject::loadObject(const std::string &path)
 {
     std::string err = tinyobj::LoadObj(shapes, material, path.c_str());

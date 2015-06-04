@@ -19,6 +19,7 @@ class WorldObject
         glm::vec3 pos;
         glm::vec3 scale;
         float rotation;
+        float mass;
 
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> material;
@@ -42,6 +43,9 @@ class WorldObject
 
         void setRotation(float rotation);
         float getRotation();
+
+        void setMass(float mass);
+        float getMass();
 };
 
 #endif // WORLDOBJECT_H

@@ -1,6 +1,6 @@
 #include "engine.h"
 
-Engine::Engine(): slide(Settings::eye, glm::vec3(0.0, 0.0, 0.0), 1.0), terrain(NULL)
+Engine::Engine(): slide(Settings::eye, glm::vec3(0.0, 2.0, 0.0), 1.0), terrain(NULL)
 {
     //ctor
 }
@@ -59,9 +59,15 @@ bool Engine::init()
     // load terrain
     terrain = new FlatTerrain();
     terrain->generateTerrain(50, 20);
+    terrain->setMass(10000.0f);
 
     // load test object
     wobjs.emplace_back(Settings::playerStart, Settings::playerScale, Settings::playerRotation, "resources/monkey.obj");
+    wobjs[0].setMass(1.0f);
+    acceleration = 0.0f;
+
+    // add physics
+    physics = new Physics();
 
     return true;
 }
@@ -82,8 +88,41 @@ bool Engine::initSun()
 
 void Engine::updatePlayer()
 {
-    if(wobjs.size() > 0)
-        wobjs[0].setPos(glm::vec3(wobjs[0].getPos().x+0.0001, wobjs[0].getPos().y, wobjs[0].getPos().z));
+    glm::vec3 eye = slide.getEye();
+    glm::vec3 center = slide.getCenter();
+    float speedForward = 0.0002f;
+
+    if(wobjs.size() > 0) {
+        float distance = physics->distance(wobjs[0].getPos(), glm::vec3(center.x, 0.0, 0.0));
+        float force = physics->force(wobjs[0].getMass(), terrain->getMass(), distance);
+
+        // TODO: Has to be calculated with the elapsed time instead of per update
+        float accel = (force / wobjs[0].getMass()) * 1;
+
+        if (physics->getMaxAcceleration() < accel)
+            accel = physics->getMaxAcceleration();
+
+        //accel = 0.001f;
+        if (acceleration < 0.0f) {
+            std::cerr << "go upwards" << std::endl;
+            acceleration += accel;
+        } else
+            acceleration = 0.0f;
+
+        // update position of flappy
+        wobjs[0].setPos(glm::vec3(wobjs[0].getPos().x+speedForward,
+                                  wobjs[0].getPos().y-(acceleration+accel),
+                                  wobjs[0].getPos().z));
+
+        eye.x += speedForward;
+        center.x += speedForward;
+
+        slide.setEye(eye);
+        slide.setCenter(center);
+
+        std::cout << "pos (" << wobjs[0].getPos().x << ", " << wobjs[0].getPos().y << ") accel: " << acceleration << " distance: " << distance << std::endl;
+        //std::cout << "center (" << center.x << ", " << center.y << "), player (" << wobjs[0].getPos().x << ", " << wobjs[0].getPos().y << ")" << std::endl;
+    }
 }
 
 void Engine::drawFrame()
@@ -235,7 +274,13 @@ void Engine::handleKeyEvent(sf::Event event)
         center.x++;
     } else if (event.key.code == sf::Keyboard::R) {
         eye = Settings::eye;
-        center = glm::vec3(0.0, 0.0, 0.0);
+        center = glm::vec3(0.0, 2.0, 0.0);
+
+        // reset player
+        if(wobjs.size() > 0)
+            wobjs[0].setPos(Settings::playerStart);
+    } else if (event.key.code == sf::Keyboard::Space) {
+        acceleration = -0.02f;
     }
 
     std::cout << "eye (" << eye.x << ", " << eye.y << ", " << eye.z << ")" << std::endl;

@@ -21,6 +21,9 @@ class Terrain
 
         GLuint getVertexBuffer();
         GLuint getTextureBuffer();
+
+        virtual void setMass(float mass) = 0;
+        virtual float getMass() = 0;
 };
 
 #endif // TERRAIN_H

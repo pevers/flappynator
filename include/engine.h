@@ -10,6 +10,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+#include <ctime>
 
 #include "settings.h"
 #include "shaderprogram.h"
@@ -17,6 +18,7 @@
 #include "flatterrain.h"
 #include "../src/util/tiny_obj_loader.h"
 #include "worldobject.h"
+#include "physics.h"
 
 class Engine
 {
@@ -35,11 +37,14 @@ class Engine
         // sliding window, eye, center, speed
         Slide slide;
         Terrain *terrain;
+        Physics *physics;
 
         glm::mat4 projMatrix;
         glm::mat4 viewMatrix;
 
         std::vector<WorldObject> wobjs;
+
+        float acceleration;
     public:
         Engine();
         virtual ~Engine();
