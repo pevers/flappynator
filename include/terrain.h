@@ -1,3 +1,5 @@
+#define GLEW_STATIC
+
 #ifndef TERRAIN_H
 #define TERRAIN_H
 

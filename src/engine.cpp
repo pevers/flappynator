@@ -1,3 +1,4 @@
+#define GLEW_STATIC
 #include "engine.h"
 
 Engine::Engine(): slide(Settings::eye, glm::vec3(0.0, 0.0, 0.0), 1.0), terrain(NULL)

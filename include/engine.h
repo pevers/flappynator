@@ -4,6 +4,7 @@
 #define GLEW_STATIC
 #define GLM_FORCE_RADIANS
 
+
 #include <GL/glew.h>
 #include <SFML/Window.hpp>
 #include <glm/glm.hpp>

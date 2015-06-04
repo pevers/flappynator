@@ -37,14 +37,9 @@
 			<Add directory="$(#glfw.include)" />
 		</Compiler>
 		<Linker>
-			<Add library="GL" />
-			<Add library="GLEW" />
-			<Add library="pthread" />
-			<Add library="Xxf86vm" />
 			<Add library="sfml-graphics" />
 			<Add library="sfml-window" />
 			<Add library="sfml-system" />
-			<Add library="SOIL" />
 			<Add directory="$(#glfw.lib)" />
 		</Linker>
 		<Unit filename="include/engine.h" />
