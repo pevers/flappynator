@@ -15,8 +15,6 @@ uniform SimpleDirectionalLight sunLight;
 
 void main() {
 	float diffuseIntensity = max(0.0, dot(normalize(normal), -sunLight.direction));
-	if (diffuseIntensity < 0.2)
-		diffuseIntensity = 0.0;
    	outColor = vec4(color, 1.0) * vec4(sunLight.color*(sunLight.ambientIntensity+diffuseIntensity), 1.0);
 }
 

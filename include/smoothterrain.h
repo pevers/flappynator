@@ -12,9 +12,12 @@ class SmoothTerrain : public Terrain
     private:
         std::vector<glm::vec3> vertices;
         std::vector<unsigned int> indices;
+        std::vector<std::vector<glm::vec3>> accNormals;
         std::vector<glm::vec3> normals;
 
         const float mountainInterval = 10;
+
+        glm::vec3 calcAverageNormal(std::vector<glm::vec3> normals);
     public:
         SmoothTerrain();
         virtual ~SmoothTerrain();

@@ -10,6 +10,15 @@ SmoothTerrain::~SmoothTerrain()
     //dtor
 }
 
+glm::vec3 SmoothTerrain::calcAverageNormal(std::vector<glm::vec3> normals)
+{
+    glm::vec3 total;
+    for (glm::vec3 v : normals) {
+        total += v;
+    }
+    return glm::normalize(total / (float)normals.size());
+}
+
 /**
  * Generates terrain equals the size height*width.
  */
@@ -22,6 +31,7 @@ bool SmoothTerrain::generateTerrain(unsigned int width, unsigned int height)
     indices.clear();
 
     vertices.resize(width * height);
+    accNormals.resize(width * height);
     normals.resize(width * height);
     indices.resize(6 * (width - 1) * (height - 1));
 
@@ -44,7 +54,7 @@ bool SmoothTerrain::generateTerrain(unsigned int width, unsigned int height)
             indices[i * (width - 1) * 6 + j * 6 + 1] = j + 1 + i * width;
             indices[i * (width - 1) * 6 + j * 6 + 2] = j + (i + 1) * width;
 
-            // set indices first triangle
+            // set indices second triangle
             indices[i * (width - 1) * 6 + j * 6 + 3] = j + (i + 1) * width;
             indices[i * (width - 1) * 6 + j * 6 + 4] = j + 1 + i * width;
             indices[i * (width - 1) * 6 + j * 6 + 5] = j + 1 + (i + 1) * width;
@@ -52,11 +62,15 @@ bool SmoothTerrain::generateTerrain(unsigned int width, unsigned int height)
     }
 
     // calculate normals
-    for (unsigned int i = 0; i < indices.size(); i = i + 3) {
-        // calculate triangle normal
-        normals[indices[i]] = glm::cross(vertices[indices[i]], vertices[indices[i+1]]);
-        normals[indices[i+1]] = glm::cross(vertices[indices[i]], vertices[indices[i+1]]);
-        normals[indices[i+2]] = glm::cross(vertices[indices[i]], vertices[indices[i+1]]);
+    for (int i = 0; i < indices.size(); i = i + 3) {
+
+        accNormals[indices[i]].push_back(glm::cross(vertices[indices[i+2]] - vertices[indices[i]], vertices[indices[i+1]] - vertices[indices[i]]));
+        accNormals[indices[i+1]].push_back(glm::cross(vertices[indices[i+2]] - vertices[indices[i]], vertices[indices[i+1]] - vertices[indices[i]]));
+        accNormals[indices[i+2]].push_back(glm::cross(vertices[indices[i+2]] - vertices[indices[i]], vertices[indices[i+1]] - vertices[indices[i]]));
+
+        normals[indices[i]] = calcAverageNormal(accNormals[indices[i]]);
+        normals[indices[i+1]] = calcAverageNormal(accNormals[indices[i]]);
+        normals[indices[i+2]] = calcAverageNormal(accNormals[indices[i]]);
     }
 
     // load data into VBO

@@ -57,9 +57,10 @@ bool Engine::init()
 
     // load terrain
     terrain = new SmoothTerrain();
-    terrain->generateTerrain(200, 200);
+    terrain->generateTerrain(200, 10);
 
     // load test object
+    wobjs.emplace_back(Settings::playerStart, Settings::playerScale, Settings::playerRotation, "resources/monkey.obj");
     wobjs.emplace_back(Settings::playerStart, Settings::playerScale, Settings::playerRotation, "resources/monkey.obj");
 
     return true;

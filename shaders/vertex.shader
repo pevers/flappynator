@@ -9,10 +9,7 @@ out vec3 color;
 out vec3 normal;
 
 void main() {
-	if (inPosition.y > 2)
-		color = vec3(1.0, 1.0, 1.0);
-	else
-		color = overrideColor;
+	color = overrideColor;
 	normal = inNormal;
 	gl_Position = MVP * vec4(inPosition, 1.0);
 }
