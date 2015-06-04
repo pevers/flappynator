@@ -30,8 +30,8 @@ class WorldObject
         bool loadObject(const std::string &path);
         unsigned int getObjectSize();
 
-        GLuint getVertexBuffer();
-        GLuint getElementBuffer();
+        GLuint &getVertexBuffer();
+        GLuint &getElementBuffer();
         GLuint getNormalBuffer();
 
         void setPos(glm::vec3 pos);

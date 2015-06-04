@@ -10,6 +10,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+#include <memory>
 
 #include "settings.h"
 #include "shaderprogram.h"
@@ -35,12 +36,14 @@ class Engine
 
         // sliding window, eye, center, speed
         Slide slide;
-        Terrain *terrain;
+        std::unique_ptr<Terrain> terrain;
 
         glm::mat4 projMatrix;
         glm::mat4 viewMatrix;
 
         std::vector<WorldObject> wobjs;
+
+        void cleanWorldObjectBuffers();
     public:
         Engine();
         virtual ~Engine();

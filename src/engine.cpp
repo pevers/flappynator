@@ -1,6 +1,6 @@
 #include "engine.h"
 
-Engine::Engine(): slide(Settings::eye, glm::vec3(0.0, 0.0, 0.0), 1.0), terrain(NULL)
+Engine::Engine(): slide(Settings::eye, glm::vec3(0.0, 0.0, 0.0), 1.0)
 {
     //ctor
 }
@@ -8,11 +8,10 @@ Engine::Engine(): slide(Settings::eye, glm::vec3(0.0, 0.0, 0.0), 1.0), terrain(N
 Engine::~Engine()
 {
     //dtor
+    cleanWorldObjectBuffers();
     glDeleteProgram(shaderProgram);
     glDeleteVertexArrays(1, &vao);
 
-    if (terrain != NULL)
-        delete terrain;
 }
 
 bool Engine::init()
@@ -56,7 +55,7 @@ bool Engine::init()
     }
 
     // load terrain
-    terrain = new SmoothTerrain();
+    terrain.reset(new SmoothTerrain());
     terrain->generateTerrain(200, 10);
 
     // load test object
@@ -219,4 +218,10 @@ void Engine::handleKeyEvent(sf::Event event)
     slide.setCenter(center);
 }
 
-
+void Engine::cleanWorldObjectBuffers()
+{
+    for (int i = 0; i < wobjs.size(); i++) {
+        glDeleteBuffers(1, &wobjs[i].getVertexBuffer());
+        glDeleteBuffers(1, &wobjs[i].getElementBuffer());
+    }
+}

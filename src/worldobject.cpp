@@ -14,19 +14,14 @@ WorldObject::WorldObject(glm::vec3 start, glm::vec3 scl, float rot, const std::s
 
 WorldObject::~WorldObject()
 {
-    std::cout << "warning, destructor called" << std::endl;
-
-    //dtor
-    glDeleteBuffers(1, &vbo);
-    glDeleteBuffers(1, &elementBuffer);
 }
 
-GLuint WorldObject::getVertexBuffer()
+GLuint &WorldObject::getVertexBuffer()
 {
     return vbo;
 }
 
-GLuint WorldObject::getElementBuffer()
+GLuint &WorldObject::getElementBuffer()
 {
     return elementBuffer;
 }
