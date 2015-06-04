@@ -80,6 +80,12 @@ bool Engine::initSun()
     return (color && intensity && direction);
 }
 
+void Engine::updatePlayer()
+{
+    if(wobjs.size() > 0)
+        wobjs[0].setPos(glm::vec3(wobjs[0].getPos().x+0.0001, wobjs[0].getPos().y, wobjs[0].getPos().z));
+}
+
 void Engine::drawFrame()
 {
     // draw a single frame
@@ -178,6 +184,9 @@ void Engine::mainLoop() {
                 break;
             }
         }
+
+        // update player object
+        updatePlayer();
 
         // draw single frame
         drawFrame();

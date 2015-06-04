@@ -46,6 +46,7 @@ class Engine
 
         bool init();
         bool initSun();
+        void updatePlayer();
         void drawFrame();
         void drawTerrain();
         void drawWorldObjects();

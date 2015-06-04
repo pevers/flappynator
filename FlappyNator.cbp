@@ -45,6 +45,7 @@
 		</Linker>
 		<Unit filename="include/engine.h" />
 		<Unit filename="include/flatterrain.h" />
+		<Unit filename="include/player.h" />
 		<Unit filename="include/settings.h" />
 		<Unit filename="include/shaderprogram.h" />
 		<Unit filename="include/slide.h" />
@@ -53,6 +54,7 @@
 		<Unit filename="src/engine.cpp" />
 		<Unit filename="src/flatterrain.cpp" />
 		<Unit filename="src/main.cpp" />
+		<Unit filename="src/player.cpp" />
 		<Unit filename="src/settings.cpp" />
 		<Unit filename="src/slide.cpp" />
 		<Unit filename="src/terrain.cpp" />
@@ -62,6 +64,7 @@
 		<Extensions>
 			<code_completion />
 			<debugger />
+			<envvars />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>
