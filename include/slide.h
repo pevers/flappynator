@@ -1,3 +1,5 @@
+#define GLEW_STATIC
+
 #ifndef SLIDE_H
 #define SLIDE_H
 

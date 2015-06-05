@@ -1,3 +1,5 @@
+#define GLEW_STATIC
+
 #ifndef SHADERPROGRAM_H
 #define SHADERPROGRAM_H
 

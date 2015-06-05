@@ -1,3 +1,5 @@
+#define GLEW_STATIC
+
 #ifndef WORLDOBJECT_H
 #define WORLDOBJECT_H
 
