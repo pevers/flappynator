@@ -19,6 +19,7 @@
 #include "../src/util/tiny_obj_loader.h"
 #include "worldobject.h"
 #include "smoothterrain.h"
+#include "player.h"
 
 class Engine
 {
@@ -41,7 +42,8 @@ class Engine
         glm::mat4 projMatrix;
         glm::mat4 viewMatrix;
 
-        std::vector<WorldObject> wobjs;
+        std::unique_ptr<Player> player;
+        std::vector<std::unique_ptr<WorldObject>> wobjs;
 
         void cleanWorldObjectBuffers();
     public:
@@ -52,8 +54,12 @@ class Engine
         bool initSun();
         void drawFrame();
         void drawTerrain();
+        void drawPlayer();
         void drawWorldObjects();
+        void drawObject(WorldObject &w);
         void mainLoop();
+
+        void updateWorldObjects();
 
         void handleKeyEvent(sf::Event event);
 };

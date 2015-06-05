@@ -59,8 +59,8 @@ bool Engine::init()
     terrain->generateTerrain(200, 10);
 
     // load test object
-    wobjs.emplace_back(Settings::playerStart, Settings::playerScale, Settings::playerRotation, "resources/monkey.obj");
-    wobjs.emplace_back(Settings::playerStart, Settings::playerScale, Settings::playerRotation, "resources/monkey.obj");
+    player = std::unique_ptr<Player>(new Player());
+    //wobjs.push_back();
 
     return true;
 }
@@ -71,7 +71,7 @@ bool Engine::initSun()
     glUniform3f(color, 1.0f, 1.0f, 1.0f);
 
     GLuint intensity = glGetUniformLocation(shaderProgram, "sunLight.ambientIntensity");
-    glUniform1f(intensity, 0.70f);
+    glUniform1f(intensity, 0.60f);
 
     GLuint direction = glGetUniformLocation(shaderProgram, "sunLight.direction");
     glUniform3f(direction, glm::normalize(Settings::sunDirection).x, glm::normalize(Settings::sunDirection).y, glm::normalize(Settings::sunDirection).z);
@@ -94,6 +94,9 @@ void Engine::drawFrame()
 
     // draw objects
     drawWorldObjects();
+
+    // draw player
+    drawPlayer();
 }
 
 void Engine::drawTerrain()
@@ -128,41 +131,57 @@ void Engine::drawTerrain()
 
 }
 
+void Engine::drawObject(WorldObject &w)
+{
+    //glm::mat4 modelMatrix = glm::translate(modelMatrix, wobjs[i].getPos());
+    GLuint uniColor = glGetUniformLocation(shaderProgram, "overrideColor");
+    glm::mat4 modelMatrix;
+    modelMatrix = glm::rotate(glm::scale(glm::translate(modelMatrix, w.getPos()), w.getScale()), w.getRotation().z, glm::vec3(0.0, 0.0, 1.0));
+    modelMatrix = glm::rotate(modelMatrix, w.getRotation().y, glm::vec3(0.0, 1.0, 0.0));
+    //modelMatrix = glm::rotate(modelMatrix, w.getRotation().z, glm::vec3(0.0, 0.0, 1.0));
+    glm::mat4 MVP = projMatrix * viewMatrix * modelMatrix;
+
+    GLuint matrixID = glGetUniformLocation(shaderProgram, "MVP");
+    glUniformMatrix4fv(matrixID, 1, GL_FALSE, &MVP[0][0]);  // bind matrix to shader
+
+    // get vertex buffer
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, w.getVertexBuffer());
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+    // get normal buffer
+    GLint normalAttrib = glGetAttribLocation(shaderProgram, "inNormal");
+    glEnableVertexAttribArray(normalAttrib);
+    glBindBuffer(GL_ARRAY_BUFFER, w.getNormalBuffer());
+    glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, w.getElementBuffer());
+
+    // override texture colors
+    glUniform3f(uniColor, 1.0f, 0.3f, 0.3f);
+    glDrawElements(GL_TRIANGLES, w.getObjectSize(), GL_UNSIGNED_INT, (void*)0);
+
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(normalAttrib);
+
+}
+
 void Engine::drawWorldObjects()
 {
-    GLuint uniColor = glGetUniformLocation(shaderProgram, "overrideColor");
-    for (unsigned int i = 0; i < wobjs.size(); i++) {
-        //glm::mat4 modelMatrix = glm::translate(modelMatrix, wobjs[i].getPos());
-        glm::mat4 modelMatrix;
-        modelMatrix = glm::rotate(glm::scale(glm::translate(modelMatrix, wobjs[i].getPos()), wobjs[i].getScale()), wobjs[i].getRotation(), glm::vec3(0.0f, 1.0f, 0.0f));
-        glm::mat4 MVP = projMatrix * viewMatrix * modelMatrix;
-
-        GLuint matrixID = glGetUniformLocation(shaderProgram, "MVP");
-        glUniformMatrix4fv(matrixID, 1, GL_FALSE, &MVP[0][0]);  // bind matrix to shader
-
-        // get vertex buffer
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, wobjs[i].getVertexBuffer());
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-        // get normal buffer
-        GLint normalAttrib = glGetAttribLocation(shaderProgram, "inNormal");
-		glEnableVertexAttribArray(normalAttrib);
-		glBindBuffer(GL_ARRAY_BUFFER, wobjs[i].getNormalBuffer());
-		glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, wobjs[i].getElementBuffer());
-
-        // override texture colors
-        glUniform3f(uniColor, 1.0f, 0.3f, 0.3f);
-        glDrawElements(GL_TRIANGLES, wobjs[i].getObjectSize(), GL_UNSIGNED_INT, (void*)0);
-
-        glDisableVertexAttribArray(0);
-        glDisableVertexAttribArray(normalAttrib);
+    for (auto &w : wobjs) {
+        drawObject(*w);
     }
 }
 
+void Engine::drawPlayer()
+{
+    drawObject(*player);
+}
+
 void Engine::mainLoop() {
+
+    sf::Clock clock;
+    sf::Time accumulator = sf::Time::Zero;
 
     while (window.isOpen())
     {
@@ -183,11 +202,19 @@ void Engine::mainLoop() {
             }
         }
 
+        while (accumulator > Settings::ups)
+        {
+            accumulator -= Settings::ups;
+            updateWorldObjects();
+        }
+
         // draw single frame
         drawFrame();
 
         // swap buffers
         window.display();
+
+        accumulator += clock.restart();
     }
 }
 
@@ -211,6 +238,8 @@ void Engine::handleKeyEvent(sf::Event event)
     } else if (event.key.code == sf::Keyboard::R) {
         eye = Settings::eye;
         center = glm::vec3(0.0, 0.0, 0.0);
+    } else if (event.key.code == sf::Keyboard::Space) {
+        player->addAcc(glm::vec3(0.0f, 1.0f / 200.0, 0.0f));
     }
 
     std::cout << "eye (" << eye.x << ", " << eye.y << ", " << eye.z << ")" << std::endl;
@@ -221,7 +250,20 @@ void Engine::handleKeyEvent(sf::Event event)
 void Engine::cleanWorldObjectBuffers()
 {
     for (int i = 0; i < wobjs.size(); i++) {
-        glDeleteBuffers(1, &wobjs[i].getVertexBuffer());
-        glDeleteBuffers(1, &wobjs[i].getElementBuffer());
+        glDeleteBuffers(1, &wobjs[i]->getVertexBuffer());
+        glDeleteBuffers(1, &wobjs[i]->getElementBuffer());
     }
 }
+
+/**
+ * Update world objects at a rate of Settings::ups.
+ */
+void Engine::updateWorldObjects()
+{
+    for (auto &w : wobjs) {
+        w->update();
+    }
+
+    player->update();
+}
+

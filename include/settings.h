@@ -20,9 +20,14 @@ namespace Settings
 
     extern glm::vec3 playerStart;
     extern glm::vec3 playerScale;
-    extern float playerRotation;
+    extern glm::vec3 playerRotation;
+    extern glm::vec3 playerAcc;
+    extern glm::vec3 playerSpeed;
+    extern std::string playerModel;
 
     extern glm::vec3 sunDirection;
+
+    extern sf::Time ups;
 }
 
 #endif // SETTINGS_H

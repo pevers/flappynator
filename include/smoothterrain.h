@@ -15,7 +15,7 @@ class SmoothTerrain : public Terrain
         std::vector<std::vector<glm::vec3>> accNormals;
         std::vector<glm::vec3> normals;
 
-        const float mountainInterval = 10;
+        const float mountainInterval = 20;
 
         glm::vec3 calcAverageNormal(std::vector<glm::vec3> normals);
     public:

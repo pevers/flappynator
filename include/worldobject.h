@@ -18,13 +18,13 @@ class WorldObject
 
         glm::vec3 pos;
         glm::vec3 scale;
-        float rotation;
+        glm::vec3 rotation;
 
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> material;
     public:
         WorldObject();
-        WorldObject(glm::vec3 start, glm::vec3 scl, float rot, const std::string &path);
+        WorldObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot, const std::string &path);
         virtual ~WorldObject();
 
         bool loadObject(const std::string &path);
@@ -32,7 +32,7 @@ class WorldObject
 
         GLuint &getVertexBuffer();
         GLuint &getElementBuffer();
-        GLuint getNormalBuffer();
+        GLuint &getNormalBuffer();
 
         void setPos(glm::vec3 pos);
         glm::vec3 getPos();
@@ -40,8 +40,10 @@ class WorldObject
         void setScale(glm::vec3 scale);
         glm::vec3 getScale();
 
-        void setRotation(float rotation);
-        float getRotation();
+        void setRotation(glm::vec3 rotation);
+        glm::vec3 getRotation();
+
+        virtual void update() { }
 };
 
 #endif // WORLDOBJECT_H

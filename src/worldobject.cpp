@@ -5,7 +5,7 @@ WorldObject::WorldObject()
     //ctor
 }
 
-WorldObject::WorldObject(glm::vec3 start, glm::vec3 scl, float rot, const std::string &path) : pos(start), scale(scl), rotation(rot)
+WorldObject::WorldObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot, const std::string &path) : pos(start), scale(scl), rotation(rot)
 {
     if (!loadObject(path)) {
         std::cerr << "warning, could not add object " << path << std::endl;
@@ -26,7 +26,7 @@ GLuint &WorldObject::getElementBuffer()
     return elementBuffer;
 }
 
-GLuint WorldObject::getNormalBuffer()
+GLuint &WorldObject::getNormalBuffer()
 {
     return normalBuffer;
 }
@@ -51,12 +51,12 @@ glm::vec3 WorldObject::getScale()
     return scale;
 }
 
-void WorldObject::setRotation(float rotation)
+void WorldObject::setRotation(glm::vec3 rotation)
 {
     this->rotation = rotation;
 }
 
-float WorldObject::getRotation()
+glm::vec3 WorldObject::getRotation()
 {
     return rotation;
 }
