@@ -1,9 +1,9 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#define GLEW_STATIC
 #define GLM_FORCE_RADIANS
 
+#define GLEW_STATIC
 #include <GL/glew.h>
 #include <SFML/Window.hpp>
 #include <glm/glm.hpp>
