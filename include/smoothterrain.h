@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <typeinfo>
+#include <SOIL/SOIL.h>
 #include "terrain.h"
 #include "simplexnoise.h"
 
@@ -14,8 +15,9 @@ class SmoothTerrain : public Terrain
         std::vector<unsigned int> indices;
         std::vector<std::vector<glm::vec3>> accNormals;
         std::vector<glm::vec3> normals;
+        std::vector<glm::vec2> texCoords;
 
-        const float mountainInterval = 20;
+        GLuint textures[1];
 
         glm::vec3 calcAverageNormal(std::vector<glm::vec3> normals);
     public:

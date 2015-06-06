@@ -49,6 +49,4 @@ void Player::update()
     } else {
         rotation.z = -acos(glm::dot(glm::normalize(speed), glm::normalize(glm::vec3(1.0, 0.0, 0.0))));
     }
-
-    std::cout << "rotation " << rotation.z * 180 / M_PI << std::endl;
 }

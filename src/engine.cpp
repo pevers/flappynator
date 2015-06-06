@@ -57,7 +57,7 @@ bool Engine::init()
 
     // load terrain
     terrain.reset(new SmoothTerrain());
-    terrain->generateTerrain(200, 10);
+    terrain->generateTerrain(10, 10);
 
     // load test object
     player = std::unique_ptr<Player>(new Player());
@@ -122,13 +122,18 @@ void Engine::drawTerrain()
     glBindBuffer(GL_ARRAY_BUFFER, terrain->getNormalBuffer());
     glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrain->getElementBuffer());
+    GLint texAttrib = glGetAttribLocation(shaderProgram, "inCoord");
+    glEnableVertexAttribArray(texAttrib);
+    glBindBuffer(GL_ARRAY_BUFFER, terrain->getTextureBuffer());
+    glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-    glUniform3f(uniColor, 0.129f, 0.698f, 0.02f);
-    glDrawElements(GL_TRIANGLES, terrain->getTerrainSize(), GL_UNSIGNED_INT, (void*)0);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrain->getElementBuffer());
+
+    glUniform3f(uniColor, 1.0f, 1.0f, 1.0f);
+    glDrawArrays(GL_TRIANGLES, 0, terrain->getTerrainSize());
 
     glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(normalAttrib);
+//    glDisableVertexAttribArray(normalAttrib);
 
 }
 
@@ -266,5 +271,7 @@ void Engine::updateWorldObjects()
     }
 
     player->update();
+    slide.setCenter(player->getPos());
+    slide.setEye(glm::vec3(player->getPos().x + 1.0, player->getPos().y, 6.0));
 }
 

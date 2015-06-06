@@ -12,7 +12,7 @@ namespace Settings
 
     glm::vec3 eye(0.0, 2.0, 5.0);
 
-    glm::vec3 playerStart(0.0, 2.0, 0.0);
+    glm::vec3 playerStart(0.0, 2.0, 2.0);
     glm::vec3 playerScale(0.5, 0.5, 0.5);
     glm::vec3 playerAcc(0.0, - 1.0 / 2000, 0.0);
     glm::vec3 playerSpeed(1.0 / 100, 0.0, 0.0);

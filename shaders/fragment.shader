@@ -1,6 +1,7 @@
 #version 330
 in vec3 color;
 in vec3 normal;
+in vec2 texcoord;
 
 out vec4 outColor;
 
@@ -12,6 +13,7 @@ struct SimpleDirectionalLight
 }; 
 
 uniform SimpleDirectionalLight sunLight;
+uniform sampler2D tex;
 
 void main() {
 	float diffuseIntensity = max(0.0, dot(normalize(normal), -sunLight.direction));
