@@ -5,6 +5,7 @@
 #include <vector>
 #include <typeinfo>
 #include <SOIL/SOIL.h>
+#include "settings.h"
 #include "terrain.h"
 #include "simplexnoise.h"
 
@@ -16,6 +17,8 @@ class SmoothTerrain : public Terrain
         std::vector<std::vector<glm::vec3>> accNormals;
         std::vector<glm::vec3> normals;
         std::vector<glm::vec2> texCoords;
+
+        std::vector<glm::vec3> mountains;
 
         GLuint textures[1];
 

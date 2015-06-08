@@ -57,7 +57,7 @@ bool Engine::init()
 
     // load terrain
     terrain.reset(new SmoothTerrain());
-    terrain->generateTerrain(10, 10);
+    terrain->generateTerrain(50, 50);
 
     // load test object
     player = std::unique_ptr<Player>(new Player());
@@ -272,6 +272,6 @@ void Engine::updateWorldObjects()
 
     player->update();
     slide.setCenter(player->getPos());
-    slide.setEye(glm::vec3(player->getPos().x + 1.0, player->getPos().y, 6.0));
+    slide.setEye(glm::vec3(player->getPos().x + 1.0, player->getPos().y, 8.0));
 }
 

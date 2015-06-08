@@ -30,27 +30,31 @@ bool SmoothTerrain::generateTerrain(unsigned int width, unsigned int height)
     vertices.clear();
     texCoords.clear();
     normals.clear();
+    mountains.clear();
 //    indices.clear();
 
     //accNormals.resize(width * height);
 //    normals.resize(width * height);
 //    indices.resize(6 * (width - 1) * (height - 1));
-    for (float z = 0; z < height; z += 0.1) {
-        for (float x = 0; x < width; x += 0.1) {
+    float miny = 0;
+    float maxy = 0.2;
+    for (float z = 0; z < height; z += 0.5) {
+
+        for (float x = 0; x < width; x += 0.5) {
 
             //if ((int)x % (int)mountainInterval > mountainInterval * 0.5)
             //    y = scaled_octave_noise_3d(4, 4, 1, -2.0, rand() % 6, x, y, z);
 
-            float y1 = scaled_octave_noise_2d(5, 0.01, 1, 0.0, 0.3, x, z);
-            float y2 = scaled_octave_noise_2d(5, 0.01, 1, 0.0, 0.3, x, z+0.1);
-            float y3 = scaled_octave_noise_2d(5, 0.01, 1, 0.0, 0.3, x+0.1, z);
-            float y4 = scaled_octave_noise_2d(5, 0.01, 1, 0.0, 0.3, x+0.1, z+0.1);
+            float y1 = scaled_octave_noise_2d(5, 0.01, 1, miny, maxy, x, z);
+            float y2 = scaled_octave_noise_2d(5, 0.01, 1, miny, maxy, x, z+0.5);
+            float y3 = scaled_octave_noise_2d(5, 0.01, 1, miny, maxy, x+0.5, z);
+            float y4 = scaled_octave_noise_2d(5, 0.01, 1, miny, maxy, x+0.5, z+0.5);
             //float y1 = 0, y2 = 0, y3 = 0, y4 = 0;
 
             glm::vec3 t1 = glm::vec3(x, y1, z);
-            glm::vec3 t2 = glm::vec3(x, y2, z+0.1);
-            glm::vec3 t3 = glm::vec3(x+0.1, y3, z);
-            glm::vec3 t4 = glm::vec3(x+0.1, y4, z+0.1);
+            glm::vec3 t2 = glm::vec3(x, y2, z+0.5);
+            glm::vec3 t3 = glm::vec3(x+0.5, y3, z);
+            glm::vec3 t4 = glm::vec3(x+0.5, y4, z+0.5);
 
             vertices.push_back(t1); vertices.push_back(t2); vertices.push_back(t3);
             vertices.push_back(t3); vertices.push_back(t2); vertices.push_back(t4);
@@ -79,6 +83,23 @@ bool SmoothTerrain::generateTerrain(unsigned int width, unsigned int height)
             texCoords.push_back(glm::vec2(1.0, 1.0));
         }
     }
+
+    // generate random hills at random.x and player.z
+    srand(time(NULL));
+    int msize = width / 2;
+    float startx = Settings::playerStart.x + 1.0, startz = Settings::playerStart.z + 1;
+    for (int i = 0; i < msize; i++) {
+        startx += rand() % 5;
+        mountains.push_back(glm::vec3(startx, Settings::playerStart.y, startz));
+    }
+
+    for (int i = 0; i < vertices.size(); i++) {
+        for (int j = 0; j < msize; j++) {
+            if (glm::distance(vertices[i], glm::vec3(mountains[j].x, mountains[j].y, mountains[j].z)) < 2)
+                vertices[i].y += 1.0;
+        }
+    }
+
 
 //    for (unsigned int i = 0; i < height - 1; i++) {
 //        for (unsigned int j = 0; j < width - 1; j++) {
