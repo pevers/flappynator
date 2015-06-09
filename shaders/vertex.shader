@@ -15,9 +15,10 @@ out vec4 shadowCoord;
 void main() {
 	color = overrideColor;
 	if (inPosition.y <= 1.0)
-		color = vec3(0.255, 0.412, 0.882);
+		//color = vec3(0.255, 0.412, 0.882);	// see blue
+		color = vec3(0.333, 0.42, 0.184);
 	else
-		color = vec3(0.8, 0.8, 0.8);
+		color = vec3(0.6, 0.6, 0.6);
 	normal = inNormal;	
 	gl_Position = MVP * vec4(inPosition, 1.0);
 

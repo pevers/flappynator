@@ -25,7 +25,9 @@ namespace Settings
     extern glm::vec3 playerSpeed;
     extern std::string playerModel;
 
-    extern glm::vec3 sunDirection;
+    extern glm::vec3 sunPos;
+    extern glm::vec3 sunSpot;
+    //extern glm::vec3 sunDirection;
 
     extern sf::Time ups;
 }

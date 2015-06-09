@@ -120,7 +120,7 @@ bool Engine::initSun()
     glUniform1f(intensity, 0.60f);
 
     GLuint direction = glGetUniformLocation(shaderProgram, "sunLight.direction");
-    glUniform3f(direction, glm::normalize(Settings::sunDirection).x, glm::normalize(Settings::sunDirection).y, glm::normalize(Settings::sunDirection).z);
+    glUniform3f(direction, glm::normalize(Settings::sunSpot - Settings::sunPos).x, glm::normalize(Settings::sunSpot - Settings::sunPos).y, glm::normalize(Settings::sunSpot - Settings::sunPos).z);
 
     return (color && intensity && direction);
 }
@@ -146,13 +146,15 @@ void Engine::draw()
 
     // calculate matrix
     viewMatrix = slide.getSlideView();
-    projMatrix = glm::perspective(45.0f, 1024.0f / 768.0f, 1.0f, 100.0f);
+    projMatrix = glm::perspective(45.0f, (float)Settings::screenWidth / (float)Settings::screenHeight, 1.0f, 100.0f);
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, depthTexture);
 
     GLuint shadowMap = glGetUniformLocation(shaderProgram, "shadowMap");
     glUniform1i(shadowMap, 1);
+
+    glCullFace(GL_BACK);
 
     drawTerrain();
     drawWorldObjects();
@@ -168,8 +170,9 @@ void Engine::drawShadows()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     projMatrix = glm::ortho<float>(-100, 100, -100, 100, -100, 200);
-    glm::vec3 sunPos = glm::vec3(0, 10, 0);
-    viewMatrix = glm::lookAt(sunPos, glm::vec3(15,0,15), glm::vec3(0,1,0));
+    viewMatrix = glm::lookAt(Settings::sunPos, Settings::sunSpot, glm::vec3(0, 1, 0));
+
+    glCullFace(GL_FRONT);
 
     drawPlayerShadow();
     drawWorldShadow();
@@ -377,6 +380,10 @@ void Engine::handleKeyEvent(sf::Event event)
     } else if (event.key.code == sf::Keyboard::S) {
         eye.z++;
         center.z++;
+    } else if (event.key.code == sf::Keyboard::A) {
+        eye.x--;
+    } else if (event.key.code == sf::Keyboard::D) {
+        eye.x++;
     } else if (event.key.code == sf::Keyboard::Space) {
         player->addAcc(glm::vec3(0.0f, 1.0f / 200.0, 0.0f));
     }
@@ -405,6 +412,6 @@ void Engine::updateWorldObjects()
 
     player->update();
     slide.setCenter(player->getPos());
-    slide.setEye(glm::vec3(player->getPos().x + 1.0, player->getPos().y, 8.0));
+    slide.setEye(glm::vec3(player->getPos().x + 1.0, player->getPos().y, Settings::playerStart.z + 10));
 }
 

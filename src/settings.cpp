@@ -15,11 +15,13 @@ namespace Settings
     glm::vec3 playerStart(3.0, 1.0, 2.0);
     glm::vec3 playerScale(0.5, 0.5, 0.5);
     glm::vec3 playerAcc(0.0, - 1.0 / 2000, 0.0);
-    glm::vec3 playerSpeed(1.0 / 100, 0.0, 0.0);
+    glm::vec3 playerSpeed(1.0 / 30, 0.0, 0.0);  // should be 100
     glm::vec3 playerRotation(0.0, 0.5 * M_PI, 0.0);
     std::string playerModel = "resources/monkey.obj";
 
-    glm::vec3 sunDirection(cos(45*3.1415/180.0)*70, -sin(45*3.1415/180.0)*70, 0.0f);
+    glm::vec3 sunPos(-10.0, 100.0, 0.0);
+    glm::vec3 sunSpot(50, 0, 50);
+    //glm::vec3 sunDirection(cos(45*3.1415/180.0)*70, -sin(45*3.1415/180.0)*70, 1.0f);
 
     sf::Time ups = sf::seconds(1.f / 60.f);
 }
