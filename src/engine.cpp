@@ -63,10 +63,6 @@ bool Engine::init()
     glAttachShader(depthShaderProgram, fragmentShader);
     glLinkProgram(depthShaderProgram);
 
-    // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
-    glGenFramebuffers(1, &frameBuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-
     if (!initShadowMap()) {
         std::cerr << "no shadow map initialized " << std::endl;
         return false;
@@ -92,9 +88,11 @@ bool Engine::init()
 bool Engine::initShadowMap() {
 
     // Depth texture. Slower than a depth buffer, but you can sample it later in your shader
+    glGenFramebuffers(1, &frameBuffer);
+
     glGenTextures(1, &depthTexture);
     glBindTexture(GL_TEXTURE_2D, depthTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, Settings::screenWidth, Settings::screenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -102,8 +100,12 @@ bool Engine::initShadowMap() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
+	// The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
+    glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
     glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
 
     // Always check that our framebuffer is ok
     return glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
@@ -137,7 +139,7 @@ void Engine::drawFrame()
 void Engine::draw()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, 1024, 768);
+    glViewport(0, 0, Settings::screenWidth, Settings::screenHeight);
 
     glUseProgram(shaderProgram);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -160,19 +162,14 @@ void Engine::draw()
 void Engine::drawShadows()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-    glViewport(0, 0, 1024, 1024);
+    glViewport(0, 0, Settings::screenWidth, Settings::screenHeight);
 
     glUseProgram(depthShaderProgram);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     projMatrix = glm::ortho<float>(-100, 100, -100, 100, -100, 200);
-    glm::vec3 sunPos = glm::vec3(1, 10, 0);
-    viewMatrix = glm::lookAt(sunPos, glm::vec3(0,0,0), glm::vec3(0,1,0));
-
-    glm::mat4 model = glm::mat4(1.0);
-    depthMVP = projMatrix * viewMatrix * model;
-    GLuint depthMatrixID = glGetUniformLocation(depthShaderProgram, "depthMVP");
-    glUniformMatrix4fv(depthMatrixID, 1, GL_FALSE, &depthMVP[0][0]);
+    glm::vec3 sunPos = glm::vec3(0, 10, 0);
+    viewMatrix = glm::lookAt(sunPos, glm::vec3(15,0,15), glm::vec3(0,1,0));
 
     drawPlayerShadow();
     drawWorldShadow();
@@ -224,9 +221,7 @@ void Engine::drawTerrain()
 void Engine::drawObject(WorldObject &w)
 {
     //glm::mat4 modelMatrix = glm::translate(modelMatrix, wobjs[i].getPos());
-    glm::mat4 model;
-    model = glm::rotate(glm::scale(glm::translate(model, w.getPos()), w.getScale()), w.getRotation().z, glm::vec3(0.0, 0.0, 1.0));
-    model = glm::rotate(model, w.getRotation().y, glm::vec3(0.0, 1.0, 0.0));
+    glm::mat4 model = w.getModel();
     //modelMatrix = glm::rotate(modelMatrix, w.getRotation().z, glm::vec3(0.0, 0.0, 1.0));
     glm::mat4 MVP = projMatrix * viewMatrix * model;
 
@@ -272,6 +267,11 @@ void Engine::drawObject(WorldObject &w)
 
 void Engine::drawWorldShadow()
 {
+    glm::mat4 model = glm::mat4(1.0);
+    depthMVP = projMatrix * viewMatrix * model;
+    GLuint depthMatrixID = glGetUniformLocation(depthShaderProgram, "depthMVP");
+    glUniformMatrix4fv(depthMatrixID, 1, GL_FALSE, &depthMVP[0][0]);
+
     // get vertex buffer
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, terrain->getVertexBuffer());
@@ -283,6 +283,12 @@ void Engine::drawWorldShadow()
 
 void Engine::drawPlayerShadow()
 {
+    glm::mat4 model = player->getModel();
+
+    depthMVP = projMatrix * viewMatrix * model;
+    GLuint depthMatrixID = glGetUniformLocation(depthShaderProgram, "depthMVP");
+    glUniformMatrix4fv(depthMatrixID, 1, GL_FALSE, &depthMVP[0][0]);
+
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, player->getVertexBuffer());
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
@@ -332,7 +338,7 @@ void Engine::mainLoop() {
         while (accumulator > Settings::ups)
         {
             accumulator -= Settings::ups;
-            //updateWorldObjects();
+            updateWorldObjects();
         }
 
         // draw single frame
@@ -382,7 +388,7 @@ void Engine::handleKeyEvent(sf::Event event)
 
 void Engine::cleanWorldObjectBuffers()
 {
-    for (int i = 0; i < wobjs.size(); i++) {
+    for (unsigned int i = 0; i < wobjs.size(); i++) {
         glDeleteBuffers(1, &wobjs[i]->getVertexBuffer());
         glDeleteBuffers(1, &wobjs[i]->getElementBuffer());
     }

@@ -61,6 +61,15 @@ glm::vec3 WorldObject::getRotation()
     return rotation;
 }
 
+glm::mat4 WorldObject::getModel()
+{
+    glm::mat4 model;
+    model = glm::rotate(glm::translate(model, pos), rotation.y, glm::vec3(0.0, 1.0, 0.0));
+    model = glm::rotate(model, rotation.z, glm::vec3(1.0, 0.0, 0.0));   // this is because we did a rotation before xD
+    model = glm::scale(model, scale);
+    return model;
+}
+
 bool WorldObject::loadObject(const std::string &path)
 {
     std::string err = tinyobj::LoadObj(shapes, material, path.c_str());

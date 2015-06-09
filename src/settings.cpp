@@ -3,8 +3,8 @@
 
 namespace Settings
 {
-    int screenWidth = 800;
-    int screenHeight = 600;
+    int screenWidth = 1024;
+    int screenHeight = 768;
     int bitsPerPixel = 32;
 
     sf::ContextSettings context(24, 8, 2);

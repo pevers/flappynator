@@ -40,7 +40,7 @@ bool SmoothTerrain::generateTerrain(unsigned int width, unsigned int height)
             float y2 = scaled_octave_noise_2d(5, 0.01, 1, miny, maxy, x, z+0.25);
             float y3 = scaled_octave_noise_2d(5, 0.01, 1, miny, maxy, x+0.25, z);
             float y4 = scaled_octave_noise_2d(5, 0.01, 1, miny, maxy, x+0.25, z+0.25);
-            y1 = 0, y2 = 0, y3 = 0, y4 = 0;
+            //y1 = 0, y2 = 0, y3 = 0, y4 = 0;
 
             glm::vec3 t1 = glm::vec3(x, y1, z);
             glm::vec3 t2 = glm::vec3(x, y2, z+0.25);

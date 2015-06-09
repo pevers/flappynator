@@ -7,7 +7,9 @@
 #include <vector>
 #include <iostream>
 #include <GL/glew.h>
+#define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "../src/util/tiny_obj_loader.h"
 
@@ -44,6 +46,8 @@ class WorldObject
 
         void setRotation(glm::vec3 rotation);
         glm::vec3 getRotation();
+
+        glm::mat4 getModel();
 
         virtual void update() { }
 };
