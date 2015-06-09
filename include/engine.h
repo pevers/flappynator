@@ -26,10 +26,14 @@ class Engine
     private:
         sf::Window window;
         GLuint shaderProgram;
+        GLuint depthShaderProgram;
         GLuint elementBuffer;
         GLuint vertexBuffer;
+        GLuint frameBuffer;
 
         GLuint vao;
+
+        GLuint depthTexture;
 
         // debug object shit
         std::vector<tinyobj::shape_t> shapes;
@@ -41,22 +45,28 @@ class Engine
 
         glm::mat4 projMatrix;
         glm::mat4 viewMatrix;
+        glm::mat4 depthMVP;
 
         std::unique_ptr<Player> player;
         std::vector<std::unique_ptr<WorldObject>> wobjs;
 
         void cleanWorldObjectBuffers();
+        void draw();
     public:
         Engine();
         virtual ~Engine();
 
         bool init();
         bool initSun();
+        bool initShadowMap();
+        void drawShadows();
         void drawFrame();
         void drawTerrain();
         void drawPlayer();
         void drawWorldObjects();
         void drawObject(WorldObject &w);
+        void drawWorldShadow();
+        void drawPlayerShadow();
         void mainLoop();
 
         void updateWorldObjects();

@@ -11,6 +11,7 @@ Engine::~Engine()
     //dtor
     cleanWorldObjectBuffers();
     glDeleteProgram(shaderProgram);
+    glDeleteProgram(depthShaderProgram);
     glDeleteVertexArrays(1, &vao);
 
 }
@@ -49,6 +50,28 @@ bool Engine::init()
     glLinkProgram(shaderProgram);
     glUseProgram(shaderProgram);
 
+    // create shader program for the shadow mapping, TODO: move shader creation, attaching, etc. to seperate file
+    depthShaderProgram = glCreateProgram();
+    fragmentShader = ShaderProgram::loadShaderFromFile("shaders/depthFragment.shader", GL_FRAGMENT_SHADER);
+    vertexShader = ShaderProgram::loadShaderFromFile("shaders/depthVertex.shader", GL_VERTEX_SHADER);
+
+    if (!fragmentShader || !vertexShader) {
+        return false;
+    }
+
+    glAttachShader(depthShaderProgram, vertexShader);
+    glAttachShader(depthShaderProgram, fragmentShader);
+    glLinkProgram(depthShaderProgram);
+
+    // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
+    glGenFramebuffers(1, &frameBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+
+    if (!initShadowMap()) {
+        std::cerr << "no shadow map initialized " << std::endl;
+        return false;
+    }
+
     // load sun
     if (!initSun()) {
         std::cerr << "no sun initialized " << std::endl;
@@ -64,6 +87,26 @@ bool Engine::init()
     //wobjs.push_back();
 
     return true;
+}
+
+bool Engine::initShadowMap() {
+
+    // Depth texture. Slower than a depth buffer, but you can sample it later in your shader
+    glGenTextures(1, &depthTexture);
+    glBindTexture(GL_TEXTURE_2D, depthTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
+    glDrawBuffer(GL_NONE);
+
+    // Always check that our framebuffer is ok
+    return glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
 }
 
 bool Engine::initSun()
@@ -83,69 +126,109 @@ bool Engine::initSun()
 void Engine::drawFrame()
 {
     // draw a single frame
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // draw shadows
+    drawShadows();
+
+    // draw rest
+    draw();
+}
+
+void Engine::draw()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, 1024, 768);
 
     glUseProgram(shaderProgram);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    // calculate matrix
     viewMatrix = slide.getSlideView();
-    projMatrix = glm::perspective(45.0f, 800.0f / 600.0f, 1.0f, 100.0f);
+    projMatrix = glm::perspective(45.0f, 1024.0f / 768.0f, 1.0f, 100.0f);
 
-    // draw terrain
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, depthTexture);
+
+    GLuint shadowMap = glGetUniformLocation(shaderProgram, "shadowMap");
+    glUniform1i(shadowMap, 1);
+
     drawTerrain();
-
-    // draw objects
     drawWorldObjects();
-
-    // draw player
     drawPlayer();
+}
+
+void Engine::drawShadows()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+    glViewport(0, 0, 1024, 1024);
+
+    glUseProgram(depthShaderProgram);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    projMatrix = glm::ortho<float>(-100, 100, -100, 100, -100, 200);
+    glm::vec3 sunPos = glm::vec3(1, 10, 0);
+    viewMatrix = glm::lookAt(sunPos, glm::vec3(0,0,0), glm::vec3(0,1,0));
+
+    glm::mat4 model = glm::mat4(1.0);
+    depthMVP = projMatrix * viewMatrix * model;
+    GLuint depthMatrixID = glGetUniformLocation(depthShaderProgram, "depthMVP");
+    glUniformMatrix4fv(depthMatrixID, 1, GL_FALSE, &depthMVP[0][0]);
+
+    drawPlayerShadow();
+    drawWorldShadow();
 }
 
 void Engine::drawTerrain()
 {
-    // no model matrix, defaults  to 0,0
-    glm::mat4 modelMatrix;
-    glm::mat4 MVP = projMatrix * viewMatrix * modelMatrix;
+    // Render to the screen
+    glm::mat4 model;
+    glm::mat4 MVP = projMatrix * viewMatrix * model;
 
     GLuint matrixID = glGetUniformLocation(shaderProgram, "MVP");
     glUniformMatrix4fv(matrixID, 1, GL_FALSE, &MVP[0][0]);  // bind matrix to shader
 
-    GLuint uniColor = glGetUniformLocation(shaderProgram, "overrideColor");
+    GLuint depthBias = glGetUniformLocation(shaderProgram, "depthBiasMVP");
+    glm::mat4 biasMatrix(
+        0.5, 0.0, 0.0, 0.0,
+        0.0, 0.5, 0.0, 0.0,
+        0.0, 0.0, 0.5, 0.0,
+        0.5, 0.5, 0.5, 1.0
+    );
+
+    glm::mat4 depthBiasMVP = biasMatrix * depthMVP;
+    glUniformMatrix4fv(depthBias, 1, GL_FALSE, &depthBiasMVP[0][0]);
 
     // send vertex buffer
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, terrain->getVertexBuffer());
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-    // send normal buffer
-    GLint normalAttrib = glGetAttribLocation(shaderProgram, "inNormal");
-    glEnableVertexAttribArray(normalAttrib);
-    glBindBuffer(GL_ARRAY_BUFFER, terrain->getNormalBuffer());
-    glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-    GLint texAttrib = glGetAttribLocation(shaderProgram, "inCoord");
-    glEnableVertexAttribArray(texAttrib);
+    // texture buffer
+    glEnableVertexAttribArray(1);
     glBindBuffer(GL_ARRAY_BUFFER, terrain->getTextureBuffer());
-    glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrain->getElementBuffer());
+    // send normal buffer
+    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, terrain->getNormalBuffer());
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
+    GLuint uniColor = glGetUniformLocation(shaderProgram, "overrideColor");
     glUniform3f(uniColor, 1.0f, 1.0f, 1.0f);
+
     glDrawArrays(GL_TRIANGLES, 0, terrain->getTerrainSize());
-
     glDisableVertexAttribArray(0);
-//    glDisableVertexAttribArray(normalAttrib);
-
 }
 
 void Engine::drawObject(WorldObject &w)
 {
     //glm::mat4 modelMatrix = glm::translate(modelMatrix, wobjs[i].getPos());
-    GLuint uniColor = glGetUniformLocation(shaderProgram, "overrideColor");
-    glm::mat4 modelMatrix;
-    modelMatrix = glm::rotate(glm::scale(glm::translate(modelMatrix, w.getPos()), w.getScale()), w.getRotation().z, glm::vec3(0.0, 0.0, 1.0));
-    modelMatrix = glm::rotate(modelMatrix, w.getRotation().y, glm::vec3(0.0, 1.0, 0.0));
+    glm::mat4 model;
+    model = glm::rotate(glm::scale(glm::translate(model, w.getPos()), w.getScale()), w.getRotation().z, glm::vec3(0.0, 0.0, 1.0));
+    model = glm::rotate(model, w.getRotation().y, glm::vec3(0.0, 1.0, 0.0));
     //modelMatrix = glm::rotate(modelMatrix, w.getRotation().z, glm::vec3(0.0, 0.0, 1.0));
-    glm::mat4 MVP = projMatrix * viewMatrix * modelMatrix;
+    glm::mat4 MVP = projMatrix * viewMatrix * model;
 
     GLuint matrixID = glGetUniformLocation(shaderProgram, "MVP");
     glUniformMatrix4fv(matrixID, 1, GL_FALSE, &MVP[0][0]);  // bind matrix to shader
@@ -155,21 +238,59 @@ void Engine::drawObject(WorldObject &w)
     glBindBuffer(GL_ARRAY_BUFFER, w.getVertexBuffer());
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-    // get normal buffer
-    GLint normalAttrib = glGetAttribLocation(shaderProgram, "inNormal");
-    glEnableVertexAttribArray(normalAttrib);
+    GLuint depthBias = glGetUniformLocation(shaderProgram, "depthBiasMVP");
+    glm::mat4 biasMatrix(
+        0.5, 0.0, 0.0, 0.0,
+        0.0, 0.5, 0.0, 0.0,
+        0.0, 0.0, 0.5, 0.0,
+        0.5, 0.5, 0.5, 1.0
+    );
+
+    glm::mat4 depthBiasMVP = biasMatrix * MVP;
+    glUniformMatrix4fv(depthBias, 1, GL_FALSE, &depthBiasMVP[0][0]);
+
+    // texture buffer
+//    glEnableVertexAttribArray(1);
+//    glBindBuffer(GL_ARRAY_BUFFER, w.getTextureBuffer());
+//    glEnableVertexAttribArray(1);
+//    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+    // send normal buffer
+    glEnableVertexAttribArray(2);
     glBindBuffer(GL_ARRAY_BUFFER, w.getNormalBuffer());
-    glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, w.getElementBuffer());
 
     // override texture colors
+    GLuint uniColor = glGetUniformLocation(shaderProgram, "overrideColor");
     glUniform3f(uniColor, 1.0f, 0.3f, 0.3f);
+
     glDrawElements(GL_TRIANGLES, w.getObjectSize(), GL_UNSIGNED_INT, (void*)0);
-
     glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(normalAttrib);
+}
 
+void Engine::drawWorldShadow()
+{
+    // get vertex buffer
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, terrain->getVertexBuffer());
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+    glDrawArrays(GL_TRIANGLES, 0, terrain->getTerrainSize());
+    glDisableVertexAttribArray(0);
+}
+
+void Engine::drawPlayerShadow()
+{
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, player->getVertexBuffer());
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, player->getElementBuffer());
+
+    glDrawElements(GL_TRIANGLES, player->getObjectSize(), GL_UNSIGNED_INT, (void*)0);
+    glDisableVertexAttribArray(0);
 }
 
 void Engine::drawWorldObjects()
@@ -211,7 +332,7 @@ void Engine::mainLoop() {
         while (accumulator > Settings::ups)
         {
             accumulator -= Settings::ups;
-            updateWorldObjects();
+            //updateWorldObjects();
         }
 
         // draw single frame
@@ -244,6 +365,12 @@ void Engine::handleKeyEvent(sf::Event event)
     } else if (event.key.code == sf::Keyboard::R) {
         eye = Settings::eye;
         center = glm::vec3(0.0, 0.0, 0.0);
+    } else if (event.key.code == sf::Keyboard::W) {
+        eye.z--;
+        center.z--;
+    } else if (event.key.code == sf::Keyboard::S) {
+        eye.z++;
+        center.z++;
     } else if (event.key.code == sf::Keyboard::Space) {
         player->addAcc(glm::vec3(0.0f, 1.0f / 200.0, 0.0f));
     }
