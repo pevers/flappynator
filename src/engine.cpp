@@ -92,7 +92,7 @@ bool Engine::initShadowMap() {
 
     glGenTextures(1, &depthTexture);
     glBindTexture(GL_TEXTURE_2D, depthTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, Settings::screenWidth, Settings::screenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1014, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -117,10 +117,13 @@ bool Engine::initSun()
     glUniform3f(color, 1.0f, 1.0f, 1.0f);
 
     GLuint intensity = glGetUniformLocation(shaderProgram, "sunLight.ambientIntensity");
-    glUniform1f(intensity, 0.60f);
+    glUniform1f(intensity, 0.50f);
 
     GLuint direction = glGetUniformLocation(shaderProgram, "sunLight.direction");
     glUniform3f(direction, glm::normalize(Settings::sunSpot - Settings::sunPos).x, glm::normalize(Settings::sunSpot - Settings::sunPos).y, glm::normalize(Settings::sunSpot - Settings::sunPos).z);
+
+    GLuint pos = glGetUniformLocation(shaderProgram, "sunLight.pos");
+    glUniform3f(pos, Settings::sunPos.x, Settings::sunPos.y, Settings::sunPos.z);
 
     return (color && intensity && direction);
 }
@@ -164,7 +167,7 @@ void Engine::draw()
 void Engine::drawShadows()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-    glViewport(0, 0, Settings::screenWidth, Settings::screenHeight);
+    glViewport(0, 0, 1024, 1014);
 
     glUseProgram(depthShaderProgram);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -181,11 +184,14 @@ void Engine::drawShadows()
 void Engine::drawTerrain()
 {
     // Render to the screen
-    glm::mat4 model;
-    glm::mat4 MVP = projMatrix * viewMatrix * model;
+    GLuint modelID = glGetUniformLocation(shaderProgram, "model");
+    GLuint viewID = glGetUniformLocation(shaderProgram, "view");
+    GLuint projID = glGetUniformLocation(shaderProgram, "proj");
 
-    GLuint matrixID = glGetUniformLocation(shaderProgram, "MVP");
-    glUniformMatrix4fv(matrixID, 1, GL_FALSE, &MVP[0][0]);  // bind matrix to shader
+    glm::mat4 model;
+    glUniformMatrix4fv(modelID, 1, GL_FALSE, &model[0][0]);
+    glUniformMatrix4fv(viewID, 1, GL_FALSE, &viewMatrix[0][0]);
+    glUniformMatrix4fv(projID, 1, GL_FALSE, &projMatrix[0][0]);
 
     GLuint depthBias = glGetUniformLocation(shaderProgram, "depthBiasMVP");
     glm::mat4 biasMatrix(
@@ -224,12 +230,15 @@ void Engine::drawTerrain()
 void Engine::drawObject(WorldObject &w)
 {
     //glm::mat4 modelMatrix = glm::translate(modelMatrix, wobjs[i].getPos());
-    glm::mat4 model = w.getModel();
     //modelMatrix = glm::rotate(modelMatrix, w.getRotation().z, glm::vec3(0.0, 0.0, 1.0));
-    glm::mat4 MVP = projMatrix * viewMatrix * model;
+    GLuint modelID = glGetUniformLocation(shaderProgram, "model");
+    GLuint viewID = glGetUniformLocation(shaderProgram, "view");
+    GLuint projID = glGetUniformLocation(shaderProgram, "proj");
 
-    GLuint matrixID = glGetUniformLocation(shaderProgram, "MVP");
-    glUniformMatrix4fv(matrixID, 1, GL_FALSE, &MVP[0][0]);  // bind matrix to shader
+    glm::mat4 model = w.getModel();
+    glUniformMatrix4fv(modelID, 1, GL_FALSE, &model[0][0]);
+    glUniformMatrix4fv(viewID, 1, GL_FALSE, &viewMatrix[0][0]);
+    glUniformMatrix4fv(projID, 1, GL_FALSE, &projMatrix[0][0]);
 
     // get vertex buffer
     glEnableVertexAttribArray(0);
@@ -244,7 +253,7 @@ void Engine::drawObject(WorldObject &w)
         0.5, 0.5, 0.5, 1.0
     );
 
-    glm::mat4 depthBiasMVP = biasMatrix * MVP;
+    glm::mat4 depthBiasMVP = biasMatrix * projMatrix * viewMatrix * model;
     glUniformMatrix4fv(depthBias, 1, GL_FALSE, &depthBiasMVP[0][0]);
 
     // texture buffer

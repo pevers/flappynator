@@ -19,7 +19,7 @@ namespace Settings
     glm::vec3 playerRotation(0.0, 0.5 * M_PI, 0.0);
     std::string playerModel = "resources/monkey.obj";
 
-    glm::vec3 sunPos(-10.0, 100.0, 0.0);
+    glm::vec3 sunPos(-10.0, 80.0, 0.0);
     glm::vec3 sunSpot(50, 0, 50);
     //glm::vec3 sunDirection(cos(45*3.1415/180.0)*70, -sin(45*3.1415/180.0)*70, 1.0f);
 

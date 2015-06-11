@@ -8,9 +8,10 @@ out vec4 outColor;
 
 struct SimpleDirectionalLight 
 { 
-   vec3 color; 
-   vec3 direction; 
-   float ambientIntensity; 
+	vec3 color; 
+	vec3 pos;
+	vec3 direction; 
+	float ambientIntensity; 
 }; 
 
 uniform SimpleDirectionalLight sunLight;
@@ -35,42 +36,26 @@ vec2 poissonDisk[16] = vec2[](
    vec2( 0.14383161, -0.14100790 ) 
 );
 
-// Returns a random number based on a vec3 and an int.
-float random(vec3 seed, int i){
-	vec4 seed4 = vec4(seed,i);
-	float dot_product = dot(seed4, vec4(12.9898,78.233,45.164,94.673));
-	return fract(sin(dot_product) * 43758.5453);
-}
-
 void main() {
 	float diffuseIntensity = max(0.0, dot(normalize(normal), -sunLight.direction));
+
+	// temp old code
 	//float cosTheta = clamp(dot(normal, sunLight.direction), 0, 1);
 	//float bias = 0.005*tan(acos(cosTheta));
 	//bias = clamp(bias, 0,0.01);
+	//float visibility = texture(shadowMap, vec3(shadowCoord.xy, (shadowCoord.z - bias)/shadowCoord.w));
 
 	float visibility = 1.0;
 	float bias = 0.005;
 	for (int i=0; i<3; i++){
-		// use either :
-		//  - Always the same samples.
-		//    Gives a fixed pattern in the shadow, but no noise
 		int index = i;
-		//  - A random sample, based on the pixel's screen location. 
-		//    No banding, but the shadow moves with the camera, which looks weird.
-		//int index = int(16.0*random(gl_FragCoord.xyy, i))%16;
-		//index = int(16.0*random(gl_FragCoord.xyy, i))%16;
-		//  - A random sample, based on the pixel's position in world space.
-		//    The position is rounded to the millimeter to avoid too much aliasing
-		//int index = int(16.0*random(floor(Position_worldspace.xyz*1000.0), i))%16;
-		
+
 		// being fully in the shadow will eat up 4*0.2 = 0.8
 		// 0.2 potentially remain, which is quite dark.
-		visibility -= 0.20*(1.0-texture(shadowMap, vec3(shadowCoord.xy + poissonDisk[index] / 800.0,  (shadowCoord.z - bias) / shadowCoord.w)));
+		visibility -= 0.20*(1.0-texture(shadowMap, vec3(shadowCoord.xy + poissonDisk[index] / 900.0,  (shadowCoord.z - bias) / shadowCoord.w)));
 	}
 
-	//float visibility = texture(shadowMap, vec3(shadowCoord.xy, (shadowCoord.z - bias)/shadowCoord.w));
-	
-	outColor = visibility * vec4(color, 1.0) * vec4(sunLight.color*(sunLight.ambientIntensity+diffuseIntensity), 1.0);
+	outColor = visibility * vec4(color, 1.0) * vec4(sunLight.color * (diffuseIntensity + sunLight.ambientIntensity), 1.0); //vec4(sunLight.color*(sunLight.ambientIntensity+diffuseIntensity+specularIntensity), 1.0);
 }
 
 

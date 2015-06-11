@@ -34,7 +34,7 @@ bool SmoothTerrain::generateTerrain(unsigned int width, unsigned int height)
 
     float miny = 0;
     float maxy = 0.20;
-    float detail = 0.5;
+    float detail = 0.25;
     for (float z = -2; z < height; z += detail) {
         for (float x = -2; x < width; x += detail) {
             float y1 = scaled_octave_noise_2d(5, 0.1, 1, miny, maxy, x, z);
