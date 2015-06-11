@@ -1,8 +1,9 @@
-#version 330
+#version 130
 in vec3 color;
 in vec2 UV;
 in vec3 normal;
 in vec4 shadowCoord;
+in vec3 cubeMapCoords;
 
 out vec4 outColor;
 
@@ -16,6 +17,7 @@ struct SimpleDirectionalLight
 
 uniform SimpleDirectionalLight sunLight;
 uniform sampler2DShadow shadowMap;
+uniform samplerCube skybox;
 
 vec2 poissonDisk[16] = vec2[]( 
    vec2( -0.94201624, -0.39906216 ), 

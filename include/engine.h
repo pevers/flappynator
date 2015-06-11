@@ -20,6 +20,7 @@
 #include "worldobject.h"
 #include "smoothterrain.h"
 #include "player.h"
+#include "skybox.h"
 
 class Engine
 {
@@ -50,6 +51,8 @@ class Engine
         std::unique_ptr<Player> player;
         std::vector<std::unique_ptr<WorldObject>> wobjs;
 
+        std::unique_ptr<Skybox> skybox;
+
         void cleanWorldObjectBuffers();
         void draw();
     public:
@@ -58,15 +61,20 @@ class Engine
 
         bool init();
         bool initSun();
+        bool initSkybox();
         bool initShadowMap();
-        void drawShadows();
+
         void drawFrame();
         void drawTerrain();
         void drawPlayer();
+        void drawSkybox();
         void drawWorldObjects();
         void drawObject(WorldObject &w);
+
+        void drawShadows();
         void drawWorldShadow();
         void drawPlayerShadow();
+
         void mainLoop();
 
         void updateWorldObjects();

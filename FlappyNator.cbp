@@ -47,6 +47,7 @@
 			<Add library="SOIL" />
 			<Add directory="$(#glfw.lib)" />
 		</Linker>
+		<Unit filename="include/cubemaptexture.h" />
 		<Unit filename="include/engine.h" />
 		<Unit filename="include/flatterrain.h" />
 		<Unit filename="include/player.h" />
@@ -57,6 +58,7 @@
 		<Unit filename="include/smoothterrain.h" />
 		<Unit filename="include/terrain.h" />
 		<Unit filename="include/worldobject.h" />
+		<Unit filename="src/cubemaptexture.cpp" />
 		<Unit filename="src/engine.cpp" />
 		<Unit filename="src/flatterrain.cpp" />
 		<Unit filename="src/main.cpp" />

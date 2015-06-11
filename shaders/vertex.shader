@@ -1,7 +1,7 @@
-#version 330
-layout(location = 0) in vec3 inPosition;
-layout(location = 1) in vec2 vertexUV;
-layout(location = 2) in vec3 inNormal;
+#version 130
+in vec3 inPosition;
+in vec2 vertexUV;
+in vec3 inNormal;
 
 uniform mat4 model, view, proj;
 
@@ -10,8 +10,8 @@ uniform mat4 depthBiasMVP;
 
 out vec3 color;
 out vec3 normal;
-out vec3 toCamera;
 out vec2 UV;
+out vec3 cubeMapCoords;
 out vec4 shadowCoord;
 
 void main() {

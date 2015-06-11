@@ -63,6 +63,18 @@ bool Engine::init()
     glAttachShader(depthShaderProgram, fragmentShader);
     glLinkProgram(depthShaderProgram);
 
+    skybox = std::unique_ptr<Skybox>(new Skybox("resources/skybox/right.png",
+            "resources/skybox/left.png",
+            "resources/skybox/top.png",
+            "resources/skybox/bottom.png",
+            "resources/skybox/back.png",
+            "resources/skybox/front.png"));
+
+    if (!skybox->load()) {
+        std::cerr << "could not initalize skybox " << std::endl;
+        return false;
+    }
+
     if (!initShadowMap()) {
         std::cerr << "no shadow map initialized " << std::endl;
         return false;
@@ -76,7 +88,7 @@ bool Engine::init()
 
     // load terrain
     terrain.reset(new SmoothTerrain());
-    terrain->generateTerrain(50, 50);
+    terrain->generateTerrain(50, 20);
 
     // load test object
     player = std::unique_ptr<Player>(new Player());
@@ -143,13 +155,15 @@ void Engine::draw()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, Settings::screenWidth, Settings::screenHeight);
-
-    glUseProgram(shaderProgram);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // calculate matrix
     viewMatrix = slide.getSlideView();
-    projMatrix = glm::perspective(45.0f, (float)Settings::screenWidth / (float)Settings::screenHeight, 1.0f, 100.0f);
+    projMatrix = glm::perspective(45.0f, (float)Settings::screenWidth / (float)Settings::screenHeight, 1.0f, 200.0f);
+
+    drawSkybox();
+
+    glUseProgram(shaderProgram);
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, depthTexture);
@@ -162,6 +176,25 @@ void Engine::draw()
     drawTerrain();
     drawWorldObjects();
     drawPlayer();
+}
+
+void Engine::drawSkybox()
+{
+    glDepthMask(GL_FALSE);
+    GLuint shader = skybox->getShaderProgram();
+    glUseProgram(shader);
+
+    // set projection and view matrix
+    GLuint projID = glGetUniformLocation(shader, "MVP");
+    glm::mat4 MVP = projMatrix * viewMatrix * skybox->getModel();
+
+    glUniformMatrix4fv(projID, 1, GL_FALSE, &MVP[0][0]);
+
+    glBindVertexArray(skybox->getVAO());
+    glBindTexture(GL_TEXTURE_CUBE_MAP, skybox->getTexture());
+    glDrawArrays(GL_TRIANGLES, 0, skybox->getSize());
+    glBindVertexArray(0);
+    glDepthMask(GL_TRUE);
 }
 
 void Engine::drawShadows()
