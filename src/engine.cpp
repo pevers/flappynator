@@ -28,7 +28,7 @@ bool Engine::init()
     }
 
     glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
+    glDepthFunc(GL_LEQUAL);
 
     // Create Vertex Array Object
     glGenVertexArrays(1, &vao);
@@ -161,8 +161,6 @@ void Engine::draw()
     viewMatrix = slide.getSlideView();
     projMatrix = glm::perspective(45.0f, (float)Settings::screenWidth / (float)Settings::screenHeight, 1.0f, 200.0f);
 
-    drawSkybox();
-
     glUseProgram(shaderProgram);
 
     glActiveTexture(GL_TEXTURE1);
@@ -176,6 +174,8 @@ void Engine::draw()
     drawTerrain();
     drawWorldObjects();
     drawPlayer();
+
+    drawSkybox();
 }
 
 void Engine::drawSkybox()
