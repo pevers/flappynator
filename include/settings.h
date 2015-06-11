@@ -5,6 +5,7 @@
 #include <math.h>
 #include <glm/glm.hpp>
 #include <SFML/Window.hpp>
+#include <memory>
 
 namespace Settings
 {
@@ -18,12 +19,20 @@ namespace Settings
 
     extern glm::vec3 eye;
 
+    extern float PI;
+
     extern glm::vec3 playerStart;
     extern glm::vec3 playerScale;
     extern glm::vec3 playerRotation;
     extern glm::vec3 playerAcc;
     extern glm::vec3 playerSpeed;
     extern std::string playerModel;
+
+    extern glm::vec3 enemyAcc;
+    extern std::string enemyModel1;
+
+    extern int numEnemies;
+    extern float startEnemyUpdate;
 
     extern glm::vec3 sunPos;
     extern glm::vec3 sunSpot;

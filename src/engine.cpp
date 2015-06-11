@@ -1,4 +1,5 @@
 #define GLEW_STATIC
+
 #include "engine.h"
 
 Engine::Engine(): slide(Settings::eye, glm::vec3(0.0, 0.0, 0.0), 1.0)
@@ -82,6 +83,28 @@ bool Engine::init()
     player = std::unique_ptr<Player>(new Player());
     //wobjs.push_back();
 
+    // Initialize enemies
+    initEnemies();
+
+    return true;
+}
+
+bool Engine::initEnemies() {
+    glm::vec3 enemyScale = Settings::playerScale;
+    glm::vec3 enemyRotation = glm::vec3(0.0, -0.5 * Settings::PI, 0.0);
+    std::string enemyModel = Settings::enemyModel1;
+
+    srand(time(NULL));
+    for(int i = 0; i < Settings::numEnemies; i++) {
+        glm::vec3 enemyStart = player->getPos() + glm::vec3(10.0*(i+1), 2+rand()%5, 0.0);
+        glm::vec3 enemyAcc = Settings::enemyAcc;
+        glm::vec3 enemySpeed = Settings::playerSpeed * glm::vec3(-3.0, 0.0, 0.0);
+
+        std::unique_ptr<Enemy> enemy = std::unique_ptr<Enemy>(new Enemy(enemyStart, enemyScale, enemyRotation, enemyAcc, enemySpeed, enemyModel));
+
+        enemies.push_back(std::move(enemy));
+    }
+
     return true;
 }
 
@@ -162,6 +185,7 @@ void Engine::draw()
     drawTerrain();
     drawWorldObjects();
     drawPlayer();
+    drawEnemies();
 }
 
 void Engine::drawShadows()
@@ -323,6 +347,13 @@ void Engine::drawPlayer()
     drawObject(*player);
 }
 
+void Engine::drawEnemies()
+{
+    for (auto &e : enemies) {
+        drawObject(*e);
+    }
+}
+
 void Engine::mainLoop() {
 
     sf::Clock clock;
@@ -417,6 +448,13 @@ void Engine::updateWorldObjects()
 {
     for (auto &w : wobjs) {
         w->update();
+    }
+
+    for (auto &e : enemies) {
+
+        // Update the enemy only when the player is in range
+        if(e->getPos().x - player->getPos().x < Settings::startEnemyUpdate)
+            e->update();
     }
 
     player->update();

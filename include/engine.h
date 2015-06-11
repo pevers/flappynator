@@ -20,6 +20,7 @@
 #include "worldobject.h"
 #include "smoothterrain.h"
 #include "player.h"
+#include "enemy.h"
 
 class Engine
 {
@@ -49,6 +50,7 @@ class Engine
 
         std::unique_ptr<Player> player;
         std::vector<std::unique_ptr<WorldObject>> wobjs;
+        std::vector<std::unique_ptr<Enemy>> enemies;
 
         void cleanWorldObjectBuffers();
         void draw();
@@ -59,10 +61,12 @@ class Engine
         bool init();
         bool initSun();
         bool initShadowMap();
+        bool initEnemies();
         void drawShadows();
         void drawFrame();
         void drawTerrain();
         void drawPlayer();
+        void drawEnemies();
         void drawWorldObjects();
         void drawObject(WorldObject &w);
         void drawWorldShadow();
