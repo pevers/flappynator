@@ -92,7 +92,7 @@ bool Engine::init()
 
     // load test object
     player = std::unique_ptr<Player>(new Player());
-    //wobjs.push_back();
+    //wobjs.push_back(std::unique_ptr<AnimatedObject>(new AnimatedObject(glm::vec3(4.0, 4.0, 2.0), glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0, 0.0, 0.0))));
 
     return true;
 }
@@ -296,9 +296,11 @@ void Engine::drawObject(WorldObject &w)
 //    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
     // send normal buffer
-    glEnableVertexAttribArray(2);
-    glBindBuffer(GL_ARRAY_BUFFER, w.getNormalBuffer());
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    if (w.hasNormals()) {
+        glEnableVertexAttribArray(2);
+        glBindBuffer(GL_ARRAY_BUFFER, w.getNormalBuffer());
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    }
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, w.getElementBuffer());
 
@@ -428,6 +430,7 @@ void Engine::handleKeyEvent(sf::Event event)
         eye.x++;
     } else if (event.key.code == sf::Keyboard::Space) {
         player->addAcc(glm::vec3(0.0f, 1.0f / 200.0, 0.0f));
+        player->startAnimation();
     }
 
     std::cout << "eye (" << eye.x << ", " << eye.y << ", " << eye.z << ")" << std::endl;
@@ -438,8 +441,7 @@ void Engine::handleKeyEvent(sf::Event event)
 void Engine::cleanWorldObjectBuffers()
 {
     for (unsigned int i = 0; i < wobjs.size(); i++) {
-        glDeleteBuffers(1, &wobjs[i]->getVertexBuffer());
-        glDeleteBuffers(1, &wobjs[i]->getElementBuffer());
+        wobjs[i]->free();
     }
 }
 

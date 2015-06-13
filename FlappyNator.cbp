@@ -47,6 +47,7 @@
 			<Add library="SOIL" />
 			<Add directory="$(#glfw.lib)" />
 		</Linker>
+		<Unit filename="include/animatedobject.h" />
 		<Unit filename="include/engine.h" />
 		<Unit filename="include/flatterrain.h" />
 		<Unit filename="include/player.h" />
@@ -56,8 +57,10 @@
 		<Unit filename="include/skybox.h" />
 		<Unit filename="include/slide.h" />
 		<Unit filename="include/smoothterrain.h" />
+		<Unit filename="include/staticobject.h" />
 		<Unit filename="include/terrain.h" />
 		<Unit filename="include/worldobject.h" />
+		<Unit filename="src/animatedobject.cpp" />
 		<Unit filename="src/engine.cpp" />
 		<Unit filename="src/flatterrain.cpp" />
 		<Unit filename="src/main.cpp" />
@@ -67,6 +70,7 @@
 		<Unit filename="src/skybox.cpp" />
 		<Unit filename="src/slide.cpp" />
 		<Unit filename="src/smoothterrain.cpp" />
+		<Unit filename="src/staticobject.cpp" />
 		<Unit filename="src/terrain.cpp" />
 		<Unit filename="src/util/tiny_obj_loader.cpp" />
 		<Unit filename="src/util/tiny_obj_loader.h" />

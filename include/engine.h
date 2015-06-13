@@ -18,6 +18,7 @@
 #include "flatterrain.h"
 #include "../src/util/tiny_obj_loader.h"
 #include "worldobject.h"
+#include "animatedobject.h"
 #include "smoothterrain.h"
 #include "player.h"
 #include "skybox.h"
@@ -35,10 +36,6 @@ class Engine
         GLuint vao;
 
         GLuint depthTexture;
-
-        // debug object shit
-        std::vector<tinyobj::shape_t> shapes;
-        std::vector<tinyobj::material_t> material;
 
         // sliding window, eye, center, speed
         Slide slide;
@@ -61,7 +58,6 @@ class Engine
 
         bool init();
         bool initSun();
-        bool initSkybox();
         bool initShadowMap();
 
         void drawFrame();

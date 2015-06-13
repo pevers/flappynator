@@ -1,6 +1,6 @@
 #include "player.h"
 
-Player::Player() : WorldObject(Settings::playerStart, Settings::playerScale, Settings::playerRotation, Settings::playerModel), acc(Settings::playerAcc), speed(Settings::playerSpeed)
+Player::Player() : AnimatedObject(Settings::playerStart, Settings::playerScale, Settings::playerRotation, false, 0), acc(Settings::playerAcc), speed(Settings::playerSpeed)
 {
     //ctor
 }
@@ -36,6 +36,9 @@ glm::vec3 Player::getAcc()
  */
 void Player::update()
 {
+    // update animation
+    AnimatedObject::update();
+
     // acceleration
     acc += Settings::playerAcc;
     if (acc.y < Settings::playerAcc.y)
