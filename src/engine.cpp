@@ -96,9 +96,11 @@ bool Engine::initEnemies() {
 
     srand(time(NULL));
     for(int i = 0; i < Settings::numEnemies; i++) {
-        glm::vec3 enemyStart = player->getPos() + glm::vec3(10.0*(i+1), 2+rand()%5, 0.0);
+        glm::vec3 enemyStart = player->getPos() + glm::vec3(10.0*(i+1), 0.0, 0.0);
         glm::vec3 enemyAcc = Settings::enemyAcc;
-        glm::vec3 enemySpeed = Settings::playerSpeed * glm::vec3(-3.0, 0.0, 0.0);
+
+        float speedX = (((rand()%200) / 100.0) + 2.0) * -1.0; // Value between 2.0 and 4.0
+        glm::vec3 enemySpeed = Settings::playerSpeed * glm::vec3(speedX, 0.0, 0.0);
 
         std::unique_ptr<Enemy> enemy = std::unique_ptr<Enemy>(new Enemy(enemyStart, enemyScale, enemyRotation, enemyAcc, enemySpeed, enemyModel));
 
@@ -454,8 +456,10 @@ void Engine::updateWorldObjects()
 
         // Update the enemy only when the player is in range
         if(e->getPos().x - player->getPos().x < Settings::startEnemyUpdate) {
-            e->start(player->getPos());
-            e->update();
+            if(e->isAlive())
+                e->update();
+            else
+                e->start(player->getPos());
         }
     }
 

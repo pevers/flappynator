@@ -29,13 +29,16 @@ class Enemy : public WorldObject
         glm::vec3 getInitAcc();
         void setHealth(int hp);
         int getHealth();
-        void calcPathToPlayer();
+        void setAngle(float angle);
+        float getAngle();
+        bool isAlive();
 
     protected:
     private:
-        glm::vec3 acc, initAcc, speed;
+        glm::vec3 acc, initAcc, speed, startPos;
         int hp;
-        bool alive;
+        bool alive, down;
+        float angle;
 
 };
 

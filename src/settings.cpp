@@ -24,7 +24,7 @@ namespace Settings
     glm::vec3 enemyAcc(0.0, - 1.0 / 2000, 0.0);
     std::string enemyModel1 = "resources/monkey.obj";
 
-    int numEnemies = 5;
+    int numEnemies = 10;
     float startEnemyUpdate = 9.0; // When the horizontal distance between the enemy and the player is smaller than this value, update the enemy
 
     glm::vec3 sunPos(-10.0, 80.0, 0.0);

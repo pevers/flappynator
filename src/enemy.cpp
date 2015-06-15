@@ -5,6 +5,8 @@ Enemy::Enemy(glm::vec3 enemyStart, glm::vec3 enemyScale, glm::vec3 enemyRotation
 {
     this->acc = enemyAcc;
     this->speed = enemySpeed;
+    this->startPos = enemyStart;
+    this->alive = false;
 }
 
 Enemy::~Enemy()
@@ -53,6 +55,21 @@ int Enemy::getHealth()
     return hp;
 }
 
+void Enemy::setAngle(float angle)
+{
+    this->angle = angle;
+}
+
+float Enemy::getAngle()
+{
+    return angle;
+}
+
+bool Enemy::isAlive()
+{
+    return alive;
+}
+
 /**
   * Calculates enemy's initial acceleration
   */
@@ -61,14 +78,16 @@ void Enemy::start(glm::vec3 playerPos)
     if(!alive)
     {
         alive = true;
+        angle = 0.0;
 
-        // Calculate the amount of time it takes the enemy to get to the x position of the player
-        float time = Settings::startEnemyUpdate / (abs(speed.x) * 60.0);
-        float frames = time * 60.0;
-        float enemyAcc = ((pos.y - playerPos.y) / pow(frames, 2.0)) * -1.0;
+        // Set a new y position for the enemy, based on the player's position
+        pos.y = playerPos.y + (rand()%5 - 1);
+        startPos.y = pos.y;
 
-        initAcc = glm::vec3(0.0, enemyAcc, 0.0);
-        acc = initAcc;
+        if(startPos.y > playerPos.y)
+            down = true;
+        else
+            down = false;
     }
 }
 
@@ -79,28 +98,14 @@ void Enemy::update()
 {
     if(alive)
     {
-        pos += speed;
-        pos.y = -(float)cos(pos.x / 2) + 3;
-        // acceleration
-        /*acc += initAcc;
-        if (acc.y < initAcc.y)
-            acc.y = initAcc.y;
+        //angle += 0.02;
+        angle += speed.x / 5.0;
 
-        speed.y += acc.y;
         pos += speed;
 
-        if (speed.y > 0) {
-            rotation.z = -acos(glm::dot(glm::normalize(speed), glm::normalize(glm::vec3(1.0, 0.0, 0.0))));
-        } else {
-            rotation.z = acos(glm::dot(glm::normalize(speed), glm::normalize(glm::vec3(1.0, 0.0, 0.0))));
-        }*/
+        if(down)
+            pos.y = (float)cos(angle)*3 + startPos.y;
+        else
+            pos.y = -(float)cos(angle)*3 + startPos.y;
     }
-}
-
-/**
- * Calculates the acceleration so that the the enemy hits the player on his current position
- */
-void Enemy::calcPathToPlayer()
-{
-
 }
