@@ -557,6 +557,30 @@ void Engine::boundingBox() {
     player->setBoundingBox(boundingBox);
 }
 
+/**
+  * Code from http://stackoverflow.com/questions/15125631/best-way-to-delete-a-stdunique-ptr-from-a-vector-with-a-raw-pointer
+  */
+void Engine::removeObjectFromVector(std::vector<std::unique_ptr<Enemy>> vec1, std::vector<Enemy*> vec2)
+{
+    vec1.erase(
+        std::remove_if( // Selectively remove elements in the second vector...
+            vec1.begin(),
+            vec1.end(),
+            [&] (std::unique_ptr<Enemy> const& p)
+            {   // This predicate checks whether the element is contained
+                // in the second vector of pointers to be removed...
+                return std::find(
+                    vec2.cbegin(),
+                    vec2.cend(),
+                    p.get()
+                    ) != vec2.end();
+            }),
+        vec1.end()
+        );
+
+    vec2.clear();
+}
+
 void Engine::checkCollision() {
     glm::vec4 boundingBoxBird = player->getBoundingBox();
     int counter = 0;
@@ -579,6 +603,8 @@ void Engine::checkCollision() {
     }*/
 
     for (auto &e : enemies) {
+
+        // Check collision with bird
         glm::vec4 boundingBoxWorld = e->getBoundingBox();
         if(boundingBoxBird.x < boundingBoxWorld.x + boundingBoxWorld.z &&
             boundingBoxBird.x + boundingBoxBird.z > boundingBoxWorld.x &&
@@ -593,6 +619,30 @@ void Engine::checkCollision() {
             //window.close();
             e->destroyObject();
         }
+
+        // Check collision with terrain
+        float startEnemy = floor(e->getBoundingBox().x); //the min x-value pos of the bird
+        float endEnemy = floor(e->getBoundingBox().x + e->getBoundingBox().z); //the max x-value pos of the bird
+        float detail = 0.25;
+        std::vector<float> mountain;
+        mountain = SmoothTerrain::getRandom();
+        for(startEnemy; startEnemy < endEnemy; startEnemy += detail) {
+            //initiate the counter with some correction
+            int counter = floor(startEnemy*4+2);
+            //check if the y-value of the mountain at the certain x is higher or equal to the y-value of the bird
+            if(mountain[counter] >= e->getBoundingBox().y) {
+                //if so then dead
+                std::cout << "enemy DIED" << std::endl;
+
+                e->destroyObject();
+
+                //std::vector<Enemy*> vec2;
+                //vec2.push_back(std::move(e));
+
+                //removeEnemyFromVector(enemies, e);
+            }
+        }
+
         counter++;
     }
 

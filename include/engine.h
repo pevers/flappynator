@@ -54,6 +54,7 @@ class Engine
 
         void cleanWorldObjectBuffers();
         void draw();
+        void removeObjectFromVector(std::vector<std::unique_ptr<Enemy>> vec1, std::vector<Enemy*> vec2);
     public:
         Engine();
         virtual ~Engine();
