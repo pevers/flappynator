@@ -92,6 +92,8 @@ bool Engine::init()
 
     // load test object
     player = std::unique_ptr<Player>(new Player());
+    //wobjs.push_back(std::unique_ptr<StaticObject>(new StaticObject(glm::vec3(4.0, 4.0, 2.0), glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0, 0.0, 0.0), "resources/monkey.obj")));
+    //wobjs.push_back(std::unique_ptr<Explosion>(new Explosion(glm::vec3(3.0, 2.0, 2.0), glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(-1.0, 0.0, 0.0))));
     //wobjs.push_back(std::unique_ptr<AnimatedObject>(new AnimatedObject(glm::vec3(4.0, 4.0, 2.0), glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0, 0.0, 0.0))));
 
     return true;
@@ -237,6 +239,9 @@ void Engine::drawTerrain()
     glm::mat4 depthBiasMVP = biasMatrix * depthMVP;
     glUniformMatrix4fv(depthBias, 1, GL_FALSE, &depthBiasMVP[0][0]);
 
+    GLuint isTerrainID = glGetUniformLocation(shaderProgram, "isTerrain");
+    glUniform1f(isTerrainID, 1);
+
     // send vertex buffer
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, terrain->getVertexBuffer());
@@ -262,8 +267,6 @@ void Engine::drawTerrain()
 
 void Engine::drawObject(WorldObject &w)
 {
-    //glm::mat4 modelMatrix = glm::translate(modelMatrix, wobjs[i].getPos());
-    //modelMatrix = glm::rotate(modelMatrix, w.getRotation().z, glm::vec3(0.0, 0.0, 1.0));
     GLuint modelID = glGetUniformLocation(shaderProgram, "model");
     GLuint viewID = glGetUniformLocation(shaderProgram, "view");
     GLuint projID = glGetUniformLocation(shaderProgram, "proj");
@@ -272,6 +275,10 @@ void Engine::drawObject(WorldObject &w)
     glUniformMatrix4fv(modelID, 1, GL_FALSE, &model[0][0]);
     glUniformMatrix4fv(viewID, 1, GL_FALSE, &viewMatrix[0][0]);
     glUniformMatrix4fv(projID, 1, GL_FALSE, &projMatrix[0][0]);
+
+    // TODO: differen shaders for terrain is maybe a better idea than this!
+    GLuint isTerrainID = glGetUniformLocation(shaderProgram, "isTerrain");
+    glUniform1f(isTerrainID, 0);
 
     // get vertex buffer
     glEnableVertexAttribArray(0);
@@ -431,6 +438,11 @@ void Engine::handleKeyEvent(sf::Event event)
     } else if (event.key.code == sf::Keyboard::Space) {
         player->addAcc(glm::vec3(0.0f, 1.0f / 200.0, 0.0f));
         player->startAnimation();
+    } else if (event.key.code == sf::Keyboard::F) {
+        if (wobjs.size() > 0) {
+            StaticObject *obj = dynamic_cast<StaticObject*>(wobjs[0].get());
+            obj->destroyObject();
+        }
     }
 
     std::cout << "eye (" << eye.x << ", " << eye.y << ", " << eye.z << ")" << std::endl;

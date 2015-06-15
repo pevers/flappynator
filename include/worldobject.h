@@ -38,6 +38,7 @@ class WorldObject
         virtual void free() = 0;
         virtual int getObjectSize() = 0;
         virtual void update() = 0;
+        virtual void destroyObject() = 0;
 
         void setPos(glm::vec3 pos);
         glm::vec3 getPos();

@@ -19,14 +19,8 @@ void StaticObject::free()
     glDeleteBuffers(1, &normalBuffer);
 }
 
-bool StaticObject::load()
+bool StaticObject::generateBuffers()
 {
-    std::string err = tinyobj::LoadObj(shapes, material, objPath.c_str());
-    if (err.length()) {
-        std::cerr << err << std::endl;
-        return false;
-    }
-
     // succesfully loaded, load data into VBO
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -57,13 +51,84 @@ bool StaticObject::load()
     return true;
 }
 
+bool StaticObject::load()
+{
+    std::string err = tinyobj::LoadObj(shapes, material, objPath.c_str());
+    if (err.length()) {
+        std::cerr << err << std::endl;
+        return false;
+    }
+
+    return generateBuffers();
+}
+
 int StaticObject::getObjectSize()
 {
     return shapes[0].mesh.indices.size();
 }
 
+// ugly hack
+/*void StaticObject::disintegrate()
+{
+    // test, remove one of the vertices each tick
+    srand(time(NULL));
+
+    if (!shapes[0].mesh.indices.size() || !shapes[0].mesh.positions.size()) {
+        destroying = false;
+        return;
+    }
+
+    int vi = rand() % shapes[0].mesh.indices.size();
+    int v = shapes[0].mesh.indices[vi];
+
+    // set next triangle's first vertex as the new connection
+    int n;
+    if (shapes[0].mesh.indices.size() > 3)
+        n = shapes[0].mesh.indices[vi - (vi % 3) + 3];
+    else
+        n = 0;
+
+    // get the three coordinates
+    //float x = shapes[0].mesh.positions[v - (v % 3)];
+    //float y = shapes[0].mesh.positions[v - (v % 3) + 1];
+    //float z = shapes[0].mesh.positions[v - (v % 3) + 2];
+
+    // remove the vertex
+    shapes[0].mesh.positions.erase(shapes[0].mesh.positions.begin() + v - (v % 3));
+    shapes[0].mesh.positions.erase(shapes[0].mesh.positions.begin() + v - (v % 3));
+    shapes[0].mesh.positions.erase(shapes[0].mesh.positions.begin() + v - (v % 3));
+
+    // remove normal
+    shapes[0].mesh.normals.erase(shapes[0].mesh.normals.begin() + v - (v % 3));
+    shapes[0].mesh.normals.erase(shapes[0].mesh.normals.begin() + v - (v % 3));
+    shapes[0].mesh.normals.erase(shapes[0].mesh.normals.begin() + v - (v % 3));
+
+    // remove index
+    shapes[0].mesh.indices.erase(shapes[0].mesh.indices.begin() + vi - (vi % 3));
+    shapes[0].mesh.indices.erase(shapes[0].mesh.indices.begin() + vi - (vi % 3));
+    shapes[0].mesh.indices.erase(shapes[0].mesh.indices.begin() + vi - (vi % 3));
+
+    for (int i = 0; i < shapes[0].mesh.indices.size(); i++) {
+        if (shapes[0].mesh.indices[i] == v)
+            shapes[0].mesh.indices[i] = n;
+
+    }
+
+    scale = glm::vec3(scale.x - 1.0/100, scale.y - 1.0/100, scale.z - 1.0/100);
+    rotation = glm::vec3(rotation.x + 1.0/10, rotation.y + 1.0/10, rotation.z + 1.0/10);
+
+    // generate buffer
+    generateBuffers();
+
+}*/
+
+void StaticObject::destroyObject()
+{
+
+}
+
 void StaticObject::update()
 {
-    // do nothing
+    // no update
 }
 

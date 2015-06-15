@@ -24,6 +24,7 @@ class AnimatedObject : public WorldObject
         virtual void update();
         virtual void free();
         virtual bool load();
+        virtual void destroyObject();
     private:
         void setFrame(int frame);
 

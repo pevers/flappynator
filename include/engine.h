@@ -17,7 +17,7 @@
 #include "slide.h"
 #include "flatterrain.h"
 #include "../src/util/tiny_obj_loader.h"
-#include "worldobject.h"
+#include "staticobject.h"
 #include "animatedobject.h"
 #include "smoothterrain.h"
 #include "player.h"

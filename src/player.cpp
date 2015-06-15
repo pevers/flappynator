@@ -1,6 +1,6 @@
 #include "player.h"
 
-Player::Player() : AnimatedObject(Settings::playerStart, Settings::playerScale, Settings::playerRotation, false, 0), acc(Settings::playerAcc), speed(Settings::playerSpeed)
+Player::Player() : AnimatedObject(Settings::playerStart, Settings::playerScale, Settings::playerRotation, false, 14), acc(Settings::playerAcc), speed(Settings::playerSpeed)
 {
     //ctor
 }
@@ -23,7 +23,7 @@ glm::vec3 Player::getSpeed()
 void Player::addAcc(glm::vec3 acc)
 {
     this->acc.y = acc.y;
-    this->speed = Settings::playerSpeed;
+    this->speed.y = Settings::playerSpeed.y;
 }
 
 glm::vec3 Player::getAcc()
