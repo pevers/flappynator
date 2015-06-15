@@ -22,6 +22,7 @@
 #include "animatedobject.h"
 #include "smoothterrain.h"
 #include "player.h"
+#include "enemy.h"
 #include "skybox.h"
 #include "sun.h"
 
@@ -50,6 +51,7 @@ class Engine
 
         std::unique_ptr<Player> player;
         std::vector<std::unique_ptr<WorldObject>> wobjs;
+        std::vector<std::unique_ptr<Enemy>> enemies;
 
         std::unique_ptr<Skybox> skybox;
 
@@ -64,15 +66,15 @@ class Engine
         bool initSun();
         bool resetSun();
         bool initShadowMap();
-
+        bool initEnemies();
+        void drawShadows();
         void drawFrame();
         void drawTerrain();
         void drawPlayer();
+        void drawEnemies();
         void drawSkybox();
         void drawWorldObjects();
         void drawObject(WorldObject &w);
-
-        void drawShadows();
         void drawWorldShadow();
         void drawPlayerShadow();
 
@@ -81,6 +83,9 @@ class Engine
         void updateWorldObjects();
 
         void handleKeyEvent(sf::Event event);
+
+        void boundingBox();
+        void checkCollision();
 };
 
 #endif // ENGINE_H

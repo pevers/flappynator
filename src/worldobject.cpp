@@ -1,12 +1,13 @@
 #include "worldobject.h"
 
-WorldObject::WorldObject()
+WorldObject::WorldObject() : normalsExist(false), state(ALIVE)
 {
     //ctor
 }
 
 WorldObject::WorldObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot) : pos(start), scale(scl), rotation(rot), normalsExist(false), state(ALIVE)
 {
+
 }
 
 WorldObject::~WorldObject()
@@ -26,6 +27,16 @@ GLuint &WorldObject::getElementBuffer()
 GLuint &WorldObject::getNormalBuffer()
 {
     return normalBuffer;
+}
+
+void WorldObject::setBoundingBox(glm::vec4 boundingBox)
+{
+    this->boundingBox = boundingBox;
+}
+
+glm::vec4 WorldObject::getBoundingBox()
+{
+    return boundingBox;
 }
 
 void WorldObject::setPos(glm::vec3 pos)
@@ -68,14 +79,19 @@ void WorldObject::setNormalsExist(bool exist)
     normalsExist = exist;
 }
 
-STATE WorldObject::getState()
+OBJECT_STATE WorldObject::getState()
 {
     return state;
 }
 
-void WorldObject::setState(STATE state)
+void WorldObject::setState(OBJECT_STATE state)
 {
     this->state = state;
+}
+
+bool WorldObject::isAlive()
+{
+    return state == ALIVE;
 }
 
 glm::mat4 WorldObject::getModel()

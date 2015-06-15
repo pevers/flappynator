@@ -1,4 +1,3 @@
-#define GLEW_STATIC
 #include "engine.h"
 
 Engine::Engine(): slide(Settings::eye, glm::vec3(0.0, 0.0, 0.0), 1.0)
@@ -92,10 +91,33 @@ bool Engine::init()
 
     // load test object
     player = std::unique_ptr<Player>(new Player());
-
     //wobjs.push_back(std::unique_ptr<StaticObject>(new StaticObject(glm::vec3(4.0, 4.0, 2.0), glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0, 0.0, 0.0), "resources/monkey.obj")));
     //wobjs.push_back(std::unique_ptr<Explosion>(new Explosion(glm::vec3(3.0, 2.0, 2.0), glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(-1.0, 0.0, 0.0))));
     //wobjs.push_back(std::unique_ptr<AnimatedObject>(new AnimatedObject(glm::vec3(4.0, 4.0, 2.0), glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0, 0.0, 0.0))));
+
+    // Initialize enemies
+    initEnemies();
+
+    return true;
+}
+
+bool Engine::initEnemies() {
+    glm::vec3 enemyScale = Settings::enemyScale;
+    glm::vec3 enemyRotation = glm::vec3(0.0, -0.5 * M_PI, 0.0);
+    std::string enemyModel = Settings::enemyModel1;
+
+    srand(time(NULL));
+    for(int i = 0; i < Settings::numEnemies; i++) {
+        glm::vec3 enemyStart = player->getPos() + glm::vec3(15 + 10.0*i, 0.0, 0.0);
+        glm::vec3 enemyAcc = Settings::enemyAcc;
+
+        float speedX = (((rand()%200) / 100.0) + 2.0) * -1.0; // Value between 2.0 and 4.0
+        glm::vec3 enemySpeed = Settings::playerSpeed * glm::vec3(speedX, 0.0, 0.0);
+
+        std::unique_ptr<Enemy> enemy = std::unique_ptr<Enemy>(new Enemy(enemyStart, enemyScale, enemyRotation, enemyAcc, enemySpeed, enemyModel));
+
+        enemies.push_back(std::move(enemy));
+    }
 
     return true;
 }
@@ -185,7 +207,7 @@ void Engine::draw()
     drawTerrain();
     drawWorldObjects();
     drawPlayer();
-
+    drawEnemies();
     drawSkybox();
 }
 
@@ -374,6 +396,13 @@ void Engine::drawPlayer()
     drawObject(*player);
 }
 
+void Engine::drawEnemies()
+{
+    for (auto &e : enemies) {
+        drawObject(*e);
+    }
+}
+
 void Engine::mainLoop() {
 
     sf::Clock clock;
@@ -403,6 +432,12 @@ void Engine::mainLoop() {
             accumulator -= Settings::ups;
             updateWorldObjects();
         }
+
+        //set bounding box
+        boundingBox();
+
+        //check collision
+        checkCollision();
 
         // draw single frame
         drawFrame();
@@ -451,6 +486,8 @@ void Engine::handleKeyEvent(sf::Event event)
         player->destroyObject();
     }
 
+    glm::vec3 pos = player->getPos();
+    std::cout << "pos (" << pos.x << ", " << pos.y << ", " << pos.z << ")" << std::endl;
     std::cout << "eye (" << eye.x << ", " << eye.y << ", " << eye.z << ")" << std::endl;
     slide.setEye(eye);
     slide.setCenter(center);
@@ -472,12 +509,22 @@ void Engine::updateWorldObjects()
         w->update();
     }
 
-    sun->increaseIntensity(0.005);
-
+	sun->increaseIntensity(0.005);
     skybox->update(sun->getIntensity());
     player->update();
 
-    glm::vec3 center = glm::vec3(player->getPos().x + 2.0, player->getPos().y, player->getPos().z);
+    for (auto &e : enemies) {
+
+        // update the enemy only when the player is in range
+        if(e->getPos().x - player->getPos().x < Settings::startEnemyUpdate) {
+            if(e->isAlive())
+                e->update();
+            else
+                e->start(player->getPos());
+        }
+    }
+
+	glm::vec3 center = glm::vec3(player->getPos().x + 2.0, player->getPos().y, player->getPos().z);
     glm::vec3 eye = glm::vec3(player->getPos().x + 2.0, player->getPos().y, Settings::playerStart.z + 10);
 
     center.y = std::max(1.5f, center.y);
@@ -487,3 +534,52 @@ void Engine::updateWorldObjects()
     slide.setEye(eye);
 }
 
+void Engine::boundingBox() {
+    //create/set bounding box for the world objects, such as the enemies
+
+    for (auto &e : enemies) {
+        glm::vec3 pos = e->getPos();
+        glm::vec4 boundingBox = glm::vec4(pos.x - (0.5*e->getWidth()*Settings::enemyScale.z), pos.y - (0.5*e->getHeight()*Settings::enemyScale.y), (e->getWidth()*Settings::enemyScale.z), (e->getHeight()*Settings::enemyScale.y));
+        e->setBoundingBox(boundingBox);
+    }
+
+    //create/set the bounding box for the bird
+    glm::vec3 pos = player->getPos();
+    glm::vec4 boundingBox = glm::vec4(pos.x - (0.5*player->getWidth()*Settings::playerScale.z), pos.y - (0.5*player->getHeight()*Settings::playerScale.y), (player->getHeight()*Settings::playerScale.z), (player->getHeight()*Settings::playerScale.y));
+    player->setBoundingBox(boundingBox);
+}
+
+void Engine::checkCollision() {
+    glm::vec4 boundingBoxBird = player->getBoundingBox();
+    int counter = 0;
+
+    //check for world object collision with the bird
+    for (auto &e : enemies) {
+        glm::vec4 boundingBoxWorld = e->getBoundingBox();
+        if (boundingBoxBird.x < boundingBoxWorld.x + boundingBoxWorld.z &&
+            boundingBoxBird.x + boundingBoxBird.z > boundingBoxWorld.x &&
+            boundingBoxBird.y < boundingBoxWorld.y + boundingBoxWorld.w &&
+            boundingBoxBird.y + boundingBoxBird.w > boundingBoxWorld.y)
+        {
+            std::cout << "got em boss" << std::endl;
+            e->destroyObject();
+        }
+        counter++;
+    }
+
+    //check for terrain collision
+    float startBird = floor(player->getBoundingBox().x); //the min x-value pos of the bird
+    float endBird = floor(player->getBoundingBox().x + player->getBoundingBox().z); //the max x-value pos of the bird
+    float detail = 0.25;
+    std::vector<float> mountain;
+    mountain = SmoothTerrain::getRandom();
+
+    for (startBird; startBird < endBird; startBird += detail) {
+        //initiate the counter with some correction
+        int counter = floor(startBird*4+2);
+        //check if the y-value of the mountain at the certain x is higher or equal to the y-value of the bird
+        if(mountain[counter] >= player->getBoundingBox().y) {
+            std::cout << "dead" << std::endl;
+        }
+    }
+}
