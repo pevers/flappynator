@@ -18,7 +18,7 @@
 				</Compiler>
 			</Target>
 			<Target title="Release">
-				<Option output="bin/Release/SimpleGameEngine" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/Release/flappynator" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="$(#glfw)/bin" />
 				<Option object_output="obj/Release/" />
 				<Option type="0" />
