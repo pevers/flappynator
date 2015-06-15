@@ -17,9 +17,13 @@ class Player : public WorldObject
         void addAcc(glm::vec3 acc);
         glm::vec3 getAcc();
 
+        void setBoundingBox(glm::vec4 boundingBox);
+        glm::vec4 getBoundingBox();
+
     protected:
     private:
         glm::vec3 acc, speed;
+        glm::vec4 boundingBox;
 };
 
 #endif // PLAYER_H

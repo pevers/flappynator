@@ -1,5 +1,7 @@
 #include "smoothterrain.h"
-
+float SmoothTerrain::maxY[] = {};
+static float maxY2[208] {};
+std::vector<float> new_vec;
 SmoothTerrain::SmoothTerrain()
 {
     //ctor
@@ -35,8 +37,8 @@ bool SmoothTerrain::generateTerrain(unsigned int width, unsigned int height)
     float miny = 0;
     float maxy = 0.20;
     float detail = 0.25;
-    for (float z = -2; z < height; z += detail) {
-        for (float x = -2; x < width; x += detail) {
+    for (float z = 0; z < height; z += detail) {
+        for (float x = 0; x < width; x += detail) {
             float y1 = scaled_octave_noise_2d(5, 0.1, 1, miny, maxy, x, z);
             float y2 = scaled_octave_noise_2d(5, 0.1, 1, miny, maxy, x, z+detail);
             float y3 = scaled_octave_noise_2d(5, 0.1, 1, miny, maxy, x+detail, z);
@@ -83,13 +85,32 @@ bool SmoothTerrain::generateTerrain(unsigned int width, unsigned int height)
             if (distance < 4.0) {
                 vertices[i].y += 0.2 * (1.0 / (distance + 1.0)) * mountains[j].y;
             }
-
+            //std::cout << "vertices y : " << vertices[i].y << std::endl;
             // recalculate normal
             /*
             glm::vec3 t1 = vertices[i - (i % 3)];
             glm::vec3 t2 = vertices[i - (i % 3) + 1];
             glm::vec3 t3 = vertices[i - (i % 3) + 2];*/
         }
+    }
+
+    //calulate highest y point for every 1/4 x value with some threshold on the x value.
+    float maxYSingle = 0;
+    int counter = 0;
+    float maxS = 0;
+    for (float x = 0; x < width; x += detail) {
+        for (int i = 0; i < vertices.size(); i++) {
+            if(vertices[i].x >= (x - 0.1)
+               && vertices[i].x <= (x + 0.1)
+               && vertices[i].y > maxYSingle) {
+                    maxYSingle = vertices[i].y;
+                    if(maxS < vertices[i].y)
+                        maxS = vertices[i].y;
+            }
+        }
+        new_vec.push_back(maxYSingle);
+        maxYSingle = 0;
+        counter++;
     }
 
     int texWidth, texHeight;
@@ -126,6 +147,11 @@ bool SmoothTerrain::generateTerrain(unsigned int width, unsigned int height)
 
     std::cout << "done" << std::endl;
     return true;
+}
+
+std::vector<float> SmoothTerrain::getRandom( )
+{
+  return new_vec;
 }
 
 unsigned int SmoothTerrain::getTerrainSize()

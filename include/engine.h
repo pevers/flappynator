@@ -72,6 +72,9 @@ class Engine
         void updateWorldObjects();
 
         void handleKeyEvent(sf::Event event);
+
+        void boundingBox();
+        void checkCollision();
 };
 
 #endif // ENGINE_H

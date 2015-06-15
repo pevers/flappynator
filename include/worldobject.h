@@ -23,6 +23,10 @@ class WorldObject
         glm::vec3 pos;
         glm::vec3 scale;
         glm::vec3 rotation;
+        glm::vec4 boundingBox;
+
+        float heightMesh;
+        float widthMesh;
 
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> material;
@@ -38,8 +42,17 @@ class WorldObject
         GLuint &getElementBuffer();
         GLuint &getNormalBuffer();
 
+        void setBoundingBox(glm::vec4 boundingBox);
+        glm::vec4 getBoundingBox();
+
         void setPos(glm::vec3 pos);
         glm::vec3 getPos();
+
+        void setHeight(float height);
+        float getHeight();
+
+        void setWidth(float width);
+        float getWidth();
 
         void setScale(glm::vec3 scale);
         glm::vec3 getScale();

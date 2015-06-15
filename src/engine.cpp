@@ -353,6 +353,12 @@ void Engine::mainLoop() {
             updateWorldObjects();
         }
 
+        //set bounding box
+        boundingBox();
+
+        //check collision
+        checkCollision();
+
         // draw single frame
         drawFrame();
 
@@ -369,17 +375,29 @@ void Engine::handleKeyEvent(sf::Event event)
     glm::vec3 eye = slide.getEye();
     glm::vec3 center = slide.getCenter();
     if (event.key.code == sf::Keyboard::Up) {
-        eye.y++;
-        center.y++;
+        eye.y += 0.1;
+        center.y += 0.1;
+        glm::vec3 pos = player->getPos();
+        pos.y += 0.1;
+        player->setPos(pos);
     } else if (event.key.code == sf::Keyboard::Down) {
-        eye.y--;
-        center.y--;
+        eye.y -= 0.1;
+        center.y -= 0.1;
+        glm::vec3 pos = player->getPos();
+        pos.y -= 0.1;
+        player->setPos(pos);
     } else if (event.key.code == sf::Keyboard::Left) {
-        eye.x--;
-        center.x--;
+        eye.x -= 0.1;
+        center.x -= 0.1;
+        glm::vec3 pos = player->getPos();
+        pos.x -= 0.1;
+        player->setPos(pos);
     } else if (event.key.code == sf::Keyboard::Right) {
-        eye.x++;
-        center.x++;
+        eye.x += 0.1;
+        center.x += 0.1;
+        glm::vec3 pos = player->getPos();
+        pos.x += 0.1;
+        player->setPos(pos);
     } else if (event.key.code == sf::Keyboard::R) {
         eye = Settings::eye;
         center = glm::vec3(0.0, 0.0, 0.0);
@@ -395,8 +413,20 @@ void Engine::handleKeyEvent(sf::Event event)
         eye.x++;
     } else if (event.key.code == sf::Keyboard::Space) {
         player->addAcc(glm::vec3(0.0f, 1.0f / 200.0, 0.0f));
+    } else if (event.key.code == sf::Keyboard::C) {
+        wobjs.push_back(std::unique_ptr<WorldObject>(new WorldObject(glm::vec3 (10.0, 6.0, 2.0), glm::vec3 (0.5, 0.5, 0.5), Settings::playerRotation, Settings::playerModel)));
+        wobjs.push_back(std::unique_ptr<WorldObject>(new WorldObject(glm::vec3 (15.0, 6.0, 2.0), glm::vec3 (0.5, 0.5, 0.5), Settings::playerRotation, Settings::playerModel)));
+    } else if (event.key.code == sf::Keyboard::V) {
+        std::cout << "boundingBox (" << player->getBoundingBox().x <<
+        ", " << player->getBoundingBox().y <<
+        ", " << player->getBoundingBox().z <<
+        ", " << player->getBoundingBox().w <<
+        ")" << std::endl;
+    } else if (event.key.code == sf::Keyboard::B) {
+        std::cout << "world object (" << &player << ")" << std::endl;
     }
-
+    glm::vec3 pos = player->getPos();
+    std::cout << "pos (" << pos.x << ", " << pos.y << ", " << pos.z << ")" << std::endl;
     std::cout << "eye (" << eye.x << ", " << eye.y << ", " << eye.z << ")" << std::endl;
     slide.setEye(eye);
     slide.setCenter(center);
@@ -424,3 +454,64 @@ void Engine::updateWorldObjects()
     slide.setEye(glm::vec3(player->getPos().x + 1.0, player->getPos().y, Settings::playerStart.z + 10));
 }
 
+void Engine::boundingBox() {
+    //create/set bounding box for the world objects, such as the enemies
+    for (auto &w : wobjs) {
+        glm::vec3 pos = w->getPos();
+        //x,y = coordinate bottom left
+        //z = width of object
+        //y = height of object
+        glm::vec4 boundingBox = glm::vec4(pos.x - (0.5*w->getWidth()*Settings::playerScale.z), pos.y - (0.5*w->getHeight()*Settings::playerScale.y), (w->getWidth()*Settings::playerScale.z), (w->getHeight()*Settings::playerScale.y));
+        w->setBoundingBox(boundingBox);
+    }
+    //create/set the bounding box for the bird
+    glm::vec3 pos = player->getPos();
+    glm::vec4 boundingBox = glm::vec4(pos.x - (0.5*player->getWidth()*Settings::playerScale.z), pos.y - (0.5*player->getHeight()*Settings::playerScale.y), (player->getHeight()*Settings::playerScale.z), (player->getHeight()*Settings::playerScale.y));
+    player->setBoundingBox(boundingBox);
+}
+
+void Engine::checkCollision() {
+    glm::vec4 boundingBoxBird = player->getBoundingBox();
+    int counter = 0;
+    //check for world object collision with the bird
+    for (auto &w : wobjs) {
+        glm::vec4 boundingBoxWorld = w->getBoundingBox();
+        if(boundingBoxBird.x < boundingBoxWorld.x + boundingBoxWorld.z &&
+            boundingBoxBird.x + boundingBoxBird.z > boundingBoxWorld.x &&
+            boundingBoxBird.y < boundingBoxWorld.y + boundingBoxWorld.w &&
+            boundingBoxBird.y + boundingBoxBird.w > boundingBoxWorld.y)
+        {
+            std::cout << "got em boss" << std::endl;
+            /*
+            std::cout << "boundingBox (" << player->getBoundingBox().x <<
+            ", " << player->getBoundingBox().y <<
+            ", " << player->getBoundingBox().z <<
+            ", " << player->getBoundingBox().w <<
+            ")" << std::endl;
+            */
+            //delete the bird if the it is hit
+            //glDeleteBuffers(1, &player->getVertexBuffer());
+            //glDeleteBuffers(1, &player->getElementBuffer());
+            //or RAGE, UNINSTALL SCRUB
+            window.close();
+        }
+        counter++;
+    }
+
+    //check for terrain collision
+    float startBird = floor(player->getBoundingBox().x); //the min x-value pos of the bird
+    float endBird = floor(player->getBoundingBox().x + player->getBoundingBox().z); //the max x-value pos of the bird
+    float detail = 0.25;
+    std::vector<float> mountain;
+    mountain = SmoothTerrain::getRandom();
+    for(startBird; startBird < endBird; startBird += detail) {
+        //initiate the counter with some correction
+        int counter = floor(startBird*4+2);
+        //check if the y-value of the mountain at the certain x is higher or equal to the y-value of the bird
+        if(mountain[counter] >= player->getBoundingBox().y) {
+            //if so then dead
+            std::cout << "dead" << std::endl;
+            window.close();
+        }
+    }
+}

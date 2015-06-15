@@ -5,10 +5,37 @@ WorldObject::WorldObject()
     //ctor
 }
 
-WorldObject::WorldObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot, const std::string &path) : pos(start), scale(scl), rotation(rot)
+WorldObject::WorldObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot, const std::string &path) : pos(start), scale(scl), rotation(rot), boundingBox(0.0,0.0,0.0,0.0)
 {
     if (!loadObject(path)) {
         std::cerr << "warning, could not add object " << path << std::endl;
+    }
+    //calculate max and min coordinate
+    else {
+        float minX = std::numeric_limits<float>::max();
+        float maxX = std::numeric_limits<float>::min();
+        float minY = std::numeric_limits<float>::max();
+        float maxY = std::numeric_limits<float>::min();
+
+        for (size_t i = 0; i < 1; i++) {
+            for (size_t v = 0; v < shapes[i].mesh.positions.size() / 3; v++) {
+                    if(minX > shapes[i].mesh.positions[3*v+2])
+                        minX = shapes[i].mesh.positions[3*v+2];
+                    if(maxX < shapes[i].mesh.positions[3*v+2])
+                        maxX = shapes[i].mesh.positions[3*v+2];
+                    if(minY > shapes[i].mesh.positions[3*v+1])
+                        minY = shapes[i].mesh.positions[3*v+1];
+                    if(maxY < shapes[i].mesh.positions[3*v+1])
+                        maxY = shapes[i].mesh.positions[3*v+1];
+                     //std::cerr << "LOADOBJECT" <<  shapes[i].mesh.positions[3*v+0] << "  " << shapes[i].mesh.positions[3*v+1] << "  " <<  shapes[i].mesh.positions[3*v+2]<< std::endl;
+            }
+        }
+
+        widthMesh = std::abs(maxX - minX);
+        heightMesh = std::abs(maxY - minY);
+        std::cerr << "minX: " <<  minX << " maxX: " << maxX << " minY: " <<  minY << " maxY: " << maxY << std::endl;
+        std::cerr << "widthMesh: " <<  widthMesh << " heightMesh: " << heightMesh << std::endl;
+
     }
 }
 
@@ -31,6 +58,16 @@ GLuint &WorldObject::getNormalBuffer()
     return normalBuffer;
 }
 
+void WorldObject::setBoundingBox(glm::vec4 boundingBox)
+{
+    this->boundingBox = boundingBox;
+}
+
+glm::vec4 WorldObject::getBoundingBox()
+{
+    return boundingBox;
+}
+
 void WorldObject::setPos(glm::vec3 pos)
 {
     this->pos = pos;
@@ -39,6 +76,26 @@ void WorldObject::setPos(glm::vec3 pos)
 glm::vec3 WorldObject::getPos()
 {
     return pos;
+}
+
+void WorldObject::setWidth(float widthMesh)
+{
+    this->widthMesh = widthMesh;
+}
+
+float WorldObject::getWidth()
+{
+    return widthMesh;
+}
+
+void WorldObject::setHeight(float heightMesh)
+{
+    this->heightMesh = heightMesh;
+}
+
+float WorldObject::getHeight()
+{
+    return heightMesh;
 }
 
 void WorldObject::setScale(glm::vec3 scale)
@@ -82,6 +139,7 @@ bool WorldObject::loadObject(const std::string &path)
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, shapes[0].mesh.positions.size() * sizeof(float), &shapes[0].mesh.positions[0], GL_STATIC_DRAW);
+    //std::cerr << "LOADOBJECT" << shapes[1].mesh.texcoords[1] << std::endl;
 
     // create index buffer
     glGenBuffers(1, &elementBuffer);
