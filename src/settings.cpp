@@ -14,7 +14,7 @@ namespace Settings
 
     float PI = M_PI;
 
-    glm::vec3 playerStart(3.0, 1.0, 2.0);
+    glm::vec3 playerStart(3.0, 3.0, 2.0);
     glm::vec3 playerScale(0.20, 0.20, 0.20);
     glm::vec3 playerAcc(0.0, - 1.0 / 2000, 0.0);
     glm::vec3 playerSpeed(1.0 / 30, 0.0, 0.0);  // should be 100
@@ -30,7 +30,7 @@ namespace Settings
     int enemyNumFrames = 1;
 
     int numEnemies = 10;
-    float startEnemyUpdate = 9.0; // When the horizontal distance between the enemy and the player is smaller than this value, update the enemy
+    float startEnemyUpdate = 15.0; // When the horizontal distance between the enemy and the player is smaller than this value, update the enemy
 
     glm::vec3 sunPos(-10.0, 80.0, 0.0);
     glm::vec3 sunSpot(50, 0, 50);

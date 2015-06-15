@@ -88,7 +88,7 @@ void Enemy::start(glm::vec3 playerPos)
     if(!alive)
     {
         alive = true;
-        angle = 0.0;
+        angle = 0.5 * Settings::PI;
 
         // Set a new y position for the enemy, based on the player's position
         pos.y = playerPos.y + (rand()%180 / 100.0);
@@ -102,14 +102,14 @@ void Enemy::start(glm::vec3 playerPos)
 }
 
 /**
- * Update enemy position, speed and rotation.
+ * Update enemy position, speed and rotation (TODO).
  */
 void Enemy::update()
 {
     if(alive)
     {
         //angle += 0.02;
-        angle += speed.x / 5.0;
+        angle += speed.x / 3.0;
 
         pos += speed;
 
@@ -117,8 +117,5 @@ void Enemy::update()
             pos.y = (float)cos(angle)*2 + startPos.y;
         else
             pos.y = -(float)cos(angle)*2 + startPos.y;
-    } else
-    {
-        destroyObject();
     }
 }

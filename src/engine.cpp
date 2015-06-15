@@ -110,7 +110,7 @@ bool Engine::initEnemies() {
 
     srand(time(NULL));
     for(int i = 0; i < Settings::numEnemies; i++) {
-        glm::vec3 enemyStart = player->getPos() + glm::vec3(10.0*(i+1), 0.0, 0.0);
+        glm::vec3 enemyStart = player->getPos() + glm::vec3(15 + 10.0*i, 0.0, 0.0);
         glm::vec3 enemyAcc = Settings::enemyAcc;
 
         float speedX = (((rand()%200) / 100.0) + 2.0) * -1.0; // Value between 2.0 and 4.0
@@ -529,6 +529,7 @@ void Engine::updateWorldObjects()
     }
 
     player->update();
+
     slide.setCenter(player->getPos());
     slide.setEye(glm::vec3(player->getPos().x + 1.0, player->getPos().y, Settings::playerStart.z + 10));
 }
@@ -586,10 +587,11 @@ void Engine::checkCollision() {
         {
             std::cout << "got em boss" << std::endl;
             //delete the bird if the it is hit
-            glDeleteBuffers(1, &player->getVertexBuffer());
-            glDeleteBuffers(1, &player->getElementBuffer());
+            //glDeleteBuffers(1, &player->getVertexBuffer());
+            //glDeleteBuffers(1, &player->getElementBuffer());
             //or RAGE, UNINSTALL SCRUB
             //window.close();
+            e->destroyObject();
         }
         counter++;
     }

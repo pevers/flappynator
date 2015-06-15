@@ -1,6 +1,4 @@
 #include "smoothterrain.h"
-float SmoothTerrain::maxY[] = {};
-static float maxY2[208] {};
 std::vector<float> new_vec;
 SmoothTerrain::SmoothTerrain()
 {
@@ -97,15 +95,12 @@ bool SmoothTerrain::generateTerrain(unsigned int width, unsigned int height)
     //calulate highest y point for every 1/4 x value with some threshold on the x value.
     float maxYSingle = 0;
     int counter = 0;
-    float maxS = 0;
     for (float x = 0; x < width; x += detail) {
         for (int i = 0; i < vertices.size(); i++) {
             if(vertices[i].x >= (x - 0.1)
                && vertices[i].x <= (x + 0.1)
                && vertices[i].y > maxYSingle) {
                     maxYSingle = vertices[i].y;
-                    if(maxS < vertices[i].y)
-                        maxS = vertices[i].y;
             }
         }
         new_vec.push_back(maxYSingle);
