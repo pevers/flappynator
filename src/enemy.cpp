@@ -79,8 +79,10 @@ void Enemy::update()
 {
     if(alive)
     {
+        pos += speed;
+        pos.y = -(float)cos(pos.x / 2) + 3;
         // acceleration
-        acc += initAcc;
+        /*acc += initAcc;
         if (acc.y < initAcc.y)
             acc.y = initAcc.y;
 
@@ -91,7 +93,7 @@ void Enemy::update()
             rotation.z = -acos(glm::dot(glm::normalize(speed), glm::normalize(glm::vec3(1.0, 0.0, 0.0))));
         } else {
             rotation.z = acos(glm::dot(glm::normalize(speed), glm::normalize(glm::vec3(1.0, 0.0, 0.0))));
-        }
+        }*/
     }
 }
 
