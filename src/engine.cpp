@@ -453,8 +453,10 @@ void Engine::updateWorldObjects()
     for (auto &e : enemies) {
 
         // Update the enemy only when the player is in range
-        if(e->getPos().x - player->getPos().x < Settings::startEnemyUpdate)
+        if(e->getPos().x - player->getPos().x < Settings::startEnemyUpdate) {
+            e->start(player->getPos());
             e->update();
+        }
     }
 
     player->update();
