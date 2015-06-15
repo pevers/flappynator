@@ -9,7 +9,7 @@
 class AnimatedObject : public WorldObject
 {
     public:
-        AnimatedObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot, bool loop, unsigned int startFrame);
+        AnimatedObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot, bool loop, unsigned int startFrame, std::string basePath, unsigned int numFrames);
         virtual ~AnimatedObject();
 
         void setStartFrame(unsigned int frame);
@@ -42,8 +42,11 @@ class AnimatedObject : public WorldObject
         float frameRate;
         unsigned int startFrame;
         unsigned int frame;
+        unsigned int numFrames;
         bool loop;
         glm::vec4 boundingBox;
+
+        std::string basePath;
 
         sf::Clock clock;
 

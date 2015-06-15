@@ -1,7 +1,7 @@
 #include "enemy.h"
 
 Enemy::Enemy(glm::vec3 enemyStart, glm::vec3 enemyScale, glm::vec3 enemyRotation, glm::vec3 enemyAcc, glm::vec3 enemySpeed, std::string enemyModel) :
-    StaticObject(enemyStart, enemyScale, enemyRotation, enemyModel)
+    AnimatedObject(enemyStart, enemyScale, enemyRotation, true, 0, Settings::enemyPath, Settings::enemyNumFrames), boundingBox(0.0,0.0,0.0,0.0)
 {
     this->acc = enemyAcc;
     this->speed = enemySpeed;
@@ -70,6 +70,16 @@ bool Enemy::isAlive()
     return alive;
 }
 
+void Enemy::setBoundingBox(glm::vec4 boundingBox)
+{
+    this->boundingBox = boundingBox;
+}
+
+glm::vec4 Enemy::getBoundingBox()
+{
+    return boundingBox;
+}
+
 /**
   * Calculates enemy's initial acceleration
   */
@@ -81,7 +91,7 @@ void Enemy::start(glm::vec3 playerPos)
         angle = 0.0;
 
         // Set a new y position for the enemy, based on the player's position
-        pos.y = playerPos.y + rand()%4;
+        pos.y = playerPos.y + (rand()%180 / 100.0);
         startPos.y = pos.y;
 
         if(startPos.y > playerPos.y)
@@ -104,8 +114,11 @@ void Enemy::update()
         pos += speed;
 
         if(down)
-            pos.y = (float)cos(angle)*3 + startPos.y;
+            pos.y = (float)cos(angle)*2 + startPos.y;
         else
-            pos.y = -(float)cos(angle)*3 + startPos.y;
+            pos.y = -(float)cos(angle)*2 + startPos.y;
+    } else
+    {
+        destroyObject();
     }
 }

@@ -27,10 +27,14 @@ namespace Settings
     extern glm::vec3 playerAcc;
     extern glm::vec3 playerSpeed;
     extern std::string playerModel;
+    extern std::string playerPath;
+    extern int playerNumFrames;
 
     extern glm::vec3 enemyAcc;
     extern glm::vec3 enemyScale;
     extern std::string enemyModel1;
+    extern std::string enemyPath;
+    extern int enemyNumFrames;
 
     extern int numEnemies;
     extern float startEnemyUpdate;

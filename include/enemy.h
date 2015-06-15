@@ -5,9 +5,9 @@
 #include <math.h>
 
 #include "settings.h"
-#include "staticobject.h"
+#include "animatedobject.h"
 
-class Enemy : public StaticObject
+class Enemy : public AnimatedObject
 {
     public:
         Enemy(glm::vec3 enemyStart,
@@ -32,6 +32,8 @@ class Enemy : public StaticObject
         void setAngle(float angle);
         float getAngle();
         bool isAlive();
+        void setBoundingBox(glm::vec4 boundingBox);
+        glm::vec4 getBoundingBox();
 
     protected:
     private:
@@ -39,6 +41,7 @@ class Enemy : public StaticObject
         int hp;
         bool alive, down;
         float angle;
+        glm::vec4 boundingBox;
 
 };
 

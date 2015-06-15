@@ -1,7 +1,11 @@
 #include "animatedobject.h"
 #include <sstream>
-AnimatedObject::AnimatedObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot, bool loop, unsigned int startFrame) : WorldObject(start, scl, rot), frameRate(100), startFrame(startFrame), frame(startFrame), loop(loop)
+AnimatedObject::AnimatedObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot, bool loop, unsigned int startFrame, std::string basePath, unsigned int numFrames) :
+    WorldObject(start, scl, rot), frameRate(100), startFrame(startFrame), frame(startFrame), loop(loop)
 {
+    this->basePath = basePath;
+    this->numFrames = numFrames;
+
     if (!load()) {
         std::cerr << "could not load animations" << std::endl;
     }
@@ -18,10 +22,13 @@ AnimatedObject::~AnimatedObject()
 
 bool AnimatedObject::load()
 {
-    std::string basePath = "resources/animation/";
+    //std::string basePath = "resources/animation/";
 
-    frames.resize(45);
-    materials.resize(45);
+    //frames.resize(45);
+    //materials.resize(45);
+
+    frames.resize(numFrames);
+    materials.resize(numFrames);
 
     glGenBuffers(1, &vbo);
     glGenBuffers(1, &elementBuffer);
@@ -29,7 +36,7 @@ bool AnimatedObject::load()
 
     // debug, load all objects
     setNormalsExist(true);
-    for (int i = 0; i < 45; i++) {
+    for (int i = 0; i < numFrames; i++) {
         std::string path = basePath + std::to_string(i+1) + ".obj";
         std::string err = tinyobj::LoadObj(frames[i], materials[i], path.c_str());
         if (err.length()) {
@@ -161,7 +168,7 @@ unsigned int AnimatedObject::nextFrame(unsigned int f)
 
 void AnimatedObject::destroyObject()
 {
-    // empty
+    std::cout << "destroy object" << std::endl;
 }
 
 void AnimatedObject::update()

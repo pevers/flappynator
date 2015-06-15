@@ -1,6 +1,8 @@
 #include "player.h"
 
-Player::Player() : AnimatedObject(Settings::playerStart, Settings::playerScale, Settings::playerRotation, false, 14), acc(Settings::playerAcc), speed(Settings::playerSpeed), boundingBox(0.0,0.0,0.0,0.0)
+Player::Player() :
+    AnimatedObject(Settings::playerStart, Settings::playerScale, Settings::playerRotation, false, 14, Settings::playerPath, Settings::playerNumFrames),
+                   acc(Settings::playerAcc), speed(Settings::playerSpeed), boundingBox(0.0,0.0,0.0,0.0)
 {
     //ctor
 }

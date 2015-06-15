@@ -535,13 +535,20 @@ void Engine::updateWorldObjects()
 
 void Engine::boundingBox() {
     //create/set bounding box for the world objects, such as the enemies
-    for (auto &w : wobjs) {
+    /*for (auto &w : wobjs) {
         glm::vec3 pos = w->getPos();
         //x,y = coordinate bottom left
         //z = width of object
         //y = height of object
-        //glm::vec4 boundingBox = glm::vec4(pos.x - (0.5*w->getWidth()*Settings::playerScale.z), pos.y - (0.5*w->getHeight()*Settings::playerScale.y), (w->getWidth()*Settings::playerScale.z), (w->getHeight()*Settings::playerScale.y));
-        //w->setBoundingBox(boundingBox);
+        glm::vec4 boundingBox = glm::vec4(pos.x - (0.5*w->getWidth()*Settings::playerScale.z), pos.y - (0.5*w->getHeight()*Settings::playerScale.y), (w->getWidth()*Settings::playerScale.z), (w->getHeight()*Settings::playerScale.y));
+        w->setBoundingBox(boundingBox);
+    }*/
+    for (auto &e : enemies) {
+        glm::vec3 pos = e->getPos();
+        glm::vec4 boundingBox = glm::vec4(pos.x - (0.5*e->getWidth()*Settings::enemyScale.z), pos.y - (0.5*e->getHeight()*Settings::enemyScale.y), (e->getWidth()*Settings::enemyScale.z), (e->getHeight()*Settings::enemyScale.y));
+        e->setBoundingBox(boundingBox);
+
+        //std::cout << "bounding box: (" << boundingBox.x << ", " << boundingBox.y << ") width: " << boundingBox.z << " height: " << boundingBox.w << std::endl;
     }
     //create/set the bounding box for the bird
     glm::vec3 pos = player->getPos();
@@ -553,7 +560,7 @@ void Engine::checkCollision() {
     glm::vec4 boundingBoxBird = player->getBoundingBox();
     int counter = 0;
     //check for world object collision with the bird
-    for (auto &w : wobjs) {
+    /*for (auto &w : wobjs) {
         glm::vec4 boundingBoxWorld = w->getBoundingBox();
         if(boundingBoxBird.x < boundingBoxWorld.x + boundingBoxWorld.z &&
             boundingBoxBird.x + boundingBoxBird.z > boundingBoxWorld.x &&
@@ -566,6 +573,23 @@ void Engine::checkCollision() {
             glDeleteBuffers(1, &player->getElementBuffer());
             //or RAGE, UNINSTALL SCRUB
             window.close();
+        }
+        counter++;
+    }*/
+
+    for (auto &e : enemies) {
+        glm::vec4 boundingBoxWorld = e->getBoundingBox();
+        if(boundingBoxBird.x < boundingBoxWorld.x + boundingBoxWorld.z &&
+            boundingBoxBird.x + boundingBoxBird.z > boundingBoxWorld.x &&
+            boundingBoxBird.y < boundingBoxWorld.y + boundingBoxWorld.w &&
+            boundingBoxBird.y + boundingBoxBird.w > boundingBoxWorld.y)
+        {
+            std::cout << "got em boss" << std::endl;
+            //delete the bird if the it is hit
+            glDeleteBuffers(1, &player->getVertexBuffer());
+            glDeleteBuffers(1, &player->getElementBuffer());
+            //or RAGE, UNINSTALL SCRUB
+            //window.close();
         }
         counter++;
     }
