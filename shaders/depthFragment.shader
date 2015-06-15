@@ -1,4 +1,4 @@
-#version 330 core
+#version 130
 
 // Ouput data
 out float fragmentdepth;

@@ -28,15 +28,11 @@ class WorldObject
         float heightMesh;
         float widthMesh;
 
-        std::vector<tinyobj::shape_t> shapes;
-        std::vector<tinyobj::material_t> material;
+        bool normalsExist;
     public:
         WorldObject();
-        WorldObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot, const std::string &path);
+        WorldObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot);
         virtual ~WorldObject();
-
-        bool loadObject(const std::string &path);
-        unsigned int getObjectSize();
 
         GLuint &getVertexBuffer();
         GLuint &getElementBuffer();
@@ -44,6 +40,12 @@ class WorldObject
 
         void setBoundingBox(glm::vec4 boundingBox);
         glm::vec4 getBoundingBox();
+
+        virtual bool load() = 0;
+        virtual void free() = 0;
+        virtual int getObjectSize() = 0;
+        virtual void update() = 0;
+        virtual void destroyObject() = 0;
 
         void setPos(glm::vec3 pos);
         glm::vec3 getPos();
@@ -62,7 +64,8 @@ class WorldObject
 
         glm::mat4 getModel();
 
-        virtual void update() { }
+        bool hasNormals();
+        void setNormalsExist(bool exist);
 };
 
 #endif // WORLDOBJECT_H

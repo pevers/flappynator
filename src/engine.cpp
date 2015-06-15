@@ -28,7 +28,7 @@ bool Engine::init()
     }
 
     glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
+    glDepthFunc(GL_LEQUAL);
 
     // Create Vertex Array Object
     glGenVertexArrays(1, &vao);
@@ -63,6 +63,18 @@ bool Engine::init()
     glAttachShader(depthShaderProgram, fragmentShader);
     glLinkProgram(depthShaderProgram);
 
+    skybox = std::unique_ptr<Skybox>(new Skybox("resources/skybox/right.png",
+            "resources/skybox/left.png",
+            "resources/skybox/top.png",
+            "resources/skybox/bottom.png",
+            "resources/skybox/back.png",
+            "resources/skybox/front.png"));
+
+    if (!skybox->load()) {
+        std::cerr << "could not initalize skybox " << std::endl;
+        return false;
+    }
+
     if (!initShadowMap()) {
         std::cerr << "no shadow map initialized " << std::endl;
         return false;
@@ -76,11 +88,13 @@ bool Engine::init()
 
     // load terrain
     terrain.reset(new SmoothTerrain());
-    terrain->generateTerrain(50, 50);
+    terrain->generateTerrain(50, 20);
 
     // load test object
     player = std::unique_ptr<Player>(new Player());
-    //wobjs.push_back();
+    //wobjs.push_back(std::unique_ptr<StaticObject>(new StaticObject(glm::vec3(4.0, 4.0, 2.0), glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0, 0.0, 0.0), "resources/monkey.obj")));
+    //wobjs.push_back(std::unique_ptr<Explosion>(new Explosion(glm::vec3(3.0, 2.0, 2.0), glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(-1.0, 0.0, 0.0))));
+    //wobjs.push_back(std::unique_ptr<AnimatedObject>(new AnimatedObject(glm::vec3(4.0, 4.0, 2.0), glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0, 0.0, 0.0))));
 
     return true;
 }
@@ -143,13 +157,13 @@ void Engine::draw()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, Settings::screenWidth, Settings::screenHeight);
-
-    glUseProgram(shaderProgram);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // calculate matrix
     viewMatrix = slide.getSlideView();
-    projMatrix = glm::perspective(45.0f, (float)Settings::screenWidth / (float)Settings::screenHeight, 1.0f, 100.0f);
+    projMatrix = glm::perspective(45.0f, (float)Settings::screenWidth / (float)Settings::screenHeight, 1.0f, 200.0f);
+
+    glUseProgram(shaderProgram);
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, depthTexture);
@@ -162,6 +176,27 @@ void Engine::draw()
     drawTerrain();
     drawWorldObjects();
     drawPlayer();
+
+    drawSkybox();
+}
+
+void Engine::drawSkybox()
+{
+    glDepthMask(GL_FALSE);
+    GLuint shader = skybox->getShaderProgram();
+    glUseProgram(shader);
+
+    // set projection and view matrix
+    GLuint projID = glGetUniformLocation(shader, "MVP");
+    glm::mat4 MVP = projMatrix * viewMatrix * skybox->getModel();
+
+    glUniformMatrix4fv(projID, 1, GL_FALSE, &MVP[0][0]);
+
+    glBindVertexArray(skybox->getVAO());
+    glBindTexture(GL_TEXTURE_CUBE_MAP, skybox->getTexture());
+    glDrawArrays(GL_TRIANGLES, 0, skybox->getSize());
+    glBindVertexArray(0);
+    glDepthMask(GL_TRUE);
 }
 
 void Engine::drawShadows()
@@ -204,6 +239,9 @@ void Engine::drawTerrain()
     glm::mat4 depthBiasMVP = biasMatrix * depthMVP;
     glUniformMatrix4fv(depthBias, 1, GL_FALSE, &depthBiasMVP[0][0]);
 
+    GLuint isTerrainID = glGetUniformLocation(shaderProgram, "isTerrain");
+    glUniform1f(isTerrainID, 1);
+
     // send vertex buffer
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, terrain->getVertexBuffer());
@@ -229,8 +267,6 @@ void Engine::drawTerrain()
 
 void Engine::drawObject(WorldObject &w)
 {
-    //glm::mat4 modelMatrix = glm::translate(modelMatrix, wobjs[i].getPos());
-    //modelMatrix = glm::rotate(modelMatrix, w.getRotation().z, glm::vec3(0.0, 0.0, 1.0));
     GLuint modelID = glGetUniformLocation(shaderProgram, "model");
     GLuint viewID = glGetUniformLocation(shaderProgram, "view");
     GLuint projID = glGetUniformLocation(shaderProgram, "proj");
@@ -239,6 +275,10 @@ void Engine::drawObject(WorldObject &w)
     glUniformMatrix4fv(modelID, 1, GL_FALSE, &model[0][0]);
     glUniformMatrix4fv(viewID, 1, GL_FALSE, &viewMatrix[0][0]);
     glUniformMatrix4fv(projID, 1, GL_FALSE, &projMatrix[0][0]);
+
+    // TODO: differen shaders for terrain is maybe a better idea than this!
+    GLuint isTerrainID = glGetUniformLocation(shaderProgram, "isTerrain");
+    glUniform1f(isTerrainID, 0);
 
     // get vertex buffer
     glEnableVertexAttribArray(0);
@@ -263,9 +303,11 @@ void Engine::drawObject(WorldObject &w)
 //    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
     // send normal buffer
-    glEnableVertexAttribArray(2);
-    glBindBuffer(GL_ARRAY_BUFFER, w.getNormalBuffer());
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    if (w.hasNormals()) {
+        glEnableVertexAttribArray(2);
+        glBindBuffer(GL_ARRAY_BUFFER, w.getNormalBuffer());
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    }
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, w.getElementBuffer());
 
@@ -413,17 +455,12 @@ void Engine::handleKeyEvent(sf::Event event)
         eye.x++;
     } else if (event.key.code == sf::Keyboard::Space) {
         player->addAcc(glm::vec3(0.0f, 1.0f / 200.0, 0.0f));
-    } else if (event.key.code == sf::Keyboard::C) {
-        wobjs.push_back(std::unique_ptr<WorldObject>(new WorldObject(glm::vec3 (10.0, 6.0, 2.0), glm::vec3 (0.5, 0.5, 0.5), Settings::playerRotation, Settings::playerModel)));
-        wobjs.push_back(std::unique_ptr<WorldObject>(new WorldObject(glm::vec3 (15.0, 6.0, 2.0), glm::vec3 (0.5, 0.5, 0.5), Settings::playerRotation, Settings::playerModel)));
-    } else if (event.key.code == sf::Keyboard::V) {
-        std::cout << "boundingBox (" << player->getBoundingBox().x <<
-        ", " << player->getBoundingBox().y <<
-        ", " << player->getBoundingBox().z <<
-        ", " << player->getBoundingBox().w <<
-        ")" << std::endl;
-    } else if (event.key.code == sf::Keyboard::B) {
-        std::cout << "world object (" << &player << ")" << std::endl;
+        player->startAnimation();
+    } else if (event.key.code == sf::Keyboard::F) {
+        if (wobjs.size() > 0) {
+            StaticObject *obj = dynamic_cast<StaticObject*>(wobjs[0].get());
+            obj->destroyObject();
+        }
     }
     glm::vec3 pos = player->getPos();
     std::cout << "pos (" << pos.x << ", " << pos.y << ", " << pos.z << ")" << std::endl;
@@ -435,8 +472,7 @@ void Engine::handleKeyEvent(sf::Event event)
 void Engine::cleanWorldObjectBuffers()
 {
     for (unsigned int i = 0; i < wobjs.size(); i++) {
-        glDeleteBuffers(1, &wobjs[i]->getVertexBuffer());
-        glDeleteBuffers(1, &wobjs[i]->getElementBuffer());
+        wobjs[i]->free();
     }
 }
 
@@ -461,8 +497,8 @@ void Engine::boundingBox() {
         //x,y = coordinate bottom left
         //z = width of object
         //y = height of object
-        glm::vec4 boundingBox = glm::vec4(pos.x - (0.5*w->getWidth()*Settings::playerScale.z), pos.y - (0.5*w->getHeight()*Settings::playerScale.y), (w->getWidth()*Settings::playerScale.z), (w->getHeight()*Settings::playerScale.y));
-        w->setBoundingBox(boundingBox);
+        //glm::vec4 boundingBox = glm::vec4(pos.x - (0.5*w->getWidth()*Settings::playerScale.z), pos.y - (0.5*w->getHeight()*Settings::playerScale.y), (w->getWidth()*Settings::playerScale.z), (w->getHeight()*Settings::playerScale.y));
+        //w->setBoundingBox(boundingBox);
     }
     //create/set the bounding box for the bird
     glm::vec3 pos = player->getPos();
@@ -482,16 +518,9 @@ void Engine::checkCollision() {
             boundingBoxBird.y + boundingBoxBird.w > boundingBoxWorld.y)
         {
             std::cout << "got em boss" << std::endl;
-            /*
-            std::cout << "boundingBox (" << player->getBoundingBox().x <<
-            ", " << player->getBoundingBox().y <<
-            ", " << player->getBoundingBox().z <<
-            ", " << player->getBoundingBox().w <<
-            ")" << std::endl;
-            */
             //delete the bird if the it is hit
-            //glDeleteBuffers(1, &player->getVertexBuffer());
-            //glDeleteBuffers(1, &player->getElementBuffer());
+            glDeleteBuffers(1, &player->getVertexBuffer());
+            glDeleteBuffers(1, &player->getElementBuffer());
             //or RAGE, UNINSTALL SCRUB
             window.close();
         }

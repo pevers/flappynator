@@ -17,9 +17,11 @@
 #include "slide.h"
 #include "flatterrain.h"
 #include "../src/util/tiny_obj_loader.h"
-#include "worldobject.h"
+#include "staticobject.h"
+#include "animatedobject.h"
 #include "smoothterrain.h"
 #include "player.h"
+#include "skybox.h"
 
 class Engine
 {
@@ -35,10 +37,6 @@ class Engine
 
         GLuint depthTexture;
 
-        // debug object shit
-        std::vector<tinyobj::shape_t> shapes;
-        std::vector<tinyobj::material_t> material;
-
         // sliding window, eye, center, speed
         Slide slide;
         std::unique_ptr<Terrain> terrain;
@@ -50,6 +48,8 @@ class Engine
         std::unique_ptr<Player> player;
         std::vector<std::unique_ptr<WorldObject>> wobjs;
 
+        std::unique_ptr<Skybox> skybox;
+
         void cleanWorldObjectBuffers();
         void draw();
     public:
@@ -59,14 +59,18 @@ class Engine
         bool init();
         bool initSun();
         bool initShadowMap();
-        void drawShadows();
+
         void drawFrame();
         void drawTerrain();
         void drawPlayer();
+        void drawSkybox();
         void drawWorldObjects();
         void drawObject(WorldObject &w);
+
+        void drawShadows();
         void drawWorldShadow();
         void drawPlayerShadow();
+
         void mainLoop();
 
         void updateWorldObjects();

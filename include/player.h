@@ -2,9 +2,9 @@
 #define PLAYER_H
 
 #include "settings.h"
-#include "worldobject.h"
+#include "animatedobject.h"
 
-class Player : public WorldObject
+class Player : public AnimatedObject
 {
     public:
         Player();

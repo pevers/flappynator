@@ -1,11 +1,11 @@
-#define GLEW_STATIC
-
 #ifndef SHADERPROGRAM_H
 #define SHADERPROGRAM_H
 
 #include <iostream>
 #include <string>
 #include <fstream>
+
+#define GLEW_STATIC
 #include <GL/glew.h>
 
 class ShaderProgram

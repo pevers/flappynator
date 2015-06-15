@@ -1,4 +1,4 @@
-#version 330 core
+#version 130
 
 // Input vertex data, different for all executions of this shader.
 in vec3 inPosition;

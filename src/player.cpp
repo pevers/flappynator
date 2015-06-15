@@ -1,6 +1,6 @@
 #include "player.h"
 
-Player::Player() : WorldObject(Settings::playerStart, Settings::playerScale, Settings::playerRotation, Settings::playerModel), acc(Settings::playerAcc), speed(Settings::playerSpeed), boundingBox(0.0,0.0,0.0,0.0)
+Player::Player() : AnimatedObject(Settings::playerStart, Settings::playerScale, Settings::playerRotation, false, 14), acc(Settings::playerAcc), speed(Settings::playerSpeed), boundingBox(0.0,0.0,0.0,0.0)
 {
     //ctor
 }
@@ -33,7 +33,7 @@ glm::vec4 Player::getBoundingBox()
 void Player::addAcc(glm::vec3 acc)
 {
     this->acc.y = acc.y;
-    this->speed = Settings::playerSpeed;
+    this->speed.y = Settings::playerSpeed.y;
 }
 
 glm::vec3 Player::getAcc()
@@ -46,6 +46,9 @@ glm::vec3 Player::getAcc()
  */
 void Player::update()
 {
+    // update animation
+    AnimatedObject::update();
+
     // acceleration
 
     acc += Settings::playerAcc;
