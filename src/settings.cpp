@@ -1,5 +1,4 @@
 #include "settings.h"
-#define 	M_PI   3.14159265358979323846	/* pi */
 
 namespace Settings
 {
@@ -11,8 +10,6 @@ namespace Settings
     std::string windowTitle = "FlappyNator";
 
     glm::vec3 eye(0.0, 2.0, 25.0);
-
-    float PI = M_PI;
 
     glm::vec3 playerStart(3.0, 3.0, 2.0);
     glm::vec3 playerScale(0.20, 0.20, 0.20);
@@ -34,7 +31,6 @@ namespace Settings
 
     glm::vec3 sunPos(-10.0, 80.0, 0.0);
     glm::vec3 sunSpot(50, 0, 50);
-    //glm::vec3 sunDirection(cos(45*3.1415/180.0)*70, -sin(45*3.1415/180.0)*70, 1.0f);
 
     sf::Time ups = sf::seconds(1.f / 60.f);
 }

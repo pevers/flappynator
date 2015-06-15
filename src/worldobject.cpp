@@ -1,11 +1,11 @@
 #include "worldobject.h"
 
-WorldObject::WorldObject()
+WorldObject::WorldObject() : normalsExist(false), state(ALIVE)
 {
     //ctor
 }
 
-WorldObject::WorldObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot) : pos(start), scale(scl), rotation(rot), normalsExist(false)
+WorldObject::WorldObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot) : pos(start), scale(scl), rotation(rot), normalsExist(false), state(ALIVE)
 {
 
 }
@@ -48,27 +48,7 @@ glm::vec3 WorldObject::getPos()
 {
     return pos;
 }
-/*
-void WorldObject::setWidth(float widthMesh)
-{
-    this->widthMesh = widthMesh;
-}
 
-float WorldObject::getWidth()
-{
-    return widthMesh;
-}
-
-void WorldObject::setHeight(float heightMesh)
-{
-    this->heightMesh = heightMesh;
-}
-
-float WorldObject::getHeight()
-{
-    return heightMesh;
-}
-*/
 void WorldObject::setScale(glm::vec3 scale)
 {
     this->scale = scale;
@@ -108,3 +88,12 @@ glm::mat4 WorldObject::getModel()
     return model;
 }
 
+void WorldObject::setState(OBJECT_STATE state)
+{
+    this->state = state;
+}
+
+OBJECT_STATE WorldObject::getState()
+{
+    return state;
+}

@@ -23,14 +23,19 @@ class Enemy : public AnimatedObject
 
         void setSpeed(glm::vec3 speed);
         glm::vec3 getSpeed();
+
         void addAcc(glm::vec3 acc);
         glm::vec3 getAcc();
+
         void setInitAcc(glm::vec3 acc);
         glm::vec3 getInitAcc();
+
         void setHealth(int hp);
         int getHealth();
+
         void setAngle(float angle);
         float getAngle();
+
         bool isAlive();
         void setBoundingBox(glm::vec4 boundingBox);
         glm::vec4 getBoundingBox();

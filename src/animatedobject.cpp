@@ -22,11 +22,6 @@ AnimatedObject::~AnimatedObject()
 
 bool AnimatedObject::load()
 {
-    //std::string basePath = "resources/animation/";
-
-    //frames.resize(45);
-    //materials.resize(45);
-
     frames.resize(numFrames);
     materials.resize(numFrames);
 
@@ -65,22 +60,22 @@ void AnimatedObject::getDistances() {
 
     for (size_t i = 0; i < 1; i++) {
         for (size_t v = 0; v < frames[frame][0].mesh.positions.size() / 3; v++) {
-                if(minX > frames[frame][0].mesh.positions[3*v+2])
-                    minX = frames[frame][0].mesh.positions[3*v+2];
-                if(maxX < frames[frame][0].mesh.positions[3*v+2])
-                    maxX = frames[frame][0].mesh.positions[3*v+2];
-                if(minY > frames[frame][0].mesh.positions[3*v+1])
-                    minY = frames[frame][0].mesh.positions[3*v+1];
-                if(maxY < frames[frame][0].mesh.positions[3*v+1])
-                    maxY = frames[frame][0].mesh.positions[3*v+1];
+            if(minX > frames[frame][0].mesh.positions[3*v+2])
+                minX = frames[frame][0].mesh.positions[3*v+2];
+            if(maxX < frames[frame][0].mesh.positions[3*v+2])
+                maxX = frames[frame][0].mesh.positions[3*v+2];
+            if(minY > frames[frame][0].mesh.positions[3*v+1])
+                minY = frames[frame][0].mesh.positions[3*v+1];
+            if(maxY < frames[frame][0].mesh.positions[3*v+1])
+                maxY = frames[frame][0].mesh.positions[3*v+1];
                  //std::cerr << "LOADOBJECT" <<  shapes[i].mesh.positions[3*v+0] << "  " << shapes[i].mesh.positions[3*v+1] << "  " <<  shapes[i].mesh.positions[3*v+2]<< std::endl;
         }
     }
 
     widthMesh = std::abs(maxX - minX);
     heightMesh = std::abs(maxY - minY);
-    std::cerr << "minX: " <<  minX << " maxX: " << maxX << " minY: " <<  minY << " maxY: " << maxY << std::endl;
-    std::cerr << "widthMesh: " <<  widthMesh << " heightMesh: " << heightMesh << std::endl;
+    std::cout << "minX: " <<  minX << " maxX: " << maxX << " minY: " <<  minY << " maxY: " << maxY << std::endl;
+    std::cout << "widthMesh: " <<  widthMesh << " heightMesh: " << heightMesh << std::endl;
 }
 
 void AnimatedObject::setFrame(int frame)

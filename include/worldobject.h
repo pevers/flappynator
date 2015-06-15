@@ -1,17 +1,20 @@
-#define GLEW_STATIC
-
 #ifndef WORLDOBJECT_H
 #define WORLDOBJECT_H
 
 #include <string>
 #include <vector>
 #include <iostream>
+#define GLEW_STATIC
 #include <GL/glew.h>
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "../src/util/tiny_obj_loader.h"
+
+enum OBJECT_STATE {
+    ALIVE = 0, DYING, DEAD
+};
 
 class WorldObject
 {
@@ -29,6 +32,7 @@ class WorldObject
         float widthMesh;
 
         bool normalsExist;
+        OBJECT_STATE state;
     public:
         WorldObject();
         WorldObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot);
@@ -66,6 +70,9 @@ class WorldObject
 
         bool hasNormals();
         void setNormalsExist(bool exist);
+
+        void setState(OBJECT_STATE state);
+        OBJECT_STATE getState();
 };
 
 #endif // WORLDOBJECT_H

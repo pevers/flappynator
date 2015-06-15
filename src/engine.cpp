@@ -449,29 +449,17 @@ void Engine::handleKeyEvent(sf::Event event)
     glm::vec3 eye = slide.getEye();
     glm::vec3 center = slide.getCenter();
     if (event.key.code == sf::Keyboard::Up) {
-        eye.y += 0.1;
-        center.y += 0.1;
-        glm::vec3 pos = player->getPos();
-        pos.y += 0.1;
-        player->setPos(pos);
+        eye.y++;
+        center.y++;
     } else if (event.key.code == sf::Keyboard::Down) {
-        eye.y -= 0.1;
-        center.y -= 0.1;
-        glm::vec3 pos = player->getPos();
-        pos.y -= 0.1;
-        player->setPos(pos);
+        eye.y--;
+        center.y--;
     } else if (event.key.code == sf::Keyboard::Left) {
-        eye.x -= 0.1;
-        center.x -= 0.1;
-        glm::vec3 pos = player->getPos();
-        pos.x -= 0.1;
-        player->setPos(pos);
+        eye.x--;
+        center.x--;
     } else if (event.key.code == sf::Keyboard::Right) {
-        eye.x += 0.1;
-        center.x += 0.1;
-        glm::vec3 pos = player->getPos();
-        pos.x += 0.1;
-        player->setPos(pos);
+        eye.x++;
+        center.x++;
     } else if (event.key.code == sf::Keyboard::R) {
         eye = Settings::eye;
         center = glm::vec3(0.0, 0.0, 0.0);
@@ -489,11 +477,9 @@ void Engine::handleKeyEvent(sf::Event event)
         player->addAcc(glm::vec3(0.0f, 1.0f / 200.0, 0.0f));
         player->startAnimation();
     } else if (event.key.code == sf::Keyboard::F) {
-        if (wobjs.size() > 0) {
-            StaticObject *obj = dynamic_cast<StaticObject*>(wobjs[0].get());
-            obj->destroyObject();
-        }
+        player->destroyObject();
     }
+
     glm::vec3 pos = player->getPos();
     std::cout << "pos (" << pos.x << ", " << pos.y << ", " << pos.z << ")" << std::endl;
     std::cout << "eye (" << eye.x << ", " << eye.y << ", " << eye.z << ")" << std::endl;
@@ -551,6 +537,7 @@ void Engine::boundingBox() {
 
         //std::cout << "bounding box: (" << boundingBox.x << ", " << boundingBox.y << ") width: " << boundingBox.z << " height: " << boundingBox.w << std::endl;
     }
+
     //create/set the bounding box for the bird
     glm::vec3 pos = player->getPos();
     glm::vec4 boundingBox = glm::vec4(pos.x - (0.5*player->getWidth()*Settings::playerScale.z), pos.y - (0.5*player->getHeight()*Settings::playerScale.y), (player->getHeight()*Settings::playerScale.z), (player->getHeight()*Settings::playerScale.y));

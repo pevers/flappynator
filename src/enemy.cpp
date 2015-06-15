@@ -6,7 +6,6 @@ Enemy::Enemy(glm::vec3 enemyStart, glm::vec3 enemyScale, glm::vec3 enemyRotation
     this->acc = enemyAcc;
     this->speed = enemySpeed;
     this->startPos = enemyStart;
-    this->alive = false;
 }
 
 Enemy::~Enemy()
@@ -65,11 +64,6 @@ float Enemy::getAngle()
     return angle;
 }
 
-bool Enemy::isAlive()
-{
-    return alive;
-}
-
 void Enemy::setBoundingBox(glm::vec4 boundingBox)
 {
     this->boundingBox = boundingBox;
@@ -85,7 +79,7 @@ glm::vec4 Enemy::getBoundingBox()
   */
 void Enemy::start(glm::vec3 playerPos)
 {
-    if(!alive)
+    if(state != ALIVE)
     {
         alive = true;
         angle = 0.5 * Settings::PI;
@@ -106,7 +100,7 @@ void Enemy::start(glm::vec3 playerPos)
  */
 void Enemy::update()
 {
-    if(alive)
+    if(state == ALIVE)
     {
         //angle += 0.02;
         angle += speed.x / 3.0;

@@ -7,6 +7,8 @@
 #include <SFML/Window.hpp>
 #include <memory>
 
+#define 	M_PI   3.14159265358979323846	/* pi */
+
 namespace Settings
 {
     extern int screenWidth;
