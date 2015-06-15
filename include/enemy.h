@@ -5,9 +5,9 @@
 #include <math.h>
 
 #include "settings.h"
-#include "worldobject.h"
+#include "staticobject.h"
 
-class Enemy : public WorldObject
+class Enemy : public StaticObject
 {
     public:
         Enemy(glm::vec3 enemyStart,

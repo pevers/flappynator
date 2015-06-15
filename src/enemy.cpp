@@ -1,7 +1,7 @@
 #include "enemy.h"
 
 Enemy::Enemy(glm::vec3 enemyStart, glm::vec3 enemyScale, glm::vec3 enemyRotation, glm::vec3 enemyAcc, glm::vec3 enemySpeed, std::string enemyModel) :
-    WorldObject(enemyStart, enemyScale, enemyRotation, enemyModel)
+    StaticObject(enemyStart, enemyScale, enemyRotation, enemyModel)
 {
     this->acc = enemyAcc;
     this->speed = enemySpeed;
@@ -81,7 +81,7 @@ void Enemy::start(glm::vec3 playerPos)
         angle = 0.0;
 
         // Set a new y position for the enemy, based on the player's position
-        pos.y = playerPos.y + (rand()%5 - 1);
+        pos.y = playerPos.y + rand()%4;
         startPos.y = pos.y;
 
         if(startPos.y > playerPos.y)

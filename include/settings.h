@@ -29,6 +29,7 @@ namespace Settings
     extern std::string playerModel;
 
     extern glm::vec3 enemyAcc;
+    extern glm::vec3 enemyScale;
     extern std::string enemyModel1;
 
     extern int numEnemies;
