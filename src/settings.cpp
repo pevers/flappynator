@@ -16,8 +16,7 @@ namespace Settings
     glm::vec3 playerAcc(0.0, - 1.0 / 2000, 0.0);
     glm::vec3 playerSpeed(1.0 / 30, 0.0, 0.0);  // should be 100
     glm::vec3 playerRotation(0.0, 0.5 * M_PI, 0.0);
-    std::string playerModel = "resources/monkey.obj";
-    std::string playerPath = "resources/animation/";
+    std::string playerPath = "resources/animation/player/";
     int playerNumFrames = 45;
 
     glm::vec3 enemyAcc(0.0, - 1.0 / 2000, 0.0);
