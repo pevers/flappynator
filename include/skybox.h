@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <SOIL/SOIL.h>
+#include <SFML/Window.hpp>
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -31,9 +32,12 @@ class Skybox
 
         glm::mat4 getModel();
 
+        void update(float sunIntensity);
     private:
         bool loadShaders();
         bool loadVAO();
+
+        void setDarken(float darken);
 
         static constexpr GLenum types[6] = { GL_TEXTURE_CUBE_MAP_POSITIVE_X,
                                   GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
@@ -47,6 +51,8 @@ class Skybox
 
         GLuint skyboxVBO, skyboxVAO;
         GLuint shaderProgram, vertexShader, fragmentShader;
+
+        sf::Clock clock;
 };
 
 #endif // CUBEMAPTEXTURE_H

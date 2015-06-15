@@ -11,6 +11,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <memory>
+#include <cmath>
 
 #include "settings.h"
 #include "shaderprogram.h"
@@ -22,6 +23,7 @@
 #include "smoothterrain.h"
 #include "player.h"
 #include "skybox.h"
+#include "sun.h"
 
 class Engine
 {
@@ -40,6 +42,7 @@ class Engine
         // sliding window, eye, center, speed
         Slide slide;
         std::unique_ptr<Terrain> terrain;
+        std::unique_ptr<Sun> sun;
 
         glm::mat4 projMatrix;
         glm::mat4 viewMatrix;
@@ -50,6 +53,7 @@ class Engine
 
         std::unique_ptr<Skybox> skybox;
 
+
         void cleanWorldObjectBuffers();
         void draw();
     public:
@@ -58,6 +62,7 @@ class Engine
 
         bool init();
         bool initSun();
+        bool resetSun();
         bool initShadowMap();
 
         void drawFrame();

@@ -88,10 +88,11 @@ bool Engine::init()
 
     // load terrain
     terrain.reset(new SmoothTerrain());
-    terrain->generateTerrain(50, 20);
+    terrain->generateTerrain(100, 10);
 
     // load test object
     player = std::unique_ptr<Player>(new Player());
+
     //wobjs.push_back(std::unique_ptr<StaticObject>(new StaticObject(glm::vec3(4.0, 4.0, 2.0), glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0, 0.0, 0.0), "resources/monkey.obj")));
     //wobjs.push_back(std::unique_ptr<Explosion>(new Explosion(glm::vec3(3.0, 2.0, 2.0), glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(-1.0, 0.0, 0.0))));
     //wobjs.push_back(std::unique_ptr<AnimatedObject>(new AnimatedObject(glm::vec3(4.0, 4.0, 2.0), glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0, 0.0, 0.0))));
@@ -127,19 +128,25 @@ bool Engine::initShadowMap() {
 
 bool Engine::initSun()
 {
-    GLuint color = glGetUniformLocation(shaderProgram, "sunLight.color");
-    glUniform3f(color, 1.0f, 1.0f, 1.0f);
+    sun.reset(new Sun(glm::vec3(1.0, 1.0, 1.0), Settings::sunPos, Settings::sunSpot, 0.5));
+    return resetSun();
+}
 
-    GLuint intensity = glGetUniformLocation(shaderProgram, "sunLight.ambientIntensity");
-    glUniform1f(intensity, 0.50f);
+bool Engine::resetSun()
+{
+    GLuint color = glGetUniformLocation(shaderProgram, "sunLight.color");
+    glUniform3f(color, sun->getColor().x, sun->getColor().y, sun->getColor().z);
+
+    GLuint intensity = glGetUniformLocation(shaderProgram, "ambientIntensity");
+    glUniform1f(intensity, sun->getIntensity());
 
     GLuint direction = glGetUniformLocation(shaderProgram, "sunLight.direction");
-    glUniform3f(direction, glm::normalize(Settings::sunSpot - Settings::sunPos).x, glm::normalize(Settings::sunSpot - Settings::sunPos).y, glm::normalize(Settings::sunSpot - Settings::sunPos).z);
+    glUniform3f(direction, sun->getDirection().x, sun->getDirection().y, sun->getDirection().z);
 
     GLuint pos = glGetUniformLocation(shaderProgram, "sunLight.pos");
     glUniform3f(pos, Settings::sunPos.x, Settings::sunPos.y, Settings::sunPos.z);
 
-    return (color && intensity && direction);
+    return (color >= 0 && intensity >= 0 && direction >= 0);
 }
 
 void Engine::drawFrame()
@@ -164,6 +171,8 @@ void Engine::draw()
     projMatrix = glm::perspective(45.0f, (float)Settings::screenWidth / (float)Settings::screenHeight, 1.0f, 200.0f);
 
     glUseProgram(shaderProgram);
+
+    resetSun();
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, depthTexture);
@@ -439,10 +448,7 @@ void Engine::handleKeyEvent(sf::Event event)
         player->addAcc(glm::vec3(0.0f, 1.0f / 200.0, 0.0f));
         player->startAnimation();
     } else if (event.key.code == sf::Keyboard::F) {
-        if (wobjs.size() > 0) {
-            StaticObject *obj = dynamic_cast<StaticObject*>(wobjs[0].get());
-            obj->destroyObject();
-        }
+        player->destroyObject();
     }
 
     std::cout << "eye (" << eye.x << ", " << eye.y << ", " << eye.z << ")" << std::endl;
@@ -466,8 +472,18 @@ void Engine::updateWorldObjects()
         w->update();
     }
 
+    sun->increaseIntensity(0.005);
+
+    skybox->update(sun->getIntensity());
     player->update();
-    slide.setCenter(player->getPos());
-    slide.setEye(glm::vec3(player->getPos().x + 1.0, player->getPos().y, Settings::playerStart.z + 10));
+
+    glm::vec3 center = glm::vec3(player->getPos().x + 2.0, player->getPos().y, player->getPos().z);
+    glm::vec3 eye = glm::vec3(player->getPos().x + 2.0, player->getPos().y, Settings::playerStart.z + 10);
+
+    center.y = std::max(1.5f, center.y);
+    eye.y = std::max(1.5f, eye.y);
+
+    slide.setCenter(center);
+    slide.setEye(eye);
 }
 

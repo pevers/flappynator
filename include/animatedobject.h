@@ -8,7 +8,7 @@
 class AnimatedObject : public WorldObject
 {
     public:
-        AnimatedObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot, bool loop, unsigned int startFrame);
+        AnimatedObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot, std::string path, int numFrames, bool loop, unsigned int startFrame);
         virtual ~AnimatedObject();
 
         void setStartFrame(unsigned int frame);
@@ -26,9 +26,13 @@ class AnimatedObject : public WorldObject
         virtual bool load();
         virtual void destroyObject();
     private:
+        bool load(std::string path, int numFrames);
         void setFrame(int frame);
 
+        std::string path;
+
         float frameRate;
+        unsigned int numFrames;
         unsigned int startFrame;
         unsigned int frame;
         bool loop;
@@ -37,6 +41,10 @@ class AnimatedObject : public WorldObject
 
         std::vector<std::vector<tinyobj::shape_t>> frames;
         std::vector<std::vector<tinyobj::material_t>> materials;
+
+        // explosion frames if set
+        std::vector<std::vector<tinyobj::shape_t>> explosionFrames;
+        std::vector<std::vector<tinyobj::material_t>> explosionMaterials;
 };
 
 #endif // ANIMATEDOBJECT_H

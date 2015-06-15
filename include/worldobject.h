@@ -13,6 +13,10 @@
 
 #include "../src/util/tiny_obj_loader.h"
 
+enum STATE {
+    ALIVE = 0, DEAD
+};
+
 class WorldObject
 {
     protected:
@@ -25,6 +29,7 @@ class WorldObject
         glm::vec3 rotation;
 
         bool normalsExist;
+        STATE state;
     public:
         WorldObject();
         WorldObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot);
@@ -50,6 +55,9 @@ class WorldObject
         glm::vec3 getRotation();
 
         glm::mat4 getModel();
+
+        STATE getState();
+        void setState(STATE state);
 
         bool hasNormals();
         void setNormalsExist(bool exist);

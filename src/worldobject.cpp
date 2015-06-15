@@ -5,7 +5,7 @@ WorldObject::WorldObject()
     //ctor
 }
 
-WorldObject::WorldObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot) : pos(start), scale(scl), rotation(rot), normalsExist(false)
+WorldObject::WorldObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot) : pos(start), scale(scl), rotation(rot), normalsExist(false), state(ALIVE)
 {
 }
 
@@ -66,6 +66,16 @@ bool WorldObject::hasNormals()
 void WorldObject::setNormalsExist(bool exist)
 {
     normalsExist = exist;
+}
+
+STATE WorldObject::getState()
+{
+    return state;
+}
+
+void WorldObject::setState(STATE state)
+{
+    this->state = state;
 }
 
 glm::mat4 WorldObject::getModel()

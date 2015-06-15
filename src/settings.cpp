@@ -10,7 +10,7 @@ namespace Settings
     sf::ContextSettings context(24, 8, 2);
     std::string windowTitle = "FlappyNator";
 
-    glm::vec3 eye(0.0, 2.0, 5.0);
+    glm::vec3 eye(2.0, 2.0, 5.0);
 
     glm::vec3 playerStart(3.0, 1.0, 2.0);
     glm::vec3 playerScale(0.20, 0.20, 0.20);
