@@ -22,7 +22,7 @@
 #include "smoothterrain.h"
 #include "player.h"
 #include "skybox.h"
-#include "Projectile.h"
+#include "projectile.h"
 
 class Engine
 {

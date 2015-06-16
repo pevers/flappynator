@@ -496,6 +496,7 @@ void Engine::handleKeyEvent(sf::Event event)
     }
 
     std::cout << "eye (" << eye.x << ", " << eye.y << ", " << eye.z << ")" << std::endl;
+    std::cout << "Player (" << player->getPos().x << ", " << player->getPos().y << ", " << player->getPos().z << ")" << std::endl;
 
     int i = 0;
     for (auto &p : projectiles) {

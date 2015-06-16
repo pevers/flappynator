@@ -1,4 +1,4 @@
-#include "Projectile.h"
+#include "projectile.h"
 
 GLfloat projectileVertices[] = {
     -3.0, 3.0, 0.0, // bottom left corner
