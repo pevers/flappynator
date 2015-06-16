@@ -1,4 +1,4 @@
-#version 130
+#version 330
 in vec3 inPosition;
 in vec2 vertexUV;
 in vec3 inNormal;
@@ -28,7 +28,6 @@ void main() {
 
 	shadowCoord = depthBiasMVP * vec4(inPosition, 1.0);
 	UV = vertexUV;
-
 	gl_Position = proj * view * model * vec4(inPosition, 1.0);
 }
 

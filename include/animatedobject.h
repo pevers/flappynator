@@ -5,7 +5,7 @@
 #include <SFML/Window.hpp>
 
 #include "worldobject.h"
-#include "animation.h""
+#include "animation.h"
 
 class AnimatedObject : public WorldObject
 {
@@ -18,12 +18,13 @@ class AnimatedObject : public WorldObject
         virtual void free();
         virtual bool load();
         virtual void destroyObject();
+        virtual GLuint getTexture();
 
         bool addAnimation(OBJECT_STATE state, bool loop, unsigned int startFrame, unsigned int frameSize, std::string basePath);
         void setAnimationState(OBJECT_STATE state);
         void startAnimation();
     private:
-        std::vector<Animation> animations;
+        Animation *animations[OBJECT_STATE_SIZE];
         OBJECT_STATE activeAnimation;
 };
 

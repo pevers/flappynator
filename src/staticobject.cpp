@@ -130,3 +130,8 @@ void StaticObject::update()
     // no update
 }
 
+GLuint StaticObject::getTexture()
+{
+    return -1;  // nope, HACK
+}
+

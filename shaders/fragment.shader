@@ -18,6 +18,8 @@ uniform SimpleDirectionalLight sunLight;
 uniform float ambientIntensity; 
 uniform sampler2DShadow shadowMap;
 uniform samplerCube skybox;
+uniform sampler2D tex;
+uniform bool isTerrain;
 
 vec2 poissonDisk[16] = vec2[]( 
    vec2( -0.94201624, -0.39906216 ), 
@@ -58,6 +60,10 @@ void main() {
 	}
 
 	outColor = visibility * vec4(color, 1.0) * vec4(sunLight.color * (diffuseIntensity + ambientIntensity), 1.0); //vec4(sunLight.color*(sunLight.ambientIntensity+diffuseIntensity+specularIntensity), 1.0);
+	if (!isTerrain) {
+		outColor = texture(tex, UV) * outColor;
+	}
+
 }
 
 

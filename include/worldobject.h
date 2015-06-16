@@ -22,6 +22,7 @@ class WorldObject
         GLuint vbo; // vertex buffer
         GLuint elementBuffer;
         GLuint normalBuffer;
+        GLuint vboTextureBuffer;
 
         glm::vec3 pos;
         glm::vec3 scale;
@@ -41,6 +42,7 @@ class WorldObject
         GLuint &getVertexBuffer();
         GLuint &getElementBuffer();
         GLuint &getNormalBuffer();
+        GLuint &getTextureBuffer();
 
         void setBoundingBox(glm::vec4 boundingBox);
         glm::vec4 getBoundingBox();
@@ -50,6 +52,7 @@ class WorldObject
         virtual int getObjectSize() = 0;
         virtual void update() = 0;
         virtual void destroyObject() = 0;
+        virtual GLuint getTexture() = 0; // HACK
 
         void setPos(glm::vec3 pos);
         glm::vec3 getPos();

@@ -6,15 +6,14 @@ AnimatedObject::AnimatedObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot, bo
     glGenBuffers(1, &vbo);
     glGenBuffers(1, &elementBuffer);
     glGenBuffers(1, &normalBuffer);
-
-    animations.resize(OBJECT_STATE_SIZE);
+    glGenBuffers(1, &vboTextureBuffer);
 
     if (!addAnimation(ALIVE, loop, startFrame, frameSize, basePath)) {
         std::cerr << "could not load animations" << std::endl;
     } else {
         // get the size of the first animation as bounding box
-        animations[ALIVE].bindBuffer(vbo, elementBuffer, normalBuffer);
-        animations[ALIVE].getDistances(widthMesh, heightMesh);
+        animations[ALIVE]->bindBuffer(vbo, elementBuffer, normalBuffer, vboTextureBuffer);
+        animations[ALIVE]->getDistances(widthMesh, heightMesh);
     }
 }
 
@@ -30,20 +29,21 @@ bool AnimatedObject::load()
 
 bool AnimatedObject::addAnimation(OBJECT_STATE state, bool loop, unsigned int startFrame, unsigned int frameSize, std::string basePath)
 {
-    animations[state] = Animation(loop, startFrame, frameSize, basePath);
+    // TODO: MEMORY LEAK MEMORY LEAK
+    animations[state] = new Animation(loop, startFrame, frameSize, basePath);
     return true;
 }
 
 void AnimatedObject::setAnimationState(OBJECT_STATE state)
 {
-    if (state > animations.size() - 1) {
+    if (state >= OBJECT_STATE_SIZE || state < 0) {
         std::cerr << "warning, could not set animation state to " << state << ", doesn't exist" << std::endl;
     } else activeAnimation = state;
 }
 
 void AnimatedObject::startAnimation()
 {
-    animations[activeAnimation].startAnimation();
+    animations[activeAnimation]->startAnimation();
 }
 
 void AnimatedObject::free()
@@ -51,11 +51,12 @@ void AnimatedObject::free()
     glDeleteBuffers(1, &vbo);
     glDeleteBuffers(1, &elementBuffer);
     glDeleteBuffers(1, &normalBuffer);
+    glDeleteBuffers(1, &vboTextureBuffer);
 }
 
 int AnimatedObject::getObjectSize()
 {
-    return animations[activeAnimation].getObjectSize();
+    return animations[activeAnimation]->getObjectSize();
 }
 
 void AnimatedObject::destroyObject()
@@ -63,7 +64,11 @@ void AnimatedObject::destroyObject()
     // empty
 }
 
+GLuint AnimatedObject::getTexture() {
+    return animations[activeAnimation]->getTexture();
+} // HACK
+
 void AnimatedObject::update()
 {
-    animations[activeAnimation].update(vbo, elementBuffer, normalBuffer);   // we use activeAnimation as state, could be 1-1 with WorldObject::state
+    animations[activeAnimation]->update(vbo, elementBuffer, normalBuffer, vboTextureBuffer);   // we use activeAnimation as state, could be 1-1 with WorldObject::state
 }

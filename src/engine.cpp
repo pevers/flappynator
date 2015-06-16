@@ -96,7 +96,7 @@ bool Engine::init()
     //wobjs.push_back(std::unique_ptr<AnimatedObject>(new AnimatedObject(glm::vec3(4.0, 4.0, 2.0), glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0, 0.0, 0.0))));
 
     // Initialize enemies
-    initEnemies();
+    //initEnemies();
 
     return true;
 }
@@ -270,6 +270,8 @@ void Engine::drawTerrain()
     glm::mat4 depthBiasMVP = biasMatrix * depthMVP;
     glUniformMatrix4fv(depthBias, 1, GL_FALSE, &depthBiasMVP[0][0]);
 
+    glDisable(GL_TEXTURE_2D);
+
     GLuint isTerrainID = glGetUniformLocation(shaderProgram, "isTerrain");
     glUniform1f(isTerrainID, 1);
 
@@ -328,10 +330,16 @@ void Engine::drawObject(WorldObject &w)
     glUniformMatrix4fv(depthBias, 1, GL_FALSE, &depthBiasMVP[0][0]);
 
     // texture buffer
-//    glEnableVertexAttribArray(1);
-//    glBindBuffer(GL_ARRAY_BUFFER, w.getTextureBuffer());
-//    glEnableVertexAttribArray(1);
-//    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+
+    // necessary but fucking ugly, TODO: FIX FIX FIX
+    if (w.getTexture() >= 0) {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, w.getTexture());
+        glEnableVertexAttribArray(1);
+        glBindBuffer(GL_ARRAY_BUFFER, w.getTextureBuffer());
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    }
 
     // send normal buffer
     if (w.getNormalBuffer() >= 0) {
@@ -343,8 +351,8 @@ void Engine::drawObject(WorldObject &w)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, w.getElementBuffer());
 
     // override texture colors
-    GLuint uniColor = glGetUniformLocation(shaderProgram, "overrideColor");
-    glUniform3f(uniColor, 1.0f, 0.3f, 0.3f);
+    //GLuint uniColor = glGetUniformLocation(shaderProgram, "overrideColor");
+    //glUniform3f(uniColor, 1.0f, 0.3f, 0.3f);
 
     glDrawElements(GL_TRIANGLES, w.getObjectSize(), GL_UNSIGNED_INT, (void*)0);
     glDisableVertexAttribArray(0);

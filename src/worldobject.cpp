@@ -1,6 +1,6 @@
 #include "worldobject.h"
 
-WorldObject::WorldObject() : state(ALIVE), heightMesh(-1), widthMesh(-1)
+WorldObject::WorldObject() : vbo(-1), elementBuffer(-1), normalBuffer(-1), vboTextureBuffer(-1), state(ALIVE), heightMesh(-1), widthMesh(-1)
 {
     //ctor
 }
@@ -27,6 +27,11 @@ GLuint &WorldObject::getElementBuffer()
 GLuint &WorldObject::getNormalBuffer()
 {
     return normalBuffer;
+}
+
+GLuint &WorldObject::getTextureBuffer()
+{
+    return vboTextureBuffer;
 }
 
 void WorldObject::setBoundingBox(glm::vec4 boundingBox)
