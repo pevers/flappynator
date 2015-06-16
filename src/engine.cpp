@@ -89,7 +89,8 @@ bool Engine::init()
 
     // load terrain
     terrain.reset(new SmoothTerrain());
-    terrain->generateTerrain(50, 20);
+    //terrain->generateTerrain(50, 20);
+    terrain->generateTerrain(50, 10);
 
     // load test object
     player = std::unique_ptr<Player>(new Player());
@@ -100,12 +101,15 @@ bool Engine::init()
     // Initialize enemies
     initEnemies();
 
+    // Initialize boss
+    initBoss();
+
     return true;
 }
 
 bool Engine::initEnemies() {
     glm::vec3 enemyScale = Settings::enemyScale;
-    glm::vec3 enemyRotation = glm::vec3(0.0, -0.5 * Settings::PI, 0.0);
+    glm::vec3 enemyRotation = Settings::enemyRotation;
     std::string enemyModel = Settings::enemyModel1;
 
     srand(time(NULL));
@@ -117,11 +121,16 @@ bool Engine::initEnemies() {
         glm::vec3 enemySpeed = Settings::playerSpeed * glm::vec3(speedX, 0.0, 0.0);
 
         std::unique_ptr<Enemy> enemy = std::unique_ptr<Enemy>(new Enemy(enemyStart, enemyScale, enemyRotation, enemyAcc, enemySpeed, enemyModel));
+        enemy->setHealth(1);
 
         enemies.push_back(std::move(enemy));
     }
 
     return true;
+}
+
+bool Engine::initBoss() {
+
 }
 
 bool Engine::initShadowMap() {
@@ -238,6 +247,7 @@ void Engine::drawShadows()
     glCullFace(GL_FRONT);
 
     drawPlayerShadow();
+    drawEnemyShadow();
     drawWorldShadow();
 }
 
@@ -378,6 +388,32 @@ void Engine::drawPlayerShadow()
     glDisableVertexAttribArray(0);
 }
 
+void Engine::drawEnemyShadow()
+{
+    for(auto &e : enemies)
+    {
+        // Only draw shadow when the object is in the scene
+        if(e->getPos().x < slide.getEye().x + 10.0 && e->getPos().x > slide.getEye().x - 10.0)
+        {
+            glm::mat4 model = e->getModel();
+
+            depthMVP = projMatrix * viewMatrix * model;
+            GLuint depthMatrixID = glGetUniformLocation(depthShaderProgram, "depthMVP");
+            glUniformMatrix4fv(depthMatrixID, 1, GL_FALSE, &depthMVP[0][0]);
+
+            glEnableVertexAttribArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER, e->getVertexBuffer());
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, e->getElementBuffer());
+
+            glDrawElements(GL_TRIANGLES, e->getObjectSize(), GL_UNSIGNED_INT, (void*)0);
+            glDisableVertexAttribArray(0);
+        }
+    }
+
+}
+
 void Engine::drawWorldObjects()
 {
     for (auto &w : wobjs) {
@@ -397,10 +433,75 @@ void Engine::drawEnemies()
     }
 }
 
+void Engine::update()
+{
+    //set bounding box
+    boundingBox();
+
+    //check collision
+    checkCollision();
+
+    // draw single frame
+    drawFrame();
+
+    // swap buffers
+    window.display();
+}
+
+void Engine::startGame()
+{
+    // Start game
+    glm::vec3 eye = slide.getEye();
+    glm::vec3 center = slide.getCenter();
+
+    slide.setEye(eye + glm::vec3((Settings::playerStart.x-Settings::eye.x)/Settings::startCameraTurnSpeed,
+                                 (Settings::playerStart.y-Settings::eye.y)/Settings::startCameraTurnSpeed,
+                                 ((Settings::playerStart.z+10.0)-Settings::eye.z)/Settings::startCameraTurnSpeed));
+    slide.setCenter(player->getPos());
+
+    // draw single frame
+    drawFrame();
+
+    // swap buffers
+    window.display();
+
+    // New gamestate
+    if(eye.x >= 0.5)
+        gameState.currentState = GameState::ST_PLAYING;
+}
+
+void Engine::playGame()
+{
+    // Play game
+
+    update();
+}
+
+void Engine::bossLvl()
+{
+    // enter boss lvl
+
+    // new state
+    gameState.currentState = GameState::ST_END;
+}
+
+void Engine::endGame()
+{
+    // End game
+
+
+}
+
 void Engine::mainLoop() {
 
     sf::Clock clock;
     sf::Time accumulator = sf::Time::Zero;
+
+    switch(gameState.currentState)
+    {
+        case GameState::ST_STARTING:
+            std::cout << "gameState: " << gameState.currentState << std::endl;
+    };
 
     while (window.isOpen())
     {
@@ -414,7 +515,8 @@ void Engine::mainLoop() {
                     window.close();
                 break;
                 case sf::Event::KeyPressed:
-                    handleKeyEvent(windowEvent);
+                    if(gameState.currentState != GameState::ST_STARTING && gameState.currentState != GameState::ST_END)
+                        handleKeyEvent(windowEvent);
                 break;
                 default:
                 break;
@@ -424,20 +526,31 @@ void Engine::mainLoop() {
         while (accumulator > Settings::ups)
         {
             accumulator -= Settings::ups;
-            updateWorldObjects();
+
+            if(gameState.currentState != GameState::ST_STARTING)
+                updateWorldObjects();
         }
 
-        //set bounding box
-        boundingBox();
-
-        //check collision
-        checkCollision();
-
-        // draw single frame
-        drawFrame();
-
-        // swap buffers
-        window.display();
+        // Check gamestate
+        switch(gameState.currentState)
+        {
+            case GameState::ST_STARTING:
+                std::cout << "STARTING" << std::endl;
+                startGame();
+                break;
+            case GameState::ST_PLAYING:
+                std::cout << "PLAYING" << std::endl;
+                playGame();
+                break;
+            case GameState::ST_BOSS:
+                std::cout << "BOSS" << std::endl;
+                bossLvl();
+                break;
+            case GameState::ST_END:
+                std::cout << "GAME ENDED" << std::endl;
+                endGame();
+                break;
+        }
 
         accumulator += clock.restart();
     }
@@ -523,15 +636,20 @@ void Engine::updateWorldObjects()
         if(e->getPos().x - player->getPos().x < Settings::startEnemyUpdate) {
             if(e->isAlive())
                 e->update();
-            else
+            else {
                 e->start(player->getPos());
+                e->startAnimation();
+            }
         }
     }
 
     player->update();
 
-    slide.setCenter(player->getPos());
-    slide.setEye(glm::vec3(player->getPos().x + 1.0, player->getPos().y, Settings::playerStart.z + 10));
+    if(gameState.currentState != GameState::ST_STARTING)
+    {
+        slide.setCenter(player->getPos());
+        slide.setEye(glm::vec3(player->getPos().x + 1.0, player->getPos().y, Settings::playerStart.z + 10));
+    }
 }
 
 void Engine::boundingBox() {
@@ -611,13 +729,15 @@ void Engine::checkCollision() {
             boundingBoxBird.y < boundingBoxWorld.y + boundingBoxWorld.w &&
             boundingBoxBird.y + boundingBoxBird.w > boundingBoxWorld.y)
         {
-            std::cout << "got em boss" << std::endl;
+            //std::cout << "got em boss" << std::endl;
             //delete the bird if the it is hit
             //glDeleteBuffers(1, &player->getVertexBuffer());
             //glDeleteBuffers(1, &player->getElementBuffer());
             //or RAGE, UNINSTALL SCRUB
             //window.close();
             e->destroyObject();
+
+            gameState.currentState = GameState::ST_END;
         }
 
         // Check collision with terrain
@@ -632,7 +752,7 @@ void Engine::checkCollision() {
             //check if the y-value of the mountain at the certain x is higher or equal to the y-value of the bird
             if(mountain[counter] >= e->getBoundingBox().y) {
                 //if so then dead
-                std::cout << "enemy DIED" << std::endl;
+                //std::cout << "enemy DIED" << std::endl;
 
                 e->destroyObject();
 
@@ -658,8 +778,10 @@ void Engine::checkCollision() {
         //check if the y-value of the mountain at the certain x is higher or equal to the y-value of the bird
         if(mountain[counter] >= player->getBoundingBox().y) {
             //if so then dead
-            std::cout << "dead" << std::endl;
+            //std::cout << "dead" << std::endl;
             //window.close();
+
+            gameState.currentState = GameState::ST_END;
         }
     }
 }

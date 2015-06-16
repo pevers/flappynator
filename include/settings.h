@@ -20,6 +20,7 @@ namespace Settings
     extern glm::vec3 eye;
 
     extern float PI;
+    extern float startCameraTurnSpeed;
 
     extern glm::vec3 playerStart;
     extern glm::vec3 playerScale;
@@ -32,9 +33,15 @@ namespace Settings
 
     extern glm::vec3 enemyAcc;
     extern glm::vec3 enemyScale;
+    extern glm::vec3 enemyRotation;
     extern std::string enemyModel1;
     extern std::string enemyPath;
     extern int enemyNumFrames;
+
+    extern glm::vec3 bossScale;
+    extern glm::vec3 bossRotation;
+    extern std::string bossPath;
+    extern int bossNumFrames;
 
     extern int numEnemies;
     extern float startEnemyUpdate;

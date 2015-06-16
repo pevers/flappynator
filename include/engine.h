@@ -23,6 +23,8 @@
 #include "player.h"
 #include "enemy.h"
 #include "skybox.h"
+#include "gamestate.h";
+#include "boss";
 
 class Engine
 {
@@ -49,12 +51,15 @@ class Engine
         std::unique_ptr<Player> player;
         std::vector<std::unique_ptr<WorldObject>> wobjs;
         std::vector<std::unique_ptr<Enemy>> enemies;
+        std::unique_ptr<Boss> boss;
 
         std::unique_ptr<Skybox> skybox;
 
         void cleanWorldObjectBuffers();
         void draw();
         void removeObjectFromVector(std::vector<std::unique_ptr<Enemy>> vec1, std::vector<Enemy*> vec2);
+
+        GameState gameState;
     public:
         Engine();
         virtual ~Engine();
@@ -63,6 +68,8 @@ class Engine
         bool initSun();
         bool initShadowMap();
         bool initEnemies();
+        bool initBoss();
+
         void drawShadows();
         void drawFrame();
         void drawTerrain();
@@ -73,6 +80,13 @@ class Engine
         void drawObject(WorldObject &w);
         void drawWorldShadow();
         void drawPlayerShadow();
+        void drawEnemyShadow();
+
+        void update();
+        void startGame();
+        void playGame();
+        void bossLvl();
+        void endGame();
 
         void mainLoop();
 
