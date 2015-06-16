@@ -43,10 +43,11 @@
 			<Add directory="$(#glfw.lib)" />
 		</Linker>
 		<Unit filename="include/animatedobject.h" />
+		<Unit filename="include/boss.h" />
 		<Unit filename="include/enemy.h" />
 		<Unit filename="include/engine.h" />
 		<Unit filename="include/flatterrain.h" />
-		<Unit filename="include/game.h" />
+		<Unit filename="include/gamestate.h" />
 		<Unit filename="include/player.h" />
 		<Unit filename="include/settings.h" />
 		<Unit filename="include/shaderprogram.h" />
@@ -58,10 +59,11 @@
 		<Unit filename="include/terrain.h" />
 		<Unit filename="include/worldobject.h" />
 		<Unit filename="src/animatedobject.cpp" />
+		<Unit filename="src/boss.cpp" />
 		<Unit filename="src/enemy.cpp" />
 		<Unit filename="src/engine.cpp" />
 		<Unit filename="src/flatterrain.cpp" />
-		<Unit filename="src/game.cpp" />
+		<Unit filename="src/gamestate.cpp" />
 		<Unit filename="src/main.cpp" />
 		<Unit filename="src/player.cpp" />
 		<Unit filename="src/settings.cpp" />
