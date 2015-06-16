@@ -171,11 +171,71 @@ void Engine::draw()
 
     glCullFace(GL_BACK);
 
-    drawTerrain();
+    //drawTerrain();
     drawWorldObjects();
     drawPlayer();
-
+    drawProjectiles();
     drawSkybox();
+}
+
+void Engine::drawProjectiles()
+{
+    for (auto &p : projectiles) {
+        drawProjectile(*p);
+    }
+}
+
+void Engine::drawProjectile(Projectile &p){
+    //projectiles.push_back(std::unique_ptr<Projectile>(projectile);
+
+    // Render to the screen
+    GLuint modelID = glGetUniformLocation(shaderProgram, "model");
+    GLuint viewID = glGetUniformLocation(shaderProgram, "view");
+    GLuint projID = glGetUniformLocation(shaderProgram, "proj");
+
+    glm::mat4 model;
+    glUniformMatrix4fv(modelID, 1, GL_FALSE, &model[0][0]);
+    glUniformMatrix4fv(viewID, 1, GL_FALSE, &viewMatrix[0][0]);
+    glUniformMatrix4fv(projID, 1, GL_FALSE, &projMatrix[0][0]);
+
+    // get vertex buffer
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, p.getVertexBuffer());
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    GLuint depthBias = glGetUniformLocation(shaderProgram, "depthBiasMVP");
+    glm::mat4 biasMatrix(
+        0.5, 0.0, 0.0, 0.0,
+        0.0, 0.5, 0.0, 0.0,
+        0.0, 0.0, 0.5, 0.0,
+        0.5, 0.5, 0.5, 1.0
+    );
+
+    glm::mat4 depthBiasMVP = biasMatrix * projMatrix * viewMatrix * model;
+    glUniformMatrix4fv(depthBias, 1, GL_FALSE, &depthBiasMVP[0][0]);
+
+
+
+    GLuint uniColor = glGetUniformLocation(shaderProgram, "overrideColor");
+    glUniform3f(uniColor, 1.0f, 0.3f, 0.3f);
+
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, p.getElementBuffer());
+    //glDrawElements(GL_TRIANGLES, p.getObjectSize(), GL_UNSIGNED_INT, (void*)0);
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+/*
+    // override texture colors
+    GLuint uniColor = glGetUniformLocation(shaderProgram, "overrideColor");
+    glUniform3f(uniColor, 1.0f, 0.3f, 0.3f);
+
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, (void*)0);
+
+    GLuint uniColor = glGetUniformLocation(shaderProgram, "overrideColor");
+    glUniform3f(uniColor, 1.0f, 1.0f, 1.0f);
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);*/
+    glDisableVertexAttribArray(0);
 }
 
 void Engine::drawSkybox()
@@ -431,9 +491,18 @@ void Engine::handleKeyEvent(sf::Event event)
     } else if (event.key.code == sf::Keyboard::Space) {
         player->addAcc(glm::vec3(0.0f, 1.0f / 200.0, 0.0f));
         player->startAnimation();
+        std::unique_ptr<Projectile> projectile = std::unique_ptr<Projectile>(new Projectile(player->getPos()));
+        projectiles.push_back(std::move(projectile));
     }
 
     std::cout << "eye (" << eye.x << ", " << eye.y << ", " << eye.z << ")" << std::endl;
+
+    int i = 0;
+    for (auto &p : projectiles) {
+        std::cout << "projectile (" << i << "=" << p->getPos().x << ", " << p->getPos().y << ", " << p->getPos().z << ")" << std::endl;
+        i++;
+    }
+
     slide.setEye(eye);
     slide.setCenter(center);
 }
@@ -452,6 +521,10 @@ void Engine::updateWorldObjects()
 {
     for (auto &w : wobjs) {
         w->update();
+    }
+
+    for (auto &p : projectiles) {
+        p->update();
     }
 
     player->update();

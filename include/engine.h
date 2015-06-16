@@ -22,6 +22,7 @@
 #include "smoothterrain.h"
 #include "player.h"
 #include "skybox.h"
+#include "Projectile.h"
 
 class Engine
 {
@@ -41,6 +42,8 @@ class Engine
         Slide slide;
         std::unique_ptr<Terrain> terrain;
 
+        std::unique_ptr<Projectile> projectile;
+
         glm::mat4 projMatrix;
         glm::mat4 viewMatrix;
         glm::mat4 depthMVP;
@@ -48,6 +51,7 @@ class Engine
         std::unique_ptr<Player> player;
         std::vector<std::unique_ptr<WorldObject>> wobjs;
 
+        std::vector<std::unique_ptr<Projectile>> projectiles;
         std::unique_ptr<Skybox> skybox;
 
         void cleanWorldObjectBuffers();
@@ -60,12 +64,15 @@ class Engine
         bool initSun();
         bool initShadowMap();
 
+        void drawProjectile();
         void drawFrame();
         void drawTerrain();
         void drawPlayer();
         void drawSkybox();
         void drawWorldObjects();
         void drawObject(WorldObject &w);
+        void drawProjectiles();
+        void drawProjectile(Projectile &p);
 
         void drawShadows();
         void drawWorldShadow();
