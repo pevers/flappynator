@@ -104,14 +104,6 @@ bool Engine::init()
     // Initialize boss
     initBoss();
 
-    //TEST
-    sf::Image img;
-    img.LoadFromFile("yourimage.bmp");
-
-    sf::Sprite spr(img);
-
-    yourwindow.Draw(spr);
-
     return true;
 }
 
@@ -138,7 +130,16 @@ bool Engine::initEnemies() {
 }
 
 bool Engine::initBoss() {
-    boss = std::unique_ptr<Boss>(new Boss(Settings::bossStart, Settings::bossScale, Settings::bossRotation));
+    float detail = 0.25;
+    std::vector<float> mountain;
+    mountain = SmoothTerrain::getMaxYValues();
+    mountain[Settings::bossStart.x / detail];
+
+    // Keeps the boss from hitting terrain
+    glm::vec3 start = glm::vec3(Settings::bossStart.x, mountain[Settings::bossStart.x / detail] + 4.0, Settings::bossStart.z);
+    Settings::bossStart = glm::vec3(start);
+
+    boss = std::unique_ptr<Boss>(new Boss(start, Settings::bossScale, Settings::bossRotation));
 }
 
 bool Engine::initShadowMap() {
@@ -519,7 +520,7 @@ void Engine::bossLvl()
 
     if(eye.x > player->getPos().x - 10)
     {
-        slide.setEye(eye + glm::vec3(-0.1, 0.0, -0.1));
+        slide.setEye(eye + glm::vec3(-0.1, 0.0, -0.09));
         slide.setCenter(player->getPos());
     }
 
@@ -804,7 +805,7 @@ void Engine::checkCollision() {
         float endEnemy = floor(e->getBoundingBox().x + e->getBoundingBox().z); //the max x-value pos of the bird
         float detail = 0.25;
         std::vector<float> mountain;
-        mountain = SmoothTerrain::getRandom();
+        mountain = SmoothTerrain::getMaxYValues();
         for(startEnemy; startEnemy < endEnemy; startEnemy += detail) {
             //initiate the counter with some correction
             int counter = floor(startEnemy*4+2);
@@ -830,7 +831,7 @@ void Engine::checkCollision() {
     float endBird = floor(player->getBoundingBox().x + player->getBoundingBox().z); //the max x-value pos of the bird
     float detail = 0.25;
     std::vector<float> mountain;
-    mountain = SmoothTerrain::getRandom();
+    mountain = SmoothTerrain::getMaxYValues();
     for(startBird; startBird < endBird; startBird += detail) {
         //initiate the counter with some correction
         int counter = floor(startBird*4+2);

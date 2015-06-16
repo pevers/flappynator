@@ -42,7 +42,7 @@ namespace Settings
     int numEnemies = 1;
     float startEnemyUpdate = 15.0; // When the horizontal distance between the enemy and the player is smaller than this value, update the enemy
     float startBossUpdate = 10.0;
-    float startBossStateRange = 4.0;
+    float startBossStateRange = 8.0;
 
     glm::vec3 sunPos(-10.0, 80.0, 0.0);
     glm::vec3 sunSpot(50, 0, 50);

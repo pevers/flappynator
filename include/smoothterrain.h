@@ -35,7 +35,7 @@ class SmoothTerrain : public Terrain
         virtual unsigned int getTerrainSize();
         static float maxY[];
 
-        static std::vector<float> getRandom();
+        static std::vector<float> getMaxYValues();
 };
 
 #endif // SMOOTHTERRAIN_H

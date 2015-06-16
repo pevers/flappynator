@@ -144,7 +144,7 @@ bool SmoothTerrain::generateTerrain(unsigned int width, unsigned int height)
     return true;
 }
 
-std::vector<float> SmoothTerrain::getRandom( )
+std::vector<float> SmoothTerrain::getMaxYValues( )
 {
   return new_vec;
 }
