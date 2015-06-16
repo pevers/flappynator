@@ -1,12 +1,11 @@
 #include "enemy.h"
 
 Enemy::Enemy(glm::vec3 enemyStart, glm::vec3 enemyScale, glm::vec3 enemyRotation, glm::vec3 enemyAcc, glm::vec3 enemySpeed, std::string enemyModel) :
-    AnimatedObject(enemyStart, enemyScale, enemyRotation, true, 15, Settings::enemyPath, Settings::enemyNumFrames), boundingBox(0.0,0.0,0.0,0.0)
+    AnimatedObject(enemyStart, enemyScale, enemyRotation, true, 0, Settings::enemyPath, Settings::enemyNumFrames), boundingBox(0.0,0.0,0.0,0.0)
 {
     this->acc = enemyAcc;
     this->speed = enemySpeed;
     this->startPos = enemyStart;
-    this->alive = false;
 }
 
 Enemy::~Enemy()
@@ -65,11 +64,6 @@ float Enemy::getAngle()
     return angle;
 }
 
-bool Enemy::isAlive()
-{
-    return alive;
-}
-
 void Enemy::setBoundingBox(glm::vec4 boundingBox)
 {
     this->boundingBox = boundingBox;
@@ -85,10 +79,10 @@ glm::vec4 Enemy::getBoundingBox()
   */
 void Enemy::start(glm::vec3 playerPos)
 {
-    if(!alive)
+    if(!isAlive())
     {
-        alive = true;
-        angle = 0.5 * Settings::PI;
+        setState(ALIVE);
+        angle = 0.5 * M_PI;
 
         // Set a new y position for the enemy, based on the player's position
         pos.y = playerPos.y + (rand()%180 / 100.0);
@@ -108,7 +102,7 @@ void Enemy::start(glm::vec3 playerPos)
  */
 void Enemy::update()
 {
-    if(alive)
+    if(isAlive())
     {
         //angle += 0.02;
         angle += speed.x / 3.0;
@@ -124,5 +118,5 @@ void Enemy::update()
 
 void Enemy::destroyObject()
 {
-    delete this;
+    //delete this;
 }
