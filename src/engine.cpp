@@ -171,7 +171,7 @@ void Engine::draw()
 
     glCullFace(GL_BACK);
 
-    //drawTerrain();
+    drawTerrain();
     drawWorldObjects();
     drawPlayer();
     drawProjectiles();
@@ -193,7 +193,7 @@ void Engine::drawProjectile(Projectile &p){
     GLuint viewID = glGetUniformLocation(shaderProgram, "view");
     GLuint projID = glGetUniformLocation(shaderProgram, "proj");
 
-    glm::mat4 model;
+    glm::mat4 model = p.getModel();
     glUniformMatrix4fv(modelID, 1, GL_FALSE, &model[0][0]);
     glUniformMatrix4fv(viewID, 1, GL_FALSE, &viewMatrix[0][0]);
     glUniformMatrix4fv(projID, 1, GL_FALSE, &projMatrix[0][0]);
@@ -202,7 +202,6 @@ void Engine::drawProjectile(Projectile &p){
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, p.getVertexBuffer());
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
     GLuint depthBias = glGetUniformLocation(shaderProgram, "depthBiasMVP");
     glm::mat4 biasMatrix(
@@ -215,8 +214,22 @@ void Engine::drawProjectile(Projectile &p){
     glm::mat4 depthBiasMVP = biasMatrix * projMatrix * viewMatrix * model;
     glUniformMatrix4fv(depthBias, 1, GL_FALSE, &depthBiasMVP[0][0]);
 
+    // texture buffer
+//    glEnableVertexAttribArray(1);
+//    glBindBuffer(GL_ARRAY_BUFFER, w.getTextureBuffer());
+//    glEnableVertexAttribArray(1);
+//    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
+    // send normal buffer
+    if (p.hasNormals()) {
+        glEnableVertexAttribArray(2);
+        glBindBuffer(GL_ARRAY_BUFFER, p.getNormalBuffer());
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    }
 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, p.getElementBuffer());
+
+    // override texture colors
     GLuint uniColor = glGetUniformLocation(shaderProgram, "overrideColor");
     glUniform3f(uniColor, 1.0f, 0.3f, 0.3f);
 
@@ -499,11 +512,12 @@ void Engine::handleKeyEvent(sf::Event event)
     std::cout << "Player (" << player->getPos().x << ", " << player->getPos().y << ", " << player->getPos().z << ")" << std::endl;
 
     int i = 0;
+    /*
     for (auto &p : projectiles) {
         std::cout << "projectile (" << i << "=" << p->getPos().x << ", " << p->getPos().y << ", " << p->getPos().z << ")" << std::endl;
         i++;
     }
-
+    */
     slide.setEye(eye);
     slide.setCenter(center);
 }
@@ -520,6 +534,7 @@ void Engine::cleanWorldObjectBuffers()
  */
 void Engine::updateWorldObjects()
 {
+
     for (auto &w : wobjs) {
         w->update();
     }

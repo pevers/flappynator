@@ -1,10 +1,15 @@
 #include "projectile.h"
 
 GLfloat projectileVertices[] = {
-    -3.0, 3.0, 0.0, // bottom left corner
-    -3.0, -3.0, 0.0, // top left corner
-    3.0,-3.0, 0.0, // top right corner
-    3.0,3.0, 0.0}; // bottom right corner
+    //-5.0, 5.0, 0.0, // bottom left corner
+    //-5.0, -5.0, 0.0, // top left corner
+    //5.0,-5.0, 0.0, // top right corner
+   // 5.0,5.0, 0.0}; // bottom right corner
+    -1.0, 1.0, 0.0, // bottom left corner
+    1.0,1.0, 0.0, // bottom right corner
+    -1.0, -1.0, 0.0, // top left corner
+    1.0,-1.0, 0.0, // top right corner
+    };
 
 GLubyte indices[] = {0,1,2, // first triangle (bottom left - top left - top right)
                      0,2,3};
@@ -59,6 +64,7 @@ bool Projectile::load()
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(projectileVertices), projectileVertices, GL_STATIC_DRAW);
 
+    glGenBuffers(1, &elementBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices) , indices, GL_STATIC_DRAW);
 
