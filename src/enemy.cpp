@@ -121,3 +121,8 @@ void Enemy::update()
             pos.y = -(float)cos(angle)*2 + startPos.y;
     }
 }
+
+void Enemy::destroyObject()
+{
+    delete this;
+}

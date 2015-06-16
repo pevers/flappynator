@@ -38,6 +38,7 @@ namespace Settings
     extern std::string enemyPath;
     extern int enemyNumFrames;
 
+    extern glm::vec3 bossStart;
     extern glm::vec3 bossScale;
     extern glm::vec3 bossRotation;
     extern std::string bossPath;
@@ -45,6 +46,8 @@ namespace Settings
 
     extern int numEnemies;
     extern float startEnemyUpdate;
+    extern float startBossUpdate;
+    extern float startBossStateRange;
 
     extern glm::vec3 sunPos;
     extern glm::vec3 sunSpot;

@@ -90,7 +90,7 @@ bool Engine::init()
     // load terrain
     terrain.reset(new SmoothTerrain());
     //terrain->generateTerrain(50, 20);
-    terrain->generateTerrain(50, 10);
+    terrain->generateTerrain(50, 6);
 
     // load test object
     player = std::unique_ptr<Player>(new Player());
@@ -103,6 +103,14 @@ bool Engine::init()
 
     // Initialize boss
     initBoss();
+
+    //TEST
+    sf::Image img;
+    img.LoadFromFile("yourimage.bmp");
+
+    sf::Sprite spr(img);
+
+    yourwindow.Draw(spr);
 
     return true;
 }
@@ -130,7 +138,7 @@ bool Engine::initEnemies() {
 }
 
 bool Engine::initBoss() {
-
+    boss = std::unique_ptr<Boss>(new Boss(Settings::bossStart, Settings::bossScale, Settings::bossRotation));
 }
 
 bool Engine::initShadowMap() {
@@ -211,6 +219,7 @@ void Engine::draw()
     drawWorldObjects();
     drawPlayer();
     drawEnemies();
+    drawBoss();
     drawSkybox();
 }
 
@@ -248,6 +257,7 @@ void Engine::drawShadows()
 
     drawPlayerShadow();
     drawEnemyShadow();
+    drawBossShadow();
     drawWorldShadow();
 }
 
@@ -414,6 +424,24 @@ void Engine::drawEnemyShadow()
 
 }
 
+void Engine::drawBossShadow()
+{
+    glm::mat4 model = boss->getModel();
+
+    depthMVP = projMatrix * viewMatrix * model;
+    GLuint depthMatrixID = glGetUniformLocation(depthShaderProgram, "depthMVP");
+    glUniformMatrix4fv(depthMatrixID, 1, GL_FALSE, &depthMVP[0][0]);
+
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, boss->getVertexBuffer());
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, boss->getElementBuffer());
+
+    glDrawElements(GL_TRIANGLES, boss->getObjectSize(), GL_UNSIGNED_INT, (void*)0);
+    glDisableVertexAttribArray(0);
+}
+
 void Engine::drawWorldObjects()
 {
     for (auto &w : wobjs) {
@@ -431,6 +459,11 @@ void Engine::drawEnemies()
     for (auto &e : enemies) {
         drawObject(*e);
     }
+}
+
+void Engine::drawBoss()
+{
+    drawObject(*boss);
 }
 
 void Engine::update()
@@ -481,8 +514,16 @@ void Engine::bossLvl()
 {
     // enter boss lvl
 
-    // new state
-    gameState.currentState = GameState::ST_END;
+    glm::vec3 eye = slide.getEye();
+    glm::vec3 center = slide.getCenter();
+
+    if(eye.x > player->getPos().x - 10)
+    {
+        slide.setEye(eye + glm::vec3(-0.1, 0.0, -0.1));
+        slide.setCenter(player->getPos());
+    }
+
+    update();
 }
 
 void Engine::endGame()
@@ -502,6 +543,8 @@ void Engine::mainLoop() {
         case GameState::ST_STARTING:
             std::cout << "gameState: " << gameState.currentState << std::endl;
     };
+
+    window.setFramerateLimit(60);
 
     while (window.isOpen())
     {
@@ -643,12 +686,28 @@ void Engine::updateWorldObjects()
         }
     }
 
-    player->update();
+    player->update(gameState);
 
-    if(gameState.currentState != GameState::ST_STARTING)
+    if(boss->getPos().x - player->getPos().x <= Settings::startBossUpdate)
+    {
+        if(boss->isAlive())
+            boss->update();
+        else {
+            boss->start();
+            boss->startAnimation();
+        }
+    }
+
+    if(gameState.currentState == GameState::ST_PLAYING)
     {
         slide.setCenter(player->getPos());
         slide.setEye(glm::vec3(player->getPos().x + 1.0, player->getPos().y, Settings::playerStart.z + 10));
+    }
+
+    // When in range of the boss, change game state to ST_BOSS
+    if(gameState.currentState == GameState::ST_PLAYING && boss->getPos().x - player->getPos().x <= Settings::startBossStateRange)
+    {
+        gameState.currentState = GameState::ST_BOSS;
     }
 }
 
@@ -735,7 +794,7 @@ void Engine::checkCollision() {
             //glDeleteBuffers(1, &player->getElementBuffer());
             //or RAGE, UNINSTALL SCRUB
             //window.close();
-            e->destroyObject();
+            //e->destroyObject();
 
             gameState.currentState = GameState::ST_END;
         }
@@ -754,7 +813,7 @@ void Engine::checkCollision() {
                 //if so then dead
                 //std::cout << "enemy DIED" << std::endl;
 
-                e->destroyObject();
+                //e->destroyObject();
 
                 //std::vector<Enemy*> vec2;
                 //vec2.push_back(std::move(e));

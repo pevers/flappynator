@@ -24,7 +24,7 @@
 #include "enemy.h"
 #include "skybox.h"
 #include "gamestate.h";
-#include "boss";
+#include "boss.h";
 
 class Engine
 {
@@ -75,12 +75,14 @@ class Engine
         void drawTerrain();
         void drawPlayer();
         void drawEnemies();
+        void drawBoss();
         void drawSkybox();
         void drawWorldObjects();
         void drawObject(WorldObject &w);
         void drawWorldShadow();
         void drawPlayerShadow();
         void drawEnemyShadow();
+        void drawBossShadow();
 
         void update();
         void startGame();

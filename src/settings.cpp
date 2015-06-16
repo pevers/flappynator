@@ -15,7 +15,7 @@ namespace Settings
 
     float PI = M_PI;
 
-    float startCameraTurnSpeed = 1000.0;
+    float startCameraTurnSpeed = 240.0;
 
     glm::vec3 playerStart(3.0, 3.0, 2.0);
     glm::vec3 playerScale(0.20, 0.20, 0.20);
@@ -33,14 +33,16 @@ namespace Settings
     std::string enemyPath = "resources/animation/enemy/";
     int enemyNumFrames = 41;
 
-    //glm::vec3 bossStart()
+    glm::vec3 bossStart(25.0, 4.0, 2.0);
     glm::vec3 bossScale(0.5, 0.5, 0.5);
     glm::vec3 bossRotation(0.0, 0.5 * M_PI, 0.0);
     std::string bossPath = "resources/animation/boss/";
     int bossNumFrames = 1;
 
-    int numEnemies = 10;
+    int numEnemies = 1;
     float startEnemyUpdate = 15.0; // When the horizontal distance between the enemy and the player is smaller than this value, update the enemy
+    float startBossUpdate = 10.0;
+    float startBossStateRange = 4.0;
 
     glm::vec3 sunPos(-10.0, 80.0, 0.0);
     glm::vec3 sunSpot(50, 0, 50);

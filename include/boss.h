@@ -9,7 +9,9 @@ class Boss : public AnimatedObject
     private:
         glm::vec4 boundingBox;
 
+        float angle;
         float health;
+        bool alive; //TODO: Moet weg
 
     public:
         Boss(glm::vec3 bossStart,
@@ -19,6 +21,7 @@ class Boss : public AnimatedObject
 
         void start();
         void update();
+        bool isAlive(); //TODO: MOET WEG
 
         void setBoundingBox(glm::vec4 boundingBox);
         glm::vec4 getBoundingBox();
