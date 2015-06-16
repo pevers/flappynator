@@ -1,11 +1,10 @@
-#define GLEW_STATIC
-
 #ifndef WORLDOBJECT_H
 #define WORLDOBJECT_H
 
 #include <string>
 #include <vector>
 #include <iostream>
+#define GLEW_STATIC
 #include <GL/glew.h>
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
@@ -13,12 +12,17 @@
 
 #include "../src/util/tiny_obj_loader.h"
 
+enum OBJECT_STATE {
+    ALIVE = 0, DYING, DEAD, OBJECT_STATE_SIZE
+};
+
 class WorldObject
 {
     protected:
         GLuint vbo; // vertex buffer
         GLuint elementBuffer;
         GLuint normalBuffer;
+        GLuint vboTextureBuffer;
 
         glm::vec3 pos;
         glm::vec3 scale;
@@ -28,7 +32,8 @@ class WorldObject
         float heightMesh;
         float widthMesh;
 
-        bool normalsExist;
+        OBJECT_STATE state;
+
     public:
         WorldObject();
         WorldObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot);
@@ -37,6 +42,7 @@ class WorldObject
         GLuint &getVertexBuffer();
         GLuint &getElementBuffer();
         GLuint &getNormalBuffer();
+        GLuint &getTextureBuffer();
 
         void setBoundingBox(glm::vec4 boundingBox);
         glm::vec4 getBoundingBox();
@@ -46,6 +52,7 @@ class WorldObject
         virtual int getObjectSize() = 0;
         virtual void update() = 0;
         virtual void destroyObject() = 0;
+        virtual GLuint getTexture() = 0; // HACK
 
         void setPos(glm::vec3 pos);
         glm::vec3 getPos();
@@ -64,8 +71,9 @@ class WorldObject
 
         glm::mat4 getModel();
 
-        bool hasNormals();
-        void setNormalsExist(bool exist);
+        void setState(OBJECT_STATE state);
+        OBJECT_STATE getState();
+        bool isAlive();
 };
 
 #endif // WORLDOBJECT_H

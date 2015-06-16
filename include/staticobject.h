@@ -16,6 +16,7 @@ class StaticObject : public WorldObject
         virtual int getObjectSize();
         virtual void update();
         virtual void destroyObject();
+        virtual GLuint getTexture(); // HACK
     private:
         bool generateBuffers();
 

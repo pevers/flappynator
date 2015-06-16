@@ -60,6 +60,8 @@ Skybox::Skybox(const std::string& posXFileName,
     fileNames[3] = negYFileName;
     fileNames[4] = posZFileName;
     fileNames[5] = negZFileName;
+
+    clock.restart();
 }
 
 Skybox::~Skybox()
@@ -131,7 +133,7 @@ bool Skybox::loadVAO()
 glm::mat4 Skybox::getModel()
 {
     glm::mat4 model;
-    return glm::scale(model, glm::vec3(80.0, 80.0, 80.0));
+    return glm::scale(model, glm::vec3(200.0, 200.0, 200.0));
 }
 
 GLuint Skybox::getTexture()
@@ -148,6 +150,23 @@ void Skybox::bind(GLenum textureUnit)
 {
     glActiveTexture(textureUnit);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureObj);
+}
+
+void Skybox::setDarken(float darken)
+{
+    GLuint darkenID = glGetUniformLocation(shaderProgram, "darken");
+    glUniform1f(darkenID, darken);
+}
+
+void Skybox::update(float sunIntensity)
+{
+    sf::Time elapsed = clock.getElapsedTime();
+    if (elapsed.asMilliseconds() > 100.0) {
+        // update frame
+        clock.restart();
+
+        setDarken(0.65 - sunIntensity);
+    }
 }
 
 GLuint Skybox::getShaderProgram()

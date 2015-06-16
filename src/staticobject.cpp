@@ -36,8 +36,6 @@ bool StaticObject::generateBuffers()
         glGenBuffers(1, &normalBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
         glBufferData(GL_ARRAY_BUFFER, shapes[0].mesh.normals.size() * sizeof(float), &shapes[0].mesh.normals[0], GL_STATIC_DRAW);
-
-        setNormalsExist(true);
     } else {
         std::cout << "warning, no normals for object " << objPath << std::endl;
     }
@@ -130,5 +128,10 @@ void StaticObject::destroyObject()
 void StaticObject::update()
 {
     // no update
+}
+
+GLuint StaticObject::getTexture()
+{
+    return -1;  // nope, HACK
 }
 

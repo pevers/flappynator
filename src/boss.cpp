@@ -1,7 +1,7 @@
 #include "boss.h"
 
 Boss::Boss(glm::vec3 bossStart, glm::vec3 bossScale, glm::vec3 bossRotation) :
-    AnimatedObject(bossStart, bossScale, bossRotation, true, 1, Settings::bossPath, Settings::bossNumFrames), boundingBox(0.0,0.0,0.0,0.0)
+    AnimatedObject(bossStart, bossScale, bossRotation, true, 0, Settings::bossPath, Settings::bossNumFrames), boundingBox(0.0,0.0,0.0,0.0)
 {
 
 }
