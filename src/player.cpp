@@ -1,8 +1,8 @@
 #include "player.h"
 
 Player::Player() :
-    AnimatedObject(Settings::playerStart, Settings::playerScale, Settings::playerRotation, false, 14, Settings::playerPath, Settings::playerNumFrames),
-                   acc(Settings::playerAcc), speed(Settings::playerSpeed), boundingBox(0.0,0.0,0.0,0.0)
+    AnimatedObject(Settings::playerStart, Settings::playerScale, Settings::playerRotation, false, 14, Settings::playerNumFrames, Settings::playerPath),
+                   acc(Settings::playerAcc), speed(Settings::playerSpeed)
 {
     //ctor
 }
@@ -20,16 +20,6 @@ void Player::setSpeed(glm::vec3 speed)
 glm::vec3 Player::getSpeed()
 {
     return speed;
-}
-
-void Player::setBoundingBox(glm::vec4 boundingBox)
-{
-    this->boundingBox = boundingBox;
-}
-
-glm::vec4 Player::getBoundingBox()
-{
-    return boundingBox;
 }
 
 void Player::addAcc(glm::vec3 acc)

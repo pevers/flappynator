@@ -13,7 +13,7 @@
 #include "../src/util/tiny_obj_loader.h"
 
 enum OBJECT_STATE {
-    ALIVE = 0, DYING, DEAD
+    ALIVE = 0, DYING, DEAD, OBJECT_STATE_SIZE
 };
 
 class WorldObject
@@ -31,7 +31,6 @@ class WorldObject
         float heightMesh;
         float widthMesh;
 
-        bool normalsExist;
         OBJECT_STATE state;
 
     public:
@@ -68,9 +67,6 @@ class WorldObject
         glm::vec3 getRotation();
 
         glm::mat4 getModel();
-
-        bool hasNormals();
-        void setNormalsExist(bool exist);
 
         void setState(OBJECT_STATE state);
         OBJECT_STATE getState();

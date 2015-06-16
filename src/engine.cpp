@@ -334,7 +334,7 @@ void Engine::drawObject(WorldObject &w)
 //    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
     // send normal buffer
-    if (w.hasNormals()) {
+    if (w.getNormalBuffer() >= 0) {
         glEnableVertexAttribArray(2);
         glBindBuffer(GL_ARRAY_BUFFER, w.getNormalBuffer());
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
@@ -514,11 +514,11 @@ void Engine::updateWorldObjects()
     player->update();
 
     for (auto &e : enemies) {
-
         // update the enemy only when the player is in range
         if(e->getPos().x - player->getPos().x < Settings::startEnemyUpdate) {
-            if(e->isAlive())
+            if(e->isAlive()) {
                 e->update();
+            }
             else
                 e->start(player->getPos());
         }

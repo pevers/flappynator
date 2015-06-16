@@ -1,7 +1,7 @@
 #include "enemy.h"
 
 Enemy::Enemy(glm::vec3 enemyStart, glm::vec3 enemyScale, glm::vec3 enemyRotation, glm::vec3 enemyAcc, glm::vec3 enemySpeed, std::string enemyModel) :
-    AnimatedObject(enemyStart, enemyScale, enemyRotation, true, 0, Settings::enemyPath, Settings::enemyNumFrames), boundingBox(0.0,0.0,0.0,0.0)
+    AnimatedObject(enemyStart, enemyScale, enemyRotation, true, 0, Settings::enemyNumFrames, Settings::enemyPath), boundingBox(0.0,0.0,0.0,0.0)
 {
     this->acc = enemyAcc;
     this->speed = enemySpeed;
