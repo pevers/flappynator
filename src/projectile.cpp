@@ -106,7 +106,7 @@ int Projectile::getObjectSize()
 
 bool Projectile::load()
 {
-    texCoords.push_back(glm::vec2(0.0, 0.0));
+    /*texCoords.push_back(glm::vec2(0.0, 0.0));
     texCoords.push_back(glm::vec2(1.0, 0.0));
     texCoords.push_back(glm::vec2(0.0, 1.0));
     texCoords.push_back(glm::vec2(0.0, 1.0));
@@ -133,7 +133,7 @@ bool Projectile::load()
         glGenBuffers(1, &vboTexCoords);
         glBindBuffer(GL_ARRAY_BUFFER, vboTexCoords);
         glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * texCoords.size(), &texCoords[0], GL_STATIC_DRAW);
-    }
+    }*/
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);

@@ -324,16 +324,16 @@ void Engine::drawProjectile(Projectile &p){
 
 
     // texture buffer
-    glEnableVertexAttribArray(1);
+    /*glEnableVertexAttribArray(1);
     glBindBuffer(GL_ARRAY_BUFFER, p.getTextureBuffer());
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, p.getElementBuffer());
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, p.getElementBuffer());*/
 
     // override texture colors
-    GLuint uniColor = glGetUniformLocation(shaderProgram, "overrideColor");
-    glUniform3f(uniColor, 1.0f, 0.3f, 0.3f);
+    //GLuint uniColor = glGetUniformLocation(shaderProgram, "overrideColor");
+    //glUniform3f(uniColor, 1.0f, 0.3f, 0.3f);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 12*3);
 
