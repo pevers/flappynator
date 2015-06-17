@@ -4,7 +4,7 @@ Player::Player() :
     AnimatedObject(Settings::playerStart, Settings::playerScale, Settings::playerRotation, false, 14, Settings::playerPath, Settings::playerNumFrames),
                    acc(Settings::playerAcc), speed(Settings::playerSpeed)
 {
-    //ctor
+   addAnimation(DYING, false, 0, 45, "resources/animation/player/explode/");
 }
 
 Player::~Player()

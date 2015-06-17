@@ -593,19 +593,19 @@ void Engine::mainLoop() {
         switch(gameState.currentState)
         {
             case GameState::ST_STARTING:
-                std::cout << "STARTING" << std::endl;
+                //std::cout << "STARTING" << std::endl;
                 startGame();
                 break;
             case GameState::ST_PLAYING:
-                std::cout << "PLAYING" << std::endl;
+                //std::cout << "PLAYING" << std::endl;
                 playGame();
                 break;
             case GameState::ST_BOSS:
-                std::cout << "BOSS" << std::endl;
+                //std::cout << "BOSS" << std::endl;
                 bossLvl();
                 break;
             case GameState::ST_END:
-                std::cout << "GAME ENDED" << std::endl;
+                //std::cout << "GAME ENDED" << std::endl;
                 endGame();
                 break;
         }
@@ -648,7 +648,8 @@ void Engine::handleKeyEvent(sf::Event event)
         player->addAcc(glm::vec3(0.0f, 1.0f / 200.0, 0.0f));
         player->startAnimation();
     } else if (event.key.code == sf::Keyboard::F) {
-        player->destroyObject();
+        player->setAnimationState(DYING);
+        player->startAnimation();
     } else if (event.key.code == sf::Keyboard::Z) {
         player->changeTexture();
     }

@@ -35,7 +35,7 @@ bool AnimatedObject::addAnimation(OBJECT_STATE state, bool loop, unsigned int st
 
 void AnimatedObject::setAnimationState(OBJECT_STATE state)
 {
-    if (state >= OBJECT_STATE_SIZE || state < 0) {
+    if (state >= OBJECT_STATE_SIZE || state < 0 || animations[state] == nullptr) {
         std::cerr << "warning, could not set animation state to " << state << ", doesn't exist" << std::endl;
     } else activeAnimation = state;
 }
