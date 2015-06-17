@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 #include <SFML/Window.hpp>
 #include <SOIL/SOIL.h>
+#include <glm/glm.hpp>
 
 #include <vector>
 #include <iostream>
@@ -34,6 +35,7 @@ class Animation
         bool load();
 
         GLuint getTexture();
+        void changeTexture();
 
         bool hasNormals();
         bool hasTexture();
@@ -43,7 +45,7 @@ class Animation
 
         std::vector<std::vector<tinyobj::shape_t>> frames;
         std::vector<std::vector<tinyobj::material_t>> materials;
-        GLuint texture;
+        GLuint textures[2];
 
         sf::Clock clock;
 
@@ -53,6 +55,8 @@ class Animation
 
         float frameRate;
         unsigned int frame;
+
+        int selected_texture;
 
         std::string basePath;
 
