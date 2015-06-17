@@ -1,7 +1,7 @@
 #ifndef ANIMATEDOBJECT_H
 #define ANIMATEDOBJECT_H
 
-#include <map>
+#include <memory>
 #include <SFML/Window.hpp>
 
 #include "worldobject.h"
@@ -25,7 +25,7 @@ class AnimatedObject : public WorldObject
         void startAnimation();
         void changeTexture();
     private:
-        Animation *animations[OBJECT_STATE_SIZE];
+        std::unique_ptr<Animation> animations[OBJECT_STATE_SIZE];
         OBJECT_STATE activeAnimation;
 };
 

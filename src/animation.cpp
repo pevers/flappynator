@@ -1,7 +1,7 @@
 #include "animation.h"
 
 Animation::Animation(bool loop, unsigned int startFrame, unsigned int numFrames, std::string basePath) :
-    loop(loop), startFrame(startFrame), numFrames(numFrames), basePath(basePath), frameRate(40), m_hasNormals(false), m_hasTexture(false)
+    loop(loop), startFrame(startFrame), numFrames(numFrames), basePath(basePath), frameRate(40)
 {
     if (!load()) {
         std::cerr << "could not load animation " << basePath << std::endl;
@@ -13,8 +13,7 @@ Animation::Animation(bool loop, unsigned int startFrame, unsigned int numFrames,
 
 Animation::~Animation()
 {
-    std::cout << "watch out, delete called " << std::endl;
-    //glDeleteTextures(1, textures);
+    glDeleteTextures(2, textures);
 }
 
 void Animation::getDistances(float &width, float &height) {
@@ -189,12 +188,3 @@ void Animation::changeTexture()
     selected_texture = (selected_texture + 1)%2;
 }
 
-bool Animation::hasNormals()
-{
-    return m_hasNormals;
-}
-
-bool Animation::hasTexture()
-{
-    return m_hasTexture;
-}

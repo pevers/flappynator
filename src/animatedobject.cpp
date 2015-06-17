@@ -29,8 +29,7 @@ bool AnimatedObject::load()
 
 bool AnimatedObject::addAnimation(OBJECT_STATE state, bool loop, unsigned int startFrame, unsigned int frameSize, std::string basePath)
 {
-    // TODO: MEMORY LEAK MEMORY LEAK
-    animations[state] = new Animation(loop, startFrame, frameSize, basePath);
+    animations[state] = std::move(std::unique_ptr<Animation>(new Animation(loop, startFrame, frameSize, basePath)));
     return true;
 }
 
