@@ -21,9 +21,11 @@ class AnimatedObject : public WorldObject
         virtual GLuint getTexture();
 
         bool addAnimation(OBJECT_STATE state, bool loop, unsigned int startFrame, unsigned int frameSize, std::string basePath);
+        void setState(OBJECT_STATE state);
         void setAnimationState(OBJECT_STATE state);
         void startAnimation();
         void changeTexture();
+        bool animationFinished();
     private:
         std::unique_ptr<Animation> animations[OBJECT_STATE_SIZE];
         OBJECT_STATE activeAnimation;

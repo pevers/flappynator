@@ -25,7 +25,6 @@ namespace Settings
     glm::vec3 enemyAcc(0.0, - 1.0 / 2000, 0.0);
     glm::vec3 enemyScale(0.25, 0.25, 0.25);
     glm::vec3 enemyRotation(0.0, 0.5 * M_PI, 0.0);
-    std::string enemyModel1 = "resources/monkey.obj";
     std::string enemyPath = "resources/animation/enemy/";
     int enemyNumFrames = 41;
 
@@ -33,7 +32,7 @@ namespace Settings
     glm::vec3 bossScale(0.5, 0.5, 0.5);
     glm::vec3 bossRotation(0.0, 0.5 * M_PI, 0.0);
     std::string bossPath = "resources/animation/boss/";
-    int bossNumFrames = 1;
+    int bossNumFrames = 20;
 
     int numEnemies = 2;
     float startEnemyUpdate = 15.0; // When the horizontal distance between the enemy and the player is smaller than this value, update the enemy

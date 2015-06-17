@@ -70,7 +70,7 @@ void main() {
 		visibility -= 0.20*(1.0-texture(shadowMap, vec3(shadowCoord.xy + poissonDisk[index] / 900.0,  (shadowCoord.z - bias) / shadowCoord.w)));
 	}
 
-	outColor = visibility * vec4(color, 1.0) * vec4(sunLight.color * (diffuseIntensity + sunLight.ambientIntensity + spec), 1.0); //vec4(sunLight.color*(sunLight.ambientIntensity+diffuseIntensity+specularIntensity), 1.0);
+	outColor = visibility * vec4(color, 1.0) * vec4(sunLight.color * (diffuseIntensity + sunLight.ambientIntensity + spec), 1.0);
 	if (!isTerrain) {
 		outColor = texture(tex, UV) * outColor;
 	}

@@ -88,7 +88,7 @@ bool Engine::init()
     // load terrain
     terrain.reset(new SmoothTerrain());
 
-    terrain->generateTerrain(100, 6);
+    terrain->generateTerrain(100, 8);
 
     // load test object
     player = std::unique_ptr<Player>(new Player());
@@ -109,8 +109,6 @@ bool Engine::initEnemies() {
     glm::vec3 enemyScale = Settings::enemyScale;
     glm::vec3 enemyRotation = Settings::enemyRotation;
 
-    std::string enemyModel = Settings::enemyModel1;
-
     srand(time(NULL));
     for(int i = 0; i < Settings::numEnemies; i++) {
         glm::vec3 enemyStart = player->getPos() + glm::vec3(15 + 10.0*i, 0.0, 0.0);
@@ -119,7 +117,7 @@ bool Engine::initEnemies() {
         float speedX = (((rand()%200) / 100.0) + 2.0) * -1.0; // Value between 2.0 and 4.0
         glm::vec3 enemySpeed = Settings::playerSpeed * glm::vec3(speedX, 0.0, 0.0);
 
-        std::unique_ptr<Enemy> enemy = std::unique_ptr<Enemy>(new Enemy(enemyStart, enemyScale, enemyRotation, enemyAcc, enemySpeed, enemyModel));
+        std::unique_ptr<Enemy> enemy = std::unique_ptr<Enemy>(new Enemy(enemyStart, enemyScale, enemyRotation, enemyAcc, enemySpeed));
         enemy->setHealth(1);
 
         enemies.push_back(std::move(enemy));
@@ -261,7 +259,9 @@ void Engine::drawShadows()
 
     glCullFace(GL_FRONT);
 
-    drawPlayerShadow();
+    if (player->getState() != DEAD)
+        drawPlayerShadow();
+
     drawEnemyShadow();
     drawBossShadow();
     drawWorldShadow();
@@ -465,7 +465,8 @@ void Engine::drawWorldObjects()
 
 void Engine::drawPlayer()
 {
-    drawObject(*player);
+    if (player->getState() != DEAD)
+        drawObject(*player);
 }
 
 void Engine::drawEnemies()
@@ -485,11 +486,11 @@ void Engine::update()
     //set bounding box
     boundingBox();
 
-    //check collision
-    checkCollision();
-
     // draw single frame
     drawFrame();
+
+    //check collision
+    checkCollision();
 
     // swap buffers
     window.display();
@@ -645,8 +646,10 @@ void Engine::handleKeyEvent(sf::Event event)
     } else if (event.key.code == sf::Keyboard::D) {
         eye.x++;
     } else if (event.key.code == sf::Keyboard::Space) {
-        player->addAcc(glm::vec3(0.0f, 1.0f / 200.0, 0.0f));
-        player->startAnimation();
+        if (player->getState() == ALIVE) {
+            player->addAcc(glm::vec3(0.0f, 1.0f / 200.0, 0.0f));
+            player->startAnimation();
+        }
     } else if (event.key.code == sf::Keyboard::F) {
         player->setAnimationState(DYING);
         player->startAnimation();
@@ -719,8 +722,8 @@ void Engine::updateWorldObjects()
         //Settings::sunPos = glm::vec3(player->getPos().x, 80.0, player->getPos().z + 20);
     }
 
-	glm::vec3 center = glm::vec3(player->getPos().x + 2.0, player->getPos().y, player->getPos().z);
-    glm::vec3 eye = glm::vec3(player->getPos().x + 2.0, player->getPos().y, Settings::playerStart.z + 10);
+	glm::vec3 center = glm::vec3(player->getPos().x + 3.0, player->getPos().y, player->getPos().z);
+    glm::vec3 eye = glm::vec3(player->getPos().x + 3.0, player->getPos().y, Settings::playerStart.z + 10);
     center.y = std::max(1.5f, center.y);
     eye.y = std::max(1.5f, eye.y);
     slide.setCenter(center);
@@ -770,6 +773,11 @@ void Engine::checkCollision() {
     glm::vec4 boundingBoxBird = player->getBoundingBox();
     int counter = 0;
 
+    if (player->getState() == DEAD) {
+
+        gameState.currentState = GameState::ST_END;
+    }
+
     //check for world object collision with the bird
     for (auto &e : enemies) {
 
@@ -780,7 +788,9 @@ void Engine::checkCollision() {
             boundingBoxBird.y < boundingBoxWorld.y + boundingBoxWorld.w &&
             boundingBoxBird.y + boundingBoxBird.w > boundingBoxWorld.y)
         {
-            gameState.currentState = GameState::ST_END;
+            //player->setState(DYING);
+            //e->setState(DYING);
+            //gameState.currentState = GameState::ST_END;
         }
 
         // Check collision with terrain
@@ -814,7 +824,9 @@ void Engine::checkCollision() {
         int counter = floor(startBird*4+2);
         //check if the y-value of the mountain at the certain x is higher or equal to the y-value of the bird
         if(mountain[counter] >= player->getBoundingBox().y) {
-            gameState.currentState = GameState::ST_END;
+            //gameState.currentState = GameState::ST_END;
+            player->setState(DYING);
+
         }
     }
 }

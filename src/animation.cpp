@@ -188,3 +188,8 @@ void Animation::changeTexture()
     selected_texture = (selected_texture + 1)%2;
 }
 
+bool Animation::animationFinished()
+{
+    return frame == startFrame;
+}
+

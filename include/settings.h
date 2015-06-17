@@ -35,7 +35,6 @@ namespace Settings
     extern glm::vec3 enemyAcc;
     extern glm::vec3 enemyScale;
     extern glm::vec3 enemyRotation;
-    extern std::string enemyModel1;
     extern std::string enemyPath;
     extern int enemyNumFrames;
 

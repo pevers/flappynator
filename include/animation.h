@@ -37,6 +37,8 @@ class Animation
         GLuint getTexture();
         void changeTexture();
 
+        bool animationFinished();
+
     private:
         bool m_hasNormals, m_hasTexture;
 

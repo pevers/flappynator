@@ -33,6 +33,15 @@ bool AnimatedObject::addAnimation(OBJECT_STATE state, bool loop, unsigned int st
     return true;
 }
 
+void AnimatedObject::setState(OBJECT_STATE state)
+{
+    if (this->state != state) {
+        WorldObject::setState(state);
+        setAnimationState(state);
+        startAnimation();
+    }
+}
+
 void AnimatedObject::setAnimationState(OBJECT_STATE state)
 {
     if (state >= OBJECT_STATE_SIZE || state < 0 || animations[state] == nullptr) {
@@ -75,3 +84,9 @@ void AnimatedObject::update()
 {
     animations[activeAnimation]->update(vbo, elementBuffer, normalBuffer, vboTextureBuffer);   // we use activeAnimation as state, could be 1-1 with WorldObject::state
 }
+
+bool AnimatedObject::animationFinished()
+{
+    return animations[activeAnimation]->animationFinished();
+}
+
