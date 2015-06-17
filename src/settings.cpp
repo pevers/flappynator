@@ -13,8 +13,6 @@ namespace Settings
     glm::vec3 eye(10.0, 3.0, 2.0);
     //glm::vec3 eye(0.0, 2.0, 25.0);
 
-    float PI = M_PI;
-
     float startCameraTurnSpeed = 240.0;
 
     //glm::vec3 playerStart(3.0, 3.0, 2.0);
@@ -29,7 +27,6 @@ namespace Settings
     glm::vec3 enemyAcc(0.0, - 1.0 / 2000, 0.0);
     glm::vec3 enemyScale(0.25, 0.25, 0.25);
     glm::vec3 enemyRotation(0.0, 0.5 * M_PI, 0.0);
-    std::string enemyModel1 = "resources/monkey.obj";
     std::string enemyPath = "resources/animation/enemy/";
     int enemyNumFrames = 41;
 
@@ -37,7 +34,7 @@ namespace Settings
     glm::vec3 bossScale(0.5, 0.5, 0.5);
     glm::vec3 bossRotation(0.0, 0.5 * M_PI, 0.0);
     std::string bossPath = "resources/animation/boss/";
-    int bossNumFrames = 1;
+    int bossNumFrames = 20;
 
     int numEnemies = 5;
     float startEnemyUpdate = 15.0; // When the horizontal distance between the enemy and the player is smaller than this value, update the enemy
@@ -47,6 +44,7 @@ namespace Settings
     //glm::vec3 sunPos(-10.0, 80.0, 0.0);
     glm::vec3 sunPos(-10.0, 80.0, 60.0);
     glm::vec3 sunSpot(50, 0, 50);
+    float ambienIntensity = 0.7;
 
     sf::Time ups = sf::seconds(1.f / 60.f);
 }

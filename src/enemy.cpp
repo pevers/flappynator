@@ -1,11 +1,13 @@
 #include "enemy.h"
 
-Enemy::Enemy(glm::vec3 enemyStart, glm::vec3 enemyScale, glm::vec3 enemyRotation, glm::vec3 enemyAcc, glm::vec3 enemySpeed, std::string enemyModel) :
+Enemy::Enemy(glm::vec3 enemyStart, glm::vec3 enemyScale, glm::vec3 enemyRotation, glm::vec3 enemyAcc, glm::vec3 enemySpeed) :
     AnimatedObject(enemyStart, enemyScale, enemyRotation, true, 0, Settings::enemyPath, Settings::enemyNumFrames), boundingBox(0.0,0.0,0.0,0.0)
 {
     this->acc = enemyAcc;
     this->speed = enemySpeed;
     this->startPos = enemyStart;
+
+    addAnimation(DYING, false, 0, 25, "resources/animation/enemy/explode/");
 }
 
 Enemy::~Enemy()
@@ -102,6 +104,8 @@ void Enemy::start(glm::vec3 playerPos)
  */
 void Enemy::update()
 {
+    AnimatedObject::update();
+
     if(isAlive())
     {
         //angle += 0.02;
