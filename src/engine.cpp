@@ -20,7 +20,7 @@ bool Engine::init()
     window.create(sf::VideoMode(Settings::screenWidth, Settings::screenHeight, Settings::context.depthBits), Settings::windowTitle.c_str(), sf::Style::Close, Settings::context);
 
     // Initialize the menu of the game
-    //initMenu();
+    initMenu();
 
     // Initialize GLEW
     glewExperimental = GL_TRUE;
@@ -528,7 +528,8 @@ void Engine::drawPlayer()
 void Engine::drawEnemies()
 {
     for (auto &e : enemies) {
-        drawObject(*e);
+        if(e != NULL)
+            drawObject(*e);
     }
 }
 
@@ -647,19 +648,19 @@ void Engine::mainLoop() {
         switch(gameState.currentState)
         {
             case GameState::ST_STARTING:
-                //std::cout << "STARTING" << std::endl;
+                std::cout << "STARTING" << std::endl;
                 startGame();
                 break;
             case GameState::ST_PLAYING:
-                //std::cout << "PLAYING" << std::endl;
+                std::cout << "PLAYING" << std::endl;
                 playGame();
                 break;
             case GameState::ST_BOSS:
-                //std::cout << "BOSS" << std::endl;
+                std::cout << "BOSS" << std::endl;
                 bossLvl();
                 break;
             case GameState::ST_END:
-                //std::cout << "GAME ENDED" << std::endl;
+                std::cout << "GAME ENDED" << std::endl;
                 endGame();
                 break;
         }
@@ -739,7 +740,7 @@ void Engine::updateWorldObjects()
 
     for (auto &e : enemies) {
         // update the enemy only when the player is in range
-        if(e->getPos().x - player->getPos().x < Settings::startEnemyUpdate) {
+        if(e != NULL && e->getPos().x - player->getPos().x < Settings::startEnemyUpdate) {
             if(e->isAlive()) {
                 e->update();
             }
@@ -795,9 +796,11 @@ void Engine::boundingBox() {
     //create/set bounding box for the world objects, such as the enemies
 
     for (auto &e : enemies) {
-        glm::vec3 pos = e->getPos();
-        glm::vec4 boundingBox = glm::vec4(pos.x - (0.5*e->getWidth()*Settings::enemyScale.z), pos.y - (0.5*e->getHeight()*Settings::enemyScale.y), (e->getWidth()*Settings::enemyScale.z), (e->getHeight()*Settings::enemyScale.y));
-        e->setBoundingBox(boundingBox);
+        if(e != NULL) {
+            glm::vec3 pos = e->getPos();
+            glm::vec4 boundingBox = glm::vec4(pos.x - (0.5*e->getWidth()*Settings::enemyScale.z), pos.y - (0.5*e->getHeight()*Settings::enemyScale.y), (e->getWidth()*Settings::enemyScale.z), (e->getHeight()*Settings::enemyScale.y));
+            e->setBoundingBox(boundingBox);
+        }
     }
 
     //create/set the bounding box for the bird
@@ -842,17 +845,38 @@ void Engine::checkCollision() {
 
     //check for world object collision with the bird
     for (auto &e : enemies) {
+        if(e != NULL) {
 
-        // Check collision with bird
-        glm::vec4 boundingBoxWorld = e->getBoundingBox();
-        if (boundingBoxBird.x < boundingBoxWorld.x + boundingBoxWorld.z &&
-            boundingBoxBird.x + boundingBoxBird.z > boundingBoxWorld.x &&
-            boundingBoxBird.y < boundingBoxWorld.y + boundingBoxWorld.w &&
-            boundingBoxBird.y + boundingBoxBird.w > boundingBoxWorld.y)
-        {
-            player->setState(DYING);
-            e->setState(DYING);
-            //gameState.currentState = GameState::ST_END;
+            // Check collision with bird
+            glm::vec4 boundingBoxWorld = e->getBoundingBox();
+            if (boundingBoxBird.x < boundingBoxWorld.x + boundingBoxWorld.z &&
+                boundingBoxBird.x + boundingBoxBird.z > boundingBoxWorld.x &&
+                boundingBoxBird.y < boundingBoxWorld.y + boundingBoxWorld.w &&
+                boundingBoxBird.y + boundingBoxBird.w > boundingBoxWorld.y)
+            {
+                player->setState(DYING);
+                e->setState(DYING);
+
+
+                //std::vector<Enemy*> deleteEnemy;
+                //deleteEnemy.push_back(*e);
+                //removeObjectFromVector(enemies, deleteEnemy);
+                std::cout << "starting reset " << std::endl;
+                std::cout << enemies.size() << std::endl;
+                if(enemies[0] == NULL)
+                    std::cout << "NULL" << std::endl;
+                else
+                    std::cout << "NOT NULL" << std::endl;
+                //enemies[0].reset();
+                std::cout << "end reset " << std::endl;
+                std::cout << enemies.size() << std::endl;
+                if(enemies[0] == NULL)
+                    std::cout << "NULL" << std::endl;
+                else
+                    std::cout << "NOT NULL" << std::endl;
+
+                gameState.currentState = GameState::ST_END;
+            }
         }
 
         // Check collision with terrain
