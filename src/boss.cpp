@@ -26,6 +26,16 @@ glm::vec4 Boss::getBoundingBox()
     return boundingBox;
 }
 
+void Boss::setHealth(float health)
+{
+    this->health = health;
+}
+
+float Boss::getHealth()
+{
+    return health;
+}
+
 void Boss::start()
 {
     angle = 0.0;
@@ -34,8 +44,15 @@ void Boss::start()
 
 void Boss::update()
 {
-    AnimatedObject::update();
+    if (state == DYING && animationFinished()) {
+        setState(DEAD);
+    }
 
-    angle += 0.04;
-    pos.y = (float)cos(angle)*2.5 + Settings::bossStart.y;
+    if(state != DEAD)
+    {
+        AnimatedObject::update();
+
+        angle += 0.04;
+        pos.y = (float)cos(angle)*2.5 + Settings::bossStart.y;
+    }
 }

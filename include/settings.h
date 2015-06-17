@@ -49,6 +49,8 @@ namespace Settings
     extern float startBossUpdate;
     extern float startBossStateRange;
 
+    extern glm::vec3 projectileSpeed;
+
     extern glm::vec3 sunPos;
     extern glm::vec3 sunSpot;
     extern float ambienIntensity;

@@ -28,6 +28,7 @@
 #include "gamestate.h";
 #include "boss.h";
 #include "sun.h"
+#include "projectile.h"
 
 class Engine
 {
@@ -55,14 +56,16 @@ class Engine
         std::unique_ptr<Player> player;
         std::vector<std::unique_ptr<WorldObject>> wobjs;
         std::vector<std::unique_ptr<Enemy>> enemies;
+
         std::unique_ptr<Boss> boss;
+
+        std::vector<std::unique_ptr<Projectile>> projectiles;
+        std::unique_ptr<Projectile> projectile;
 
         std::unique_ptr<Skybox> skybox;
 
-
         void cleanWorldObjectBuffers();
         void draw();
-        void removeObjectFromVector(std::vector<std::unique_ptr<Enemy>> vec1, std::vector<Enemy*> vec2);
 
         GameState gameState;
     public:
@@ -83,6 +86,8 @@ class Engine
         void drawPlayer();
         void drawEnemies();
         void drawBoss();
+        void drawProjectiles();
+        void drawProjectile(Projectile &p);
         void drawSkybox();
         void drawWorldObjects();
         void drawObject(WorldObject &w);

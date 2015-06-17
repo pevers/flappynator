@@ -25,6 +25,9 @@ class Boss : public AnimatedObject
 
         void setBoundingBox(glm::vec4 boundingBox);
         glm::vec4 getBoundingBox();
+
+        void setHealth(float hp);
+        float getHealth();
 };
 
 #endif // BOSS_H_INCLUDED
