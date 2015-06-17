@@ -1,7 +1,7 @@
 #include "player.h"
 
 Player::Player() :
-    AnimatedObject(Settings::playerStart, Settings::playerScale, Settings::playerRotation, false, 14, Settings::playerNumFrames, Settings::playerPath),
+    AnimatedObject(Settings::playerStart, Settings::playerScale, Settings::playerRotation, false, 14, Settings::playerPath, Settings::playerNumFrames),
                    acc(Settings::playerAcc), speed(Settings::playerSpeed)
 {
     //ctor
@@ -36,7 +36,7 @@ glm::vec3 Player::getAcc()
 /**
  * Update player position, speed and rotation.
  */
-void Player::update()
+void Player::update(GameState gameState)
 {
     // update animation
     AnimatedObject::update();
@@ -47,7 +47,15 @@ void Player::update()
         acc.y = Settings::playerAcc.y;
 
     speed.y += acc.y;
-    pos += speed;
+
+    // Put this here for now, should be done in the engine..
+    if(gameState.currentState == GameState::ST_BOSS)
+    {
+        pos.y += speed.y;
+        pos.z += speed.z;
+    }
+    else
+        pos += speed;
 
     if (speed.y > 0) {
         rotation.z = -acos(glm::dot(glm::normalize(speed), glm::normalize(glm::vec3(1.0, 0.0, 0.0))));

@@ -20,6 +20,7 @@ class Enemy : public AnimatedObject
 
         void start(glm::vec3 playerPos);
         void update();
+        void destroyObject();
 
         void setSpeed(glm::vec3 speed);
         glm::vec3 getSpeed();

@@ -1,6 +1,6 @@
 #include "animatedobject.h"
 
-AnimatedObject::AnimatedObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot, bool loop, unsigned int startFrame, unsigned int frameSize, std::string basePath) :
+AnimatedObject::AnimatedObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot, bool loop, unsigned int startFrame, std::string basePath, unsigned int frameSize) :
     WorldObject(start, scl, rot), activeAnimation(ALIVE)
 {
     glGenBuffers(1, &vbo);
