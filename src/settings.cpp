@@ -12,8 +12,6 @@ namespace Settings
     glm::vec3 eye(-10.0, 3.0, 2.0);
     //glm::vec3 eye(0.0, 2.0, 25.0);
 
-    float PI = M_PI;
-
     float startCameraTurnSpeed = 240.0;
 
     glm::vec3 playerStart(3.0, 3.0, 2.0);
@@ -45,6 +43,7 @@ namespace Settings
     //glm::vec3 sunPos(-10.0, 80.0, 0.0);
     glm::vec3 sunPos(-10.0, 80.0, 60.0);
     glm::vec3 sunSpot(50, 0, 50);
+    float ambienIntensity = 0.7;
 
     sf::Time ups = sf::seconds(1.f / 60.f);
 }

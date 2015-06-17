@@ -88,7 +88,7 @@ bool Engine::init()
     // load terrain
     terrain.reset(new SmoothTerrain());
 
-    terrain->generateTerrain(100, 10);
+    terrain->generateTerrain(100, 6);
 
     // load test object
     player = std::unique_ptr<Player>(new Player());
@@ -167,7 +167,7 @@ bool Engine::initShadowMap() {
 
 bool Engine::initSun()
 {
-    sun.reset(new Sun(glm::vec3(1.0, 1.0, 1.0), Settings::sunPos, Settings::sunSpot, 0.5));
+    sun.reset(new Sun(glm::vec3(1.0, 1.0, 1.0), Settings::sunPos, Settings::sunSpot, Settings::ambienIntensity));
     return resetSun();
 }
 
@@ -176,7 +176,7 @@ bool Engine::resetSun()
     GLuint color = glGetUniformLocation(shaderProgram, "sunLight.color");
     glUniform3f(color, sun->getColor().x, sun->getColor().y, sun->getColor().z);
 
-    GLuint intensity = glGetUniformLocation(shaderProgram, "ambientIntensity");
+    GLuint intensity = glGetUniformLocation(shaderProgram, "sunLight.ambientIntensity");
     glUniform1f(intensity, sun->getIntensity());
 
     GLuint direction = glGetUniformLocation(shaderProgram, "sunLight.direction");

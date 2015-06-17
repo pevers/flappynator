@@ -21,7 +21,6 @@ namespace Settings
 
     extern glm::vec3 eye;
 
-    extern float PI;
     extern float startCameraTurnSpeed;
 
     extern glm::vec3 playerStart;
@@ -53,7 +52,7 @@ namespace Settings
 
     extern glm::vec3 sunPos;
     extern glm::vec3 sunSpot;
-    //extern glm::vec3 sunDirection;
+    extern float ambienIntensity;
 
     extern sf::Time ups;
 }
