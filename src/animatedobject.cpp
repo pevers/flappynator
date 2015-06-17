@@ -68,6 +68,10 @@ GLuint AnimatedObject::getTexture() {
     return animations[activeAnimation]->getTexture();
 } // HACK
 
+void AnimatedObject::changeTexture() {
+    animations[activeAnimation]->changeTexture();
+}
+
 void AnimatedObject::update()
 {
     animations[activeAnimation]->update(vbo, elementBuffer, normalBuffer, vboTextureBuffer);   // we use activeAnimation as state, could be 1-1 with WorldObject::state

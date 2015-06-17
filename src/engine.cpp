@@ -333,13 +333,13 @@ void Engine::drawObject(WorldObject &w)
 
 
     // necessary but fucking ugly, TODO: FIX FIX FIX
-    if (w.getTexture() >= 0) {
+  //  if (w.getTexture() >= 0) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, w.getTexture());
         glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, w.getTextureBuffer());
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    }
+   // }
 
     // send normal buffer
     if (w.getNormalBuffer() >= 0) {
@@ -427,7 +427,7 @@ void Engine::mainLoop() {
                 case sf::Event::Closed:
                     window.close();
                 break;
-                case sf::Event::KeyPressed:
+                case sf::Event::KeyReleased:
                     handleKeyEvent(windowEvent);
                 break;
                 default:
@@ -492,7 +492,10 @@ void Engine::handleKeyEvent(sf::Event event)
         player->startAnimation();
     } else if (event.key.code == sf::Keyboard::F) {
         player->destroyObject();
+    } else if (event.key.code == sf::Keyboard::Z) {
+        player->changeTexture();
     }
+
 
     glm::vec3 pos = player->getPos();
     std::cout << "pos (" << pos.x << ", " << pos.y << ", " << pos.z << ")" << std::endl;

@@ -25,7 +25,7 @@ glm::vec3 Player::getSpeed()
 void Player::addAcc(glm::vec3 acc)
 {
     this->acc.y = acc.y;
-    this->speed.y = Settings::playerSpeed.y;
+    this->speed.y = std::min(this->speed.y+this->acc.y, 0.01f);
 }
 
 glm::vec3 Player::getAcc()

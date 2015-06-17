@@ -61,16 +61,19 @@ bool Animation::load()
     }
 
     if (frames[0][0].mesh.texcoords.size() > 0) {
-        glGenTextures(1, &texture);
+        glGenTextures(2, textures);
 
+        std::string imagePath = basePath + "texture.png";
+        std::string alt_imagePath = basePath + "alt_texture.png";
         // LOAD debug animation object
         int texWidth, texHeight;
-        unsigned char *image = SOIL_load_image("resources/Flappy_Texture.png", &texWidth, &texHeight, 0, SOIL_LOAD_RGB);
+        int alt_texWidth, alt_texHeight;
+        unsigned char *image = SOIL_load_image(imagePath.c_str(), &texWidth, &texHeight, 0, SOIL_LOAD_RGBA);
         if (!image) {
             std::cerr << "could not load image " << std::endl;
         } else {
-            glBindTexture(GL_TEXTURE_2D, texture);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+            glBindTexture(GL_TEXTURE_2D, textures[0]);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
             SOIL_free_image_data(image);
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -78,6 +81,20 @@ bool Animation::load()
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         }
+        unsigned char *image_alt = SOIL_load_image(alt_imagePath.c_str(), &alt_texWidth, &alt_texHeight, 0, SOIL_LOAD_RGBA);
+        if (!image_alt) {
+            std::cerr << "could not load alternative image " << std::endl;
+        } else {
+            glBindTexture(GL_TEXTURE_2D, textures[1]);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, alt_texWidth, alt_texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_alt);
+            SOIL_free_image_data(image_alt);
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        }
+        selected_texture = 0;
     }
 
     return true;
@@ -118,7 +135,7 @@ void Animation::bindBuffer(GLuint &vbo, GLuint &elementBuffer, GLuint &normalBuf
 
     if (frames[frame][0].mesh.texcoords.size() > 0) {
         glBindBuffer(GL_ARRAY_BUFFER, vboTextureBuffer);
-        glBufferData(GL_ARRAY_BUFFER, frames[frame][0].mesh.texcoords.size() * sizeof(float), &frames[frame][0].mesh.texcoords[0], GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, frames[frame][0].mesh.texcoords.size() * sizeof(glm::vec2), &frames[frame][0].mesh.texcoords[0], GL_STATIC_DRAW);
     }
 }
 
@@ -164,7 +181,12 @@ unsigned int Animation::getObjectSize()
 
 GLuint Animation::getTexture()
 {
-    return texture;
+    return textures[selected_texture];
+}
+
+void Animation::changeTexture()
+{
+    selected_texture = (selected_texture + 1)%2;
 }
 
 bool Animation::hasNormals()
