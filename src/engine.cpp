@@ -166,7 +166,8 @@ bool Engine::initEnemies() {
 
     srand(time(NULL));
     for(int i = 0; i < Settings::numEnemies; i++) {
-        glm::vec3 enemyStart = glm::vec3(player->getPos().x + 10.0*i + 15, mountain[Settings::bossStart.x * 4] + 4.0, player->getPos().z);
+        float enemyStartX = player->getPos().x + 8.0*i + 15;
+        glm::vec3 enemyStart = glm::vec3(enemyStartX, mountain[enemyStartX * 4] + 4.0, player->getPos().z);
         //   player->getPos() + glm::vec3(15 + 10.0*i, 0.0, 0.0);
         glm::vec3 enemyAcc = Settings::enemyAcc;
 
@@ -174,7 +175,6 @@ bool Engine::initEnemies() {
         glm::vec3 enemySpeed = Settings::playerSpeed * glm::vec3(speedX, 0.0, 0.0);
 
         std::unique_ptr<Enemy> enemy = std::unique_ptr<Enemy>(new Enemy(enemyStart, enemyScale, enemyRotation, enemyAcc, enemySpeed));
-        enemy->setHealth(1);
 
         enemies.push_back(std::move(enemy));
     }
@@ -766,7 +766,7 @@ void Engine::updateWorldObjects()
     }
 
     for (auto &p : projectiles) {
-            p->update();
+        p->update();
     }
 
 	sun->increaseIntensity(0.005);

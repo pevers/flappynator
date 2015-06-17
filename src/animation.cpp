@@ -134,7 +134,7 @@ void Animation::bindBuffer(GLuint &vbo, GLuint &elementBuffer, GLuint &normalBuf
 
     if (frames[frame][0].mesh.texcoords.size() > 0) {
         glBindBuffer(GL_ARRAY_BUFFER, vboTextureBuffer);
-        glBufferData(GL_ARRAY_BUFFER, frames[frame][0].mesh.texcoords.size() * sizeof(glm::vec2), &frames[frame][0].mesh.texcoords[0], GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, frames[frame][0].mesh.texcoords.size() * sizeof(float), &frames[frame][0].mesh.texcoords[0], GL_STATIC_DRAW);
     }
 }
 

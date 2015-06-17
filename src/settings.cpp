@@ -30,13 +30,13 @@ namespace Settings
     std::string enemyPath = "resources/animation/enemy/";
     int enemyNumFrames = 41;
 
-    glm::vec3 bossStart(80.0, 4.0, 2.0);
+    glm::vec3 bossStart(70.0, 4.0, 2.0);
     glm::vec3 bossScale(2.0, 2.0, 2.0);
     glm::vec3 bossRotation(0.0, 0.5 * M_PI, 0.0);
     std::string bossPath = "resources/animation/boss/";
     int bossNumFrames = 20;
 
-    int numEnemies = 2;
+    int numEnemies = 4;
     float startEnemyUpdate = 15.0; // When the horizontal distance between the enemy and the player is smaller than this value, update the enemy
     float startBossUpdate = 15.0;
     float startBossStateRange = 11.0;

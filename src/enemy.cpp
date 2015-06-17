@@ -25,47 +25,6 @@ glm::vec3 Enemy::getSpeed()
     return speed;
 }
 
-void Enemy::addAcc(glm::vec3 acc)
-{
-    this->acc.y = acc.y;
-    this->speed = Settings::playerSpeed;
-}
-
-glm::vec3 Enemy::getAcc()
-{
-    return acc;
-}
-
-void Enemy::setInitAcc(glm::vec3 acc)
-{
-    this->initAcc.y = acc.y;
-}
-
-glm::vec3 Enemy::getInitAcc()
-{
-    return initAcc;
-}
-
-void Enemy::setHealth(int hp)
-{
-    this->hp = hp;
-}
-
-int Enemy::getHealth()
-{
-    return hp;
-}
-
-void Enemy::setAngle(float angle)
-{
-    this->angle = angle;
-}
-
-float Enemy::getAngle()
-{
-    return angle;
-}
-
 void Enemy::setBoundingBox(glm::vec4 boundingBox)
 {
     this->boundingBox = boundingBox;
@@ -87,7 +46,7 @@ void Enemy::start(glm::vec3 playerPos)
         angle = 0.5 * M_PI;
 
         // Set a new y position for the enemy, based on the player's position
-        pos.y = playerPos.y + (rand()%180 / 100.0);
+        //pos.y = playerPos.y + (rand()%180 / 100.0);
         startPos.y = pos.y;
 
         if(startPos.y > playerPos.y)
@@ -100,7 +59,7 @@ void Enemy::start(glm::vec3 playerPos)
 }
 
 /**
- * Update enemy position, speed and rotation (TODO).
+ * Update enemy position
  */
 void Enemy::update()
 {
