@@ -19,6 +19,9 @@ bool Engine::init()
 {
     window.create(sf::VideoMode(Settings::screenWidth, Settings::screenHeight, Settings::context.depthBits), Settings::windowTitle.c_str(), sf::Style::Close, Settings::context);
 
+    // Initialize the menu of the game
+    //initMenu();
+
     // Initialize GLEW
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK) {
@@ -88,7 +91,7 @@ bool Engine::init()
     // load terrain
     terrain.reset(new SmoothTerrain());
 
-    terrain->generateTerrain(100, 6);
+    terrain->generateTerrain(100, 8);
 
     // load test object
     player = std::unique_ptr<Player>(new Player());
@@ -105,21 +108,72 @@ bool Engine::init()
     return true;
 }
 
+void Engine::initMenu(){
+    //sf::Font font;
+    //font.loadFromFile("C:\\Users\\edward\\Desktop\\ARCADECLASSIC.ttf");
+
+    bool windowOn = true;
+
+    sf::Texture texture;
+    texture.loadFromFile("resources/background.png");
+    sf::Sprite sprite;
+    sprite.setTexture(texture);
+    sprite.setTextureRect(sf::IntRect(0, 0, 1024, 764));
+    sprite.setColor(sf::Color(255, 255, 255, 200));
+    sprite.setPosition(0, 0);
+
+    sf::Texture textureName;
+    textureName.loadFromFile("resources/flappy.png");
+    sf::Sprite spriteName;
+    spriteName.setTexture(textureName);
+    spriteName.setTextureRect(sf::IntRect(0, 0, 1024, 764));
+    spriteName.setPosition(Settings::screenWidth*0.28, Settings::screenHeight*0.1);
+
+    sf::Texture textureControl;
+    textureControl.loadFromFile("resources/control.png");
+    sf::Sprite spriteControl;
+    spriteControl.setTexture(textureControl);
+    spriteControl.setTextureRect(sf::IntRect(0, 0, 1024, 764));
+    spriteControl.setPosition(Settings::screenWidth*0.33, Settings::screenHeight*0.25);
+
+    while (window.isOpen() && windowOn)
+    {
+        // poll window events
+        sf::Event windowEvent;
+        while (window.pollEvent(windowEvent))
+        {
+                if (windowEvent.type == sf::Event::Closed)
+                    window.close();
+                if ((windowEvent.type == sf::Event::KeyPressed) && (windowEvent.key.code == sf::Keyboard::Space)) {
+                    windowOn = false;
+                    std::cerr << "Initialize game" << std::endl;
+                }
+        }
+        window.draw(sprite);
+        window.draw(spriteName);
+        window.draw(spriteControl);
+        window.display();
+        window.clear();
+    }
+}
+
 bool Engine::initEnemies() {
+    std::vector<float> mountain;
+    mountain = SmoothTerrain::getMaxYValues();
+
     glm::vec3 enemyScale = Settings::enemyScale;
     glm::vec3 enemyRotation = Settings::enemyRotation;
 
-    std::string enemyModel = Settings::enemyModel1;
-
     srand(time(NULL));
     for(int i = 0; i < Settings::numEnemies; i++) {
-        glm::vec3 enemyStart = player->getPos() + glm::vec3(15 + 10.0*i, 0.0, 0.0);
+        glm::vec3 enemyStart = glm::vec3(player->getPos().x + 10.0*i + 15, mountain[Settings::bossStart.x * 4] + 4.0, player->getPos().z);
+        //   player->getPos() + glm::vec3(15 + 10.0*i, 0.0, 0.0);
         glm::vec3 enemyAcc = Settings::enemyAcc;
 
         float speedX = (((rand()%200) / 100.0) + 2.0) * -1.0; // Value between 2.0 and 4.0
         glm::vec3 enemySpeed = Settings::playerSpeed * glm::vec3(speedX, 0.0, 0.0);
 
-        std::unique_ptr<Enemy> enemy = std::unique_ptr<Enemy>(new Enemy(enemyStart, enemyScale, enemyRotation, enemyAcc, enemySpeed, enemyModel));
+        std::unique_ptr<Enemy> enemy = std::unique_ptr<Enemy>(new Enemy(enemyStart, enemyScale, enemyRotation, enemyAcc, enemySpeed));
         enemy->setHealth(1);
 
         enemies.push_back(std::move(enemy));
@@ -167,7 +221,7 @@ bool Engine::initShadowMap() {
 
 bool Engine::initSun()
 {
-    sun.reset(new Sun(glm::vec3(1.0, 1.0, 1.0), Settings::sunPos, Settings::sunSpot, 0.5));
+    sun.reset(new Sun(glm::vec3(1.0, 1.0, 1.0), Settings::sunPos, Settings::sunSpot, Settings::ambienIntensity));
     return resetSun();
 }
 
@@ -176,7 +230,7 @@ bool Engine::resetSun()
     GLuint color = glGetUniformLocation(shaderProgram, "sunLight.color");
     glUniform3f(color, sun->getColor().x, sun->getColor().y, sun->getColor().z);
 
-    GLuint intensity = glGetUniformLocation(shaderProgram, "ambientIntensity");
+    GLuint intensity = glGetUniformLocation(shaderProgram, "sunLight.ambientIntensity");
     glUniform1f(intensity, sun->getIntensity());
 
     GLuint direction = glGetUniformLocation(shaderProgram, "sunLight.direction");
@@ -269,27 +323,18 @@ void Engine::drawProjectile(Projectile &p){
     glm::mat4 depthBiasMVP = biasMatrix * projMatrix * viewMatrix * model;
     glUniformMatrix4fv(depthBias, 1, GL_FALSE, &depthBiasMVP[0][0]);
 
-    // texture buffer
-//    glEnableVertexAttribArray(1);
-//    glBindBuffer(GL_ARRAY_BUFFER, w.getTextureBuffer());
-//    glEnableVertexAttribArray(1);
-//    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+// texture buffer
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, p.getTextureBuffer());
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, p.getElementBuffer());
 
     // override texture colors
     GLuint uniColor = glGetUniformLocation(shaderProgram, "overrideColor");
     glUniform3f(uniColor, 1.0f, 0.3f, 0.3f);
-
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, p.getElementBuffer());
-    //glDrawElements(GL_TRIANGLES, p.getObjectSize(), GL_UNSIGNED_INT, (void*)0);
-
-    // texture buffer
-    //glEnableVertexAttribArray(1);
-    //glBindBuffer(GL_ARRAY_BUFFER, p.getTextureBuffer());
-    //glEnableVertexAttribArray(1);
-    //glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 12*3);
 /*
@@ -338,7 +383,9 @@ void Engine::drawShadows()
 
     glCullFace(GL_FRONT);
 
-    drawPlayerShadow();
+    if (player->getState() != DEAD)
+        drawPlayerShadow();
+
     drawEnemyShadow();
     drawBossShadow();
     drawWorldShadow();
@@ -542,7 +589,8 @@ void Engine::drawWorldObjects()
 
 void Engine::drawPlayer()
 {
-    drawObject(*player);
+    if (player->getState() != DEAD)
+        drawObject(*player);
 }
 
 void Engine::drawEnemies()
@@ -562,11 +610,11 @@ void Engine::update()
     //set bounding box
     boundingBox();
 
-    //check collision
-    checkCollision();
-
     // draw single frame
     drawFrame();
+
+    //check collision
+    checkCollision();
 
     // swap buffers
     window.display();
@@ -578,11 +626,11 @@ void Engine::startGame()
     glm::vec3 eye = slide.getEye();
     glm::vec3 center = slide.getCenter();
 
-    slide.setEye(eye + glm::vec3((Settings::playerStart.x-Settings::eye.x)/Settings::startCameraTurnSpeed,
+    slide.setEye(eye + glm::vec3((Settings::playerStart.x+2.0-Settings::eye.x)/Settings::startCameraTurnSpeed,
                                  (Settings::playerStart.y-Settings::eye.y)/Settings::startCameraTurnSpeed,
                                  ((Settings::playerStart.z+10.0)-Settings::eye.z)/Settings::startCameraTurnSpeed));
 
-    slide.setCenter(player->getPos());
+    slide.setCenter(glm::vec3(player->getPos().x+2.0, player->getPos().y, player->getPos().z));
 
     // draw single frame
     drawFrame();
@@ -591,7 +639,7 @@ void Engine::startGame()
     window.display();
 
     // New gamestate
-    if(eye.x >= 0.5)
+    if(eye.x >= 22.5)
         gameState.currentState = GameState::ST_PLAYING;
 }
 
@@ -609,9 +657,9 @@ void Engine::bossLvl()
     glm::vec3 eye = slide.getEye();
     glm::vec3 center = slide.getCenter();
 
-    if(eye.x > player->getPos().x - 10)
+    if(eye.x > player->getPos().x - 9)
     {
-        slide.setEye(eye + glm::vec3(-0.1, 0.0, -0.09));
+        slide.setEye(eye + glm::vec3(-0.1, 0.01, -0.09));
         slide.setCenter(player->getPos());
     }
 
@@ -621,12 +669,9 @@ void Engine::bossLvl()
 void Engine::endGame()
 {
     // End game
-
-
 }
 
 void Engine::mainLoop() {
-
     sf::Clock clock;
     sf::Time accumulator = sf::Time::Zero;
 
@@ -670,23 +715,24 @@ void Engine::mainLoop() {
         switch(gameState.currentState)
         {
             case GameState::ST_STARTING:
-                std::cout << "STARTING" << std::endl;
+                //std::cout << "STARTING" << std::endl;
                 startGame();
                 break;
             case GameState::ST_PLAYING:
-                std::cout << "PLAYING" << std::endl;
+                //std::cout << "PLAYING" << std::endl;
                 playGame();
                 break;
             case GameState::ST_BOSS:
-                std::cout << "BOSS" << std::endl;
+                //std::cout << "BOSS" << std::endl;
                 bossLvl();
                 break;
             case GameState::ST_END:
-                std::cout << "GAME ENDED" << std::endl;
+                //std::cout << "GAME ENDED" << std::endl;
                 endGame();
                 break;
         }
 
+        //window.display();
         accumulator += clock.restart();
     }
 }
@@ -725,10 +771,15 @@ void Engine::handleKeyEvent(sf::Event event)
         std::unique_ptr<Projectile> projectile = std::unique_ptr<Projectile>(new Projectile(player->getPos(), player->getRotation()));
         projectiles.push_back(std::move(projectile));
     } else if (event.key.code == sf::Keyboard::Space) {
-        player->addAcc(glm::vec3(0.0f, 1.0f / 200.0, 0.0f));
-        player->startAnimation();
+        if (player->getState() == ALIVE) {
+            player->addAcc(glm::vec3(0.0f, 1.0f / 200.0, 0.0f));
+            player->startAnimation();
+        }
     } else if (event.key.code == sf::Keyboard::F) {
-        player->destroyObject();
+        player->setAnimationState(DYING);
+        player->startAnimation();
+    } else if (event.key.code == sf::Keyboard::Z) {
+        player->changeTexture();
     }
 
     glm::vec3 pos = player->getPos();
@@ -799,25 +850,30 @@ void Engine::updateWorldObjects()
 
     if(gameState.currentState == GameState::ST_PLAYING)
     {
-        slide.setCenter(player->getPos());
-        slide.setEye(glm::vec3(player->getPos().x + 1.0, player->getPos().y, Settings::playerStart.z + 10));
+        glm::vec3 center = glm::vec3(player->getPos().x + 2.0, player->getPos().y, player->getPos().z);
+        glm::vec3 eye = glm::vec3(player->getPos().x + 2.0, player->getPos().y, Settings::playerStart.z + 10);
+
+        center.y = std::max(3.5f, center.y);
+        eye.y = std::max(3.5f, eye.y);
+
+        slide.setCenter(center);
+        slide.setEye(eye);
+        //slide.setCenter(player->getPos());
+        //slide.setEye(glm::vec3(player->getPos().x + 1.0, player->getPos().y, Settings::playerStart.z + 10));
     }
 
     // When in range of the boss, change game state to ST_BOSS
     if(gameState.currentState == GameState::ST_PLAYING && boss->getPos().x - player->getPos().x <= Settings::startBossStateRange)
     {
         gameState.currentState = GameState::ST_BOSS;
-        //Settings::sunPos = glm::vec3(player->getPos().x, 80.0, player->getPos().z + 20);
     }
 
-	/*glm::vec3 center = glm::vec3(player->getPos().x + 2.0, player->getPos().y, player->getPos().z);
-    glm::vec3 eye = glm::vec3(player->getPos().x + 2.0, player->getPos().y, Settings::playerStart.z + 10);
-
+	/*glm::vec3 center = glm::vec3(player->getPos().x + 3.0, player->getPos().y, player->getPos().z);
+    glm::vec3 eye = glm::vec3(player->getPos().x + 3.0, player->getPos().y, Settings::playerStart.z + 10);
     center.y = std::max(1.5f, center.y);
     eye.y = std::max(1.5f, eye.y);
-
     slide.setCenter(center);
-    slide.setEye(eye);*/
+    slide.setEye(eye);-*/
 }
 
 void Engine::boundingBox() {
@@ -837,7 +893,8 @@ void Engine::boundingBox() {
 
     //create/set the bounding box for the bird
     glm::vec3 pos = player->getPos();
-    glm::vec4 boundingBox = glm::vec4(pos.x - (0.5*player->getWidth()*Settings::playerScale.z), pos.y - (0.5*player->getHeight()*Settings::playerScale.y), (player->getHeight()*Settings::playerScale.z), (player->getHeight()*Settings::playerScale.y));
+    std::cout << "width: " << player->getWidth() << " height: " << player->getHeight()  << std::endl;
+    glm::vec4 boundingBox = glm::vec4(pos.x - (0.7*player->getWidth()*Settings::playerScale.z), pos.y - (0.7*player->getHeight()*Settings::playerScale.y), (player->getWidth()*Settings::playerScale.x*0.7), (player->getHeight()*Settings::playerScale.y*0.7));
     player->setBoundingBox(boundingBox);
 }
 
@@ -869,6 +926,11 @@ void Engine::checkCollision() {
     glm::vec4 boundingBoxBird = player->getBoundingBox();
     int counter = 0;
 
+    if (player->getState() == DEAD) {
+
+        gameState.currentState = GameState::ST_END;
+    }
+
     //check for world object collision with the bird
     for (auto &e : enemies) {
 
@@ -879,7 +941,9 @@ void Engine::checkCollision() {
             boundingBoxBird.y < boundingBoxWorld.y + boundingBoxWorld.w &&
             boundingBoxBird.y + boundingBoxBird.w > boundingBoxWorld.y)
         {
-            gameState.currentState = GameState::ST_END;
+            player->setState(DYING);
+            e->setState(DYING);
+            //gameState.currentState = GameState::ST_END;
         }
 
         // Check collision with terrain
@@ -921,7 +985,9 @@ void Engine::checkCollision() {
         int counter = floor(startBird*4+2);
         //check if the y-value of the mountain at the certain x is higher or equal to the y-value of the bird
         if(mountain[counter] >= player->getBoundingBox().y) {
-            gameState.currentState = GameState::ST_END;
+            //gameState.currentState = GameState::ST_END;
+            player->setState(DYING);
+
         }
     }
 }

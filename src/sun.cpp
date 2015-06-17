@@ -42,7 +42,7 @@ void Sun::setIntensity(float intensity) {
 }
 
 float Sun::getIntensity() {
-    return std::min(std::abs(sin(intensity)) + 0.1, 0.65);
+    return std::min(std::abs(sin(intensity)) + 0.1, 0.8);
 }
 
 glm::vec3 Sun::getDirection() {

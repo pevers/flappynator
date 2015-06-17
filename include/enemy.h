@@ -14,8 +14,7 @@ class Enemy : public AnimatedObject
               glm::vec3 enemyScale,
               glm::vec3 enemyRotation,
               glm::vec3 enemyAcc,
-              glm::vec3 enemySpeed,
-              std::string enemyModel);
+              glm::vec3 enemySpeed);
         virtual ~Enemy();
 
         void start(glm::vec3 playerPos);

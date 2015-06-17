@@ -1,6 +1,8 @@
 #version 130
 in vec3 color;
 in vec2 UV;
+in vec3 v;
+in vec3 N;
 in vec3 normal;
 in vec4 shadowCoord;
 in vec3 cubeMapCoords;
@@ -12,10 +14,10 @@ struct SimpleDirectionalLight
 	vec3 color; 
 	vec3 pos;
 	vec3 direction; 
+	float ambientIntensity;
 }; 
 
 uniform SimpleDirectionalLight sunLight;
-uniform float ambientIntensity; 
 uniform sampler2DShadow shadowMap;
 uniform samplerCube skybox;
 uniform sampler2D tex;
@@ -41,7 +43,16 @@ vec2 poissonDisk[16] = vec2[](
 );
 
 void main() {
-	float diffuseIntensity = max(0.0, dot(normalize(normal), -sunLight.direction));
+	vec3 L = normalize(sunLight.pos.xyz - v);
+	vec3 E = normalize(-v); // we are in Eye Coordinates, so EyePos is (0,0,0)  	
+	vec3 R = normalize(-reflect(L,N)); 
+
+	//float diffuseIntensity = max(0.0, dot(normalize(normal), -sunLight.direction));
+	float diffuseIntensity = max(dot(N,L), 0.0);
+   	diffuseIntensity = clamp(diffuseIntensity, 0.0, 1.0); 
+
+	float spec = pow(max(dot(R,E),0.0),0.3*1);
+	spec = clamp(spec, 0.0, 1.0);  
 
 	// temp old code
 	//float cosTheta = clamp(dot(normal, sunLight.direction), 0, 1);
@@ -59,7 +70,7 @@ void main() {
 		visibility -= 0.20*(1.0-texture(shadowMap, vec3(shadowCoord.xy + poissonDisk[index] / 900.0,  (shadowCoord.z - bias) / shadowCoord.w)));
 	}
 
-	outColor = visibility * vec4(color, 1.0) * vec4(sunLight.color * (diffuseIntensity + ambientIntensity), 1.0); //vec4(sunLight.color*(sunLight.ambientIntensity+diffuseIntensity+specularIntensity), 1.0);
+	outColor = visibility * vec4(color, 1.0) * vec4(sunLight.color * (diffuseIntensity + sunLight.ambientIntensity + spec), 1.0);
 	if (!isTerrain) {
 		outColor = texture(tex, UV) * outColor;
 	}

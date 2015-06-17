@@ -29,14 +29,22 @@ bool AnimatedObject::load()
 
 bool AnimatedObject::addAnimation(OBJECT_STATE state, bool loop, unsigned int startFrame, unsigned int frameSize, std::string basePath)
 {
-    // TODO: MEMORY LEAK MEMORY LEAK
-    animations[state] = new Animation(loop, startFrame, frameSize, basePath);
+    animations[state] = std::move(std::unique_ptr<Animation>(new Animation(loop, startFrame, frameSize, basePath)));
     return true;
+}
+
+void AnimatedObject::setState(OBJECT_STATE state)
+{
+    if (this->state != state) {
+        WorldObject::setState(state);
+        setAnimationState(state);
+        startAnimation();
+    }
 }
 
 void AnimatedObject::setAnimationState(OBJECT_STATE state)
 {
-    if (state >= OBJECT_STATE_SIZE || state < 0) {
+    if (state >= OBJECT_STATE_SIZE || state < 0 || animations[state] == nullptr) {
         std::cerr << "warning, could not set animation state to " << state << ", doesn't exist" << std::endl;
     } else activeAnimation = state;
 }
@@ -68,7 +76,17 @@ GLuint AnimatedObject::getTexture() {
     return animations[activeAnimation]->getTexture();
 } // HACK
 
+void AnimatedObject::changeTexture() {
+    animations[activeAnimation]->changeTexture();
+}
+
 void AnimatedObject::update()
 {
     animations[activeAnimation]->update(vbo, elementBuffer, normalBuffer, vboTextureBuffer);   // we use activeAnimation as state, could be 1-1 with WorldObject::state
 }
+
+bool AnimatedObject::animationFinished()
+{
+    return animations[activeAnimation]->animationFinished();
+}
+

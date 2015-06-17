@@ -11,6 +11,8 @@ uniform bool isTerrain;
 out vec3 color;
 out vec3 normal;
 out vec2 UV;
+out vec3 v;
+out vec3 N;
 out vec3 cubeMapCoords;
 out vec4 shadowCoord;
 
@@ -25,6 +27,10 @@ void main() {
 	}
 
 	normal = inNormal;
+
+	mat4 normalMatrix = transpose(inverse(view * model));
+	N = vec3(normalize(normalMatrix * vec4(inNormal, 0.0)));
+	v = vec3(view * model * vec4(inPosition, 1.0));
 
 	shadowCoord = depthBiasMVP * vec4(inPosition, 1.0);
 	UV = vertexUV;

@@ -6,6 +6,7 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <SFML/Window.hpp>
+#include <SFML/Graphics.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -33,7 +34,7 @@
 class Engine
 {
     private:
-        sf::Window window;
+        sf::RenderWindow window;
         GLuint shaderProgram;
         GLuint depthShaderProgram;
         GLuint elementBuffer;
@@ -80,6 +81,9 @@ class Engine
         bool initEnemies();
         bool initBoss();
 
+        void initMenu();
+        void drawShadows();
+
         void drawFrame();
         void drawTerrain();
         void drawPlayer();
@@ -91,7 +95,6 @@ class Engine
         void drawProjectiles();
         void drawProjectile(Projectile &p);
 
-        void drawShadows();
 
         void drawWorldShadow();
         void drawPlayerShadow();
