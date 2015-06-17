@@ -7,6 +7,7 @@ uniform mat4 model, view, proj;
 uniform vec3 overrideColor;
 uniform mat4 depthBiasMVP;
 uniform bool isTerrain;
+uniform bool hasTexture;
 
 out vec3 color;
 out vec3 normal;
@@ -24,6 +25,9 @@ void main() {
 			color = vec3(0.333, 0.42, 0.184);
 		else
 			color = vec3(0.8, 0.8, 0.8);
+	} else if (!hasTexture) {
+		// bullet
+		color = vec3(0.8, 0.1, 0.1);
 	}
 
 	normal = inNormal;

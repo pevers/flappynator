@@ -305,6 +305,9 @@ void Engine::draw()
 
     glCullFace(GL_BACK);
 
+    GLuint activeTID = glGetUniformLocation(shaderProgram, "hasTexture");
+    glUniform1f(activeTID, 1);
+
     drawProjectiles();
 
     drawTerrain();
@@ -351,6 +354,9 @@ void Engine::drawProjectile(Projectile &p){
     glm::mat4 depthBiasMVP = biasMatrix * projMatrix * viewMatrix * model;
     glUniformMatrix4fv(depthBias, 1, GL_FALSE, &depthBiasMVP[0][0]);
 
+    GLuint activeTID = glGetUniformLocation(shaderProgram, "hasTexture");
+    glUniform1f(activeTID, 0);
+
 
     // texture buffer
     /*glEnableVertexAttribArray(1);
@@ -367,6 +373,7 @@ void Engine::drawProjectile(Projectile &p){
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 12*3);
 
     glDisableVertexAttribArray(0);
+    glUniform1f(activeTID, 1);
 }
 
 void Engine::drawSkybox()

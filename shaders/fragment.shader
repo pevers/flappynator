@@ -22,6 +22,7 @@ uniform sampler2DShadow shadowMap;
 uniform samplerCube skybox;
 uniform sampler2D tex;
 uniform bool isTerrain;
+uniform bool hasTexture;
 
 vec2 poissonDisk[16] = vec2[]( 
    vec2( -0.94201624, -0.39906216 ), 
@@ -71,7 +72,7 @@ void main() {
 	}
 
 	outColor = visibility * vec4(color, 1.0) * vec4(sunLight.color * (diffuseIntensity + sunLight.ambientIntensity + spec), 1.0);
-	if (!isTerrain) {
+	if (!isTerrain && hasTexture) {
 		outColor = texture(tex, UV) * outColor;
 	}
 
