@@ -25,10 +25,8 @@
 #include "player.h"
 #include "enemy.h"
 #include "skybox.h"
-
-#include "projectile.h"
-#include "gamestate.h"
-#include "boss.h"
+#include "gamestate.h";
+#include "boss.h";
 #include "sun.h"
 
 class Engine
@@ -50,8 +48,6 @@ class Engine
         std::unique_ptr<Terrain> terrain;
         std::unique_ptr<Sun> sun;
 
-        std::unique_ptr<Projectile> projectile;
-
         glm::mat4 projMatrix;
         glm::mat4 viewMatrix;
         glm::mat4 depthMVP;
@@ -61,7 +57,6 @@ class Engine
         std::vector<std::unique_ptr<Enemy>> enemies;
         std::unique_ptr<Boss> boss;
 
-        std::vector<std::unique_ptr<Projectile>> projectiles;
         std::unique_ptr<Skybox> skybox;
 
 
@@ -80,8 +75,8 @@ class Engine
         bool initShadowMap();
         bool initEnemies();
         bool initBoss();
-        void initMenu();
 
+        void initMenu();
         void drawShadows();
         void drawFrame();
         void drawTerrain();
@@ -91,9 +86,6 @@ class Engine
         void drawSkybox();
         void drawWorldObjects();
         void drawObject(WorldObject &w);
-        void drawProjectiles();
-        void drawProjectile(Projectile &p);
-
         void drawWorldShadow();
         void drawPlayerShadow();
         void drawEnemyShadow();

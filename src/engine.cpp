@@ -20,7 +20,7 @@ bool Engine::init()
     window.create(sf::VideoMode(Settings::screenWidth, Settings::screenHeight, Settings::context.depthBits), Settings::windowTitle.c_str(), sf::Style::Close, Settings::context);
 
     // Initialize the menu of the game
-    initMenu();
+    //initMenu();
 
     // Initialize GLEW
     glewExperimental = GL_TRUE;
