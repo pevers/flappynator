@@ -915,7 +915,7 @@ void Engine::checkCollision() {
             int counter = floor(startEnemy*4+2);
             //check if the y-value of the mountain at the certain x is higher or equal to the y-value of the bird
             if(mountain[counter] >= e->getBoundingBox().y) {
-                //e->setState(DYING);
+                e->setState(DYING);
             }
         }
 

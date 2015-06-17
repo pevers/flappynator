@@ -23,11 +23,10 @@ void Sun::increaseIntensity(float intensity) {
     static int ticks = 100;
 
     // stay dark for some ticks
-    //if (getIntensity() < 0.15 && !skip) {
-    if (getIntensity() < 0.35 && !skip) {
+    if (getIntensity() < 0.15 && !skip) {
         skip = true;
         ticks = 100;
-    } else if (getIntensity() > 0.35 && skip) {
+    } else if (getIntensity() > 0.15 && skip) {
         skip = false;
     }
 
