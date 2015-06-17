@@ -1,20 +1,16 @@
 #include "projectile.h"
 
 GLfloat projectileVertices[] = {
-    //-5.0, 5.0, 0.0, // bottom left corner
-    //-5.0, -5.0, 0.0, // top left corner
-    //5.0,-5.0, 0.0, // top right corner
-   // 5.0,5.0, 0.0}; // bottom right corner
-    -1.0, 1.0, 0.0, // bottom left corner
-    1.0,1.0, 0.0, // bottom right corner
-    -1.0, -1.0, 0.0, // top left corner
-    1.0,-1.0, 0.0, // top right corner
+    -1.0, 0.5, 0.0, // top left corner
+    1.0, 0.5, 0.0, // top right corner
+    -1.0, -0.05, 0.0, // bot left corner
+    1.0,-0.05, 0.0, // bot right corner
     };
 
 GLubyte indices[] = {0,1,2, // first triangle (bottom left - top left - top right)
                      0,2,3};
 
-Projectile::Projectile(glm::vec3 start) : WorldObject(start, Settings::playerScale, Settings::playerRotation), speed(Settings::projectileSpeed)
+Projectile::Projectile(glm::vec3 start, glm::vec3 rotation) : WorldObject(start, Settings::playerScale, rotation), speed(Settings::projectileSpeed)
 {
     if (!load()) {
         std::cerr << "could not load projectile" << std::endl;
@@ -25,6 +21,11 @@ Projectile::~Projectile()
 {
     //dtor
 
+}
+
+GLuint Projectile::getTextureBuffer()
+{
+    return vboTexCoords;
 }
 
 void Projectile::setSpeed(glm::vec3 speed)
@@ -43,6 +44,7 @@ glm::vec3 Projectile::getSpeed()
 void Projectile::update()
 {
     pos += speed;
+    pos += rotation;
 }
 
 void Projectile::free()
@@ -60,6 +62,9 @@ int Projectile::getObjectSize()
 
 bool Projectile::load()
 {
+
+
+
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(projectileVertices), projectileVertices, GL_STATIC_DRAW);

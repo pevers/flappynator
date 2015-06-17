@@ -57,6 +57,7 @@
 		<Unit filename="include/skybox.h" />
 		<Unit filename="include/slide.h" />
 		<Unit filename="include/smoothterrain.h" />
+		<Unit filename="src/projectile.h" />
 		<Unit filename="include/staticobject.h" />
 		<Unit filename="include/terrain.h" />
 		<Unit filename="include/worldobject.h" />
@@ -69,6 +70,7 @@
 		<Unit filename="src/simplexnoise.cpp" />
 		<Unit filename="src/skybox.cpp" />
 		<Unit filename="src/slide.cpp" />
+		<Unit filename="src/projectile.cpp" />
 		<Unit filename="src/smoothterrain.cpp" />
 		<Unit filename="src/staticobject.cpp" />
 		<Unit filename="src/terrain.cpp" />

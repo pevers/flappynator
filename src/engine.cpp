@@ -153,6 +153,7 @@ void Engine::drawFrame()
 
 void Engine::draw()
 {
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, Settings::screenWidth, Settings::screenHeight);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -235,6 +236,13 @@ void Engine::drawProjectile(Projectile &p){
 
     //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, p.getElementBuffer());
     //glDrawElements(GL_TRIANGLES, p.getObjectSize(), GL_UNSIGNED_INT, (void*)0);
+
+    // texture buffer
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, p.getTextureBuffer());
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 /*
@@ -501,11 +509,12 @@ void Engine::handleKeyEvent(sf::Event event)
         eye.x--;
     } else if (event.key.code == sf::Keyboard::D) {
         eye.x++;
+    } else if (event.key.code == sf::Keyboard::LControl) {
+        std::unique_ptr<Projectile> projectile = std::unique_ptr<Projectile>(new Projectile(player->getPos(), player->getRotation()));
+        projectiles.push_back(std::move(projectile));
     } else if (event.key.code == sf::Keyboard::Space) {
         player->addAcc(glm::vec3(0.0f, 1.0f / 200.0, 0.0f));
         player->startAnimation();
-        std::unique_ptr<Projectile> projectile = std::unique_ptr<Projectile>(new Projectile(player->getPos()));
-        projectiles.push_back(std::move(projectile));
     }
 
     std::cout << "eye (" << eye.x << ", " << eye.y << ", " << eye.z << ")" << std::endl;
