@@ -106,14 +106,18 @@ void Enemy::update()
 {
     AnimatedObject::update();
 
-    if(isAlive())
+    if (state == DYING && animationFinished()) {
+        setState(DEAD);
+    }
+
+    if(state != DEAD)
     {
         //angle += 0.02;
         angle += speed.x / 3.0;
 
         pos += speed;
 
-        if(down)
+        if(down && !DEAD)
             pos.y = (float)cos(angle)*2 + startPos.y;
         else
             pos.y = -(float)cos(angle)*2 + startPos.y;

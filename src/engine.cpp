@@ -528,7 +528,8 @@ void Engine::drawPlayer()
 void Engine::drawEnemies()
 {
     for (auto &e : enemies) {
-        drawObject(*e);
+        if (e->getState() != DEAD)
+            drawObject(*e);
     }
 }
 
@@ -740,13 +741,8 @@ void Engine::updateWorldObjects()
     for (auto &e : enemies) {
         // update the enemy only when the player is in range
         if(e->getPos().x - player->getPos().x < Settings::startEnemyUpdate) {
-            if(e->isAlive()) {
+            if(e->getState() == ALIVE || e->getState() == DYING) {
                 e->update();
-            }
-            else
-            {
-                e->start(player->getPos());
-                e->startAnimation();
             }
         }
     }
@@ -755,12 +751,8 @@ void Engine::updateWorldObjects()
 
     if(boss->getPos().x - player->getPos().x <= Settings::startBossUpdate)
     {
-        if(boss->isAlive())
+        if(boss->getState() == ALIVE || boss->getState() == DYING)
             boss->update();
-        else {
-            boss->start();
-            boss->startAnimation();
-        }
     }
 
     if(gameState.currentState == GameState::ST_PLAYING)
@@ -802,7 +794,6 @@ void Engine::boundingBox() {
 
     //create/set the bounding box for the bird
     glm::vec3 pos = player->getPos();
-    std::cout << "width: " << player->getWidth() << " height: " << player->getHeight()  << std::endl;
     glm::vec4 boundingBox = glm::vec4(pos.x - (0.7*player->getWidth()*Settings::playerScale.z), pos.y - (0.7*player->getHeight()*Settings::playerScale.y), (player->getWidth()*Settings::playerScale.x*0.7), (player->getHeight()*Settings::playerScale.y*0.7));
     player->setBoundingBox(boundingBox);
 }
