@@ -501,11 +501,11 @@ void Engine::startGame()
     glm::vec3 eye = slide.getEye();
     glm::vec3 center = slide.getCenter();
 
-    slide.setEye(eye + glm::vec3((Settings::playerStart.x-Settings::eye.x)/Settings::startCameraTurnSpeed,
+    slide.setEye(eye + glm::vec3((Settings::playerStart.x+2.0-Settings::eye.x)/Settings::startCameraTurnSpeed,
                                  (Settings::playerStart.y-Settings::eye.y)/Settings::startCameraTurnSpeed,
                                  ((Settings::playerStart.z+10.0)-Settings::eye.z)/Settings::startCameraTurnSpeed));
 
-    slide.setCenter(player->getPos());
+    slide.setCenter(glm::vec3(player->getPos().x+2.0, player->getPos().y, player->getPos().z));
 
     // draw single frame
     drawFrame();
@@ -514,7 +514,7 @@ void Engine::startGame()
     window.display();
 
     // New gamestate
-    if(eye.x >= 0.5)
+    if(eye.x >= 22.5)
         gameState.currentState = GameState::ST_PLAYING;
 }
 
@@ -532,9 +532,9 @@ void Engine::bossLvl()
     glm::vec3 eye = slide.getEye();
     glm::vec3 center = slide.getCenter();
 
-    if(eye.x > player->getPos().x - 10)
+    if(eye.x > player->getPos().x - 9)
     {
-        slide.setEye(eye + glm::vec3(-0.1, 0.0, -0.09));
+        slide.setEye(eye + glm::vec3(-0.1, 0.01, -0.09));
         slide.setCenter(player->getPos());
     }
 
@@ -544,8 +544,6 @@ void Engine::bossLvl()
 void Engine::endGame()
 {
     // End game
-
-
 }
 
 void Engine::mainLoop() {
@@ -705,25 +703,23 @@ void Engine::updateWorldObjects()
 
     if(gameState.currentState == GameState::ST_PLAYING)
     {
-        slide.setCenter(player->getPos());
-        slide.setEye(glm::vec3(player->getPos().x + 1.0, player->getPos().y, Settings::playerStart.z + 10));
+        glm::vec3 center = glm::vec3(player->getPos().x + 2.0, player->getPos().y, player->getPos().z);
+        glm::vec3 eye = glm::vec3(player->getPos().x + 2.0, player->getPos().y, Settings::playerStart.z + 10);
+
+        center.y = std::max(1.5f, center.y);
+        eye.y = std::max(1.5f, eye.y);
+
+        slide.setCenter(center);
+        slide.setEye(eye);
+        //slide.setCenter(player->getPos());
+        //slide.setEye(glm::vec3(player->getPos().x + 1.0, player->getPos().y, Settings::playerStart.z + 10));
     }
 
     // When in range of the boss, change game state to ST_BOSS
     if(gameState.currentState == GameState::ST_PLAYING && boss->getPos().x - player->getPos().x <= Settings::startBossStateRange)
     {
         gameState.currentState = GameState::ST_BOSS;
-        //Settings::sunPos = glm::vec3(player->getPos().x, 80.0, player->getPos().z + 20);
     }
-
-	/*glm::vec3 center = glm::vec3(player->getPos().x + 2.0, player->getPos().y, player->getPos().z);
-    glm::vec3 eye = glm::vec3(player->getPos().x + 2.0, player->getPos().y, Settings::playerStart.z + 10);
-
-    center.y = std::max(1.5f, center.y);
-    eye.y = std::max(1.5f, eye.y);
-
-    slide.setCenter(center);
-    slide.setEye(eye);*/
 }
 
 void Engine::boundingBox() {
@@ -737,7 +733,8 @@ void Engine::boundingBox() {
 
     //create/set the bounding box for the bird
     glm::vec3 pos = player->getPos();
-    glm::vec4 boundingBox = glm::vec4(pos.x - (0.5*player->getWidth()*Settings::playerScale.z), pos.y - (0.5*player->getHeight()*Settings::playerScale.y), (player->getHeight()*Settings::playerScale.z), (player->getHeight()*Settings::playerScale.y));
+    std::cout << "width: " << player->getWidth() << " height: " << player->getHeight()  << std::endl;
+    glm::vec4 boundingBox = glm::vec4(pos.x - (0.7*player->getWidth()*Settings::playerScale.z), pos.y - (0.7*player->getHeight()*Settings::playerScale.y), (player->getWidth()*Settings::playerScale.x*0.7), (player->getHeight()*Settings::playerScale.y*0.7));
     player->setBoundingBox(boundingBox);
 }
 

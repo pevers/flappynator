@@ -70,10 +70,16 @@ bool SmoothTerrain::generateTerrain(unsigned int width, unsigned int height)
     // generate random hills at random.x and player.z
     srand(time(NULL));
     int msize = width / 2;
-    float startx = Settings::playerStart.x + 1.0, startz = Settings::playerStart.z;
+    float startx = Settings::playerStart.x + 7.0, startz = Settings::playerStart.z;
     for (int i = 0; i < msize; i++) {
         startx += rand() % 5;
         float starty = rand() % 10;
+
+        // Low mountains near the boss so you don't get a high peak behind the bird
+        if(startx - Settings::bossStart.x <= -1.0*Settings::startBossStateRange - 10.0 || startx - Settings::bossStart.x >= 5.0)
+            starty = rand() % 4;
+
+        //if(startx - Settings::bossStart.x <= -5.0 || startx - Settings::bossStart.x >= 5.0)
         mountains.push_back(glm::vec3(startx, starty, startz));
     }
 

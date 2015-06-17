@@ -9,7 +9,7 @@ class Boss : public AnimatedObject
     private:
         glm::vec4 boundingBox;
 
-        float angle;
+        double angle;
         float health;
         bool alive; //TODO: Moet weg
 

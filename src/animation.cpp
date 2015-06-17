@@ -25,15 +25,15 @@ void Animation::getDistances(float &width, float &height) {
     float maxY = std::numeric_limits<float>::min();
 
     for (size_t i = 0; i < 1; i++) {
-        for (size_t v = 0; v < frames[frame][0].mesh.positions.size() / 3; v++) {
-            if(minX > frames[frame][0].mesh.positions[3*v+2])
-                minX = frames[frame][0].mesh.positions[3*v+2];
-            if(maxX < frames[frame][0].mesh.positions[3*v+2])
-                maxX = frames[frame][0].mesh.positions[3*v+2];
-            if(minY > frames[frame][0].mesh.positions[3*v+1])
-                minY = frames[frame][0].mesh.positions[3*v+1];
-            if(maxY < frames[frame][0].mesh.positions[3*v+1])
-                maxY = frames[frame][0].mesh.positions[3*v+1];
+        for (size_t v = 0; v < frames[0][0].mesh.positions.size() / 3; v++) {
+            if(minX > frames[0][0].mesh.positions[3*v+2])
+                minX = frames[0][0].mesh.positions[3*v+2];
+            if(maxX < frames[0][0].mesh.positions[3*v+2])
+                maxX = frames[0][0].mesh.positions[3*v+2];
+            if(minY > frames[0][0].mesh.positions[3*v+1])
+                minY = frames[0][0].mesh.positions[3*v+1];
+            if(maxY < frames[0][0].mesh.positions[3*v+1])
+                maxY = frames[0][0].mesh.positions[3*v+1];
         }
     }
 
