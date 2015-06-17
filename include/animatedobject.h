@@ -1,41 +1,31 @@
 #ifndef ANIMATEDOBJECT_H
 #define ANIMATEDOBJECT_H
 
-#include "worldobject.h"
-#include "../src/util/tiny_obj_loader.h"
+#include <map>
 #include <SFML/Window.hpp>
+
+#include "worldobject.h"
+#include "animation.h"
 
 class AnimatedObject : public WorldObject
 {
     public:
-        AnimatedObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot, bool loop, unsigned int startFrame);
+        AnimatedObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot, bool loop, unsigned int startFrame, std::string basePath, unsigned int frameSize);
         virtual ~AnimatedObject();
-
-        void setStartFrame(unsigned int frame);
-        unsigned int getStartFrame();
-
-        void setLoop(bool loop);
-        bool isLooped();
-
-        void startAnimation();
-        unsigned int nextFrame(unsigned int f);
 
         virtual int getObjectSize();
         virtual void update();
         virtual void free();
         virtual bool load();
+        virtual void destroyObject();
+        virtual GLuint getTexture();
+
+        bool addAnimation(OBJECT_STATE state, bool loop, unsigned int startFrame, unsigned int frameSize, std::string basePath);
+        void setAnimationState(OBJECT_STATE state);
+        void startAnimation();
     private:
-        void setFrame(int frame);
-
-        float frameRate;
-        unsigned int startFrame;
-        unsigned int frame;
-        bool loop;
-
-        sf::Clock clock;
-
-        std::vector<std::vector<tinyobj::shape_t>> frames;
-        std::vector<std::vector<tinyobj::material_t>> materials;
+        Animation *animations[OBJECT_STATE_SIZE];
+        OBJECT_STATE activeAnimation;
 };
 
 #endif // ANIMATEDOBJECT_H

@@ -20,15 +20,22 @@ class SmoothTerrain : public Terrain
 
         std::vector<glm::vec3> mountains;
 
+
+        //static std::vector<float> new_vec;
         GLuint textures[1];
 
         glm::vec3 calcAverageNormal(std::vector<glm::vec3> normals);
+
+        //float getAcc();
     public:
         SmoothTerrain();
         virtual ~SmoothTerrain();
 
         virtual bool generateTerrain(unsigned int width, unsigned int height);
         virtual unsigned int getTerrainSize();
+        static float maxY[];
+
+        static std::vector<float> getMaxYValues();
 };
 
 #endif // SMOOTHTERRAIN_H

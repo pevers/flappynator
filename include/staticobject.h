@@ -2,6 +2,7 @@
 #define STATICOBJECT_H
 
 #include <iostream>
+#include <SFML/Window.hpp>
 #include "worldobject.h"
 
 class StaticObject : public WorldObject
@@ -14,11 +15,17 @@ class StaticObject : public WorldObject
         virtual bool load();
         virtual int getObjectSize();
         virtual void update();
+        virtual void destroyObject();
+        virtual GLuint getTexture(); // HACK
     private:
+        bool generateBuffers();
+
         std::string objPath;
 
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> material;
+
+        //void disintegrate();
 };
 
 #endif // STATICOBJECT_H

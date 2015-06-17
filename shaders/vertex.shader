@@ -4,9 +4,9 @@ in vec2 vertexUV;
 in vec3 inNormal;
 
 uniform mat4 model, view, proj;
-
 uniform vec3 overrideColor;
 uniform mat4 depthBiasMVP;
+uniform bool isTerrain;
 
 out vec3 color;
 out vec3 normal;
@@ -16,17 +16,18 @@ out vec4 shadowCoord;
 
 void main() {
 	color = overrideColor;
-	if (inPosition.y <= 1.0)
-		//color = vec3(0.255, 0.412, 0.882);	// sea blue
-		color = vec3(0.333, 0.42, 0.184);
-	else
-		color = vec3(0.8, 0.8, 0.8);
+	if (isTerrain) {
+		if (inPosition.y <= 1.0)
+			//color = vec3(0.255, 0.412, 0.882);	// sea blue
+			color = vec3(0.333, 0.42, 0.184);
+		else
+			color = vec3(0.8, 0.8, 0.8);
+	}
 
 	normal = inNormal;
 
 	shadowCoord = depthBiasMVP * vec4(inPosition, 1.0);
 	UV = vertexUV;
-
 	gl_Position = proj * view * model * vec4(inPosition, 1.0);
 }
 

@@ -1,4 +1,3 @@
-#define GLEW_STATIC
 #include "engine.h"
 
 Engine::Engine(): slide(Settings::eye, glm::vec3(0.0, 0.0, 0.0), 1.0)
@@ -88,13 +87,56 @@ bool Engine::init()
 
     // load terrain
     terrain.reset(new SmoothTerrain());
-    terrain->generateTerrain(50, 20);
+
+    terrain->generateTerrain(100, 6);
 
     // load test object
     player = std::unique_ptr<Player>(new Player());
+    //wobjs.push_back(std::unique_ptr<StaticObject>(new StaticObject(glm::vec3(4.0, 4.0, 2.0), glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0, 0.0, 0.0), "resources/monkey.obj")));
+    //wobjs.push_back(std::unique_ptr<Explosion>(new Explosion(glm::vec3(3.0, 2.0, 2.0), glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(-1.0, 0.0, 0.0))));
     //wobjs.push_back(std::unique_ptr<AnimatedObject>(new AnimatedObject(glm::vec3(4.0, 4.0, 2.0), glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0, 0.0, 0.0))));
 
+    // Initialize enemies
+    initEnemies();
+
+    // Initialize boss
+    initBoss();
+
     return true;
+}
+
+bool Engine::initEnemies() {
+    glm::vec3 enemyScale = Settings::enemyScale;
+    glm::vec3 enemyRotation = Settings::enemyRotation;
+
+    std::string enemyModel = Settings::enemyModel1;
+
+    srand(time(NULL));
+    for(int i = 0; i < Settings::numEnemies; i++) {
+        glm::vec3 enemyStart = player->getPos() + glm::vec3(15 + 10.0*i, 0.0, 0.0);
+        glm::vec3 enemyAcc = Settings::enemyAcc;
+
+        float speedX = (((rand()%200) / 100.0) + 2.0) * -1.0; // Value between 2.0 and 4.0
+        glm::vec3 enemySpeed = Settings::playerSpeed * glm::vec3(speedX, 0.0, 0.0);
+
+        std::unique_ptr<Enemy> enemy = std::unique_ptr<Enemy>(new Enemy(enemyStart, enemyScale, enemyRotation, enemyAcc, enemySpeed, enemyModel));
+        enemy->setHealth(1);
+
+        enemies.push_back(std::move(enemy));
+    }
+
+    return true;
+}
+
+bool Engine::initBoss() {
+    std::vector<float> mountain;
+    mountain = SmoothTerrain::getMaxYValues();
+
+    // Keeps the boss from hitting terrain
+    glm::vec3 start = glm::vec3(Settings::bossStart.x, mountain[Settings::bossStart.x * 4] + 4.0, Settings::bossStart.z);
+    Settings::bossStart = glm::vec3(start);
+
+    boss = std::unique_ptr<Boss>(new Boss(start, Settings::bossScale, Settings::bossRotation));
 }
 
 bool Engine::initShadowMap() {
@@ -125,19 +167,25 @@ bool Engine::initShadowMap() {
 
 bool Engine::initSun()
 {
-    GLuint color = glGetUniformLocation(shaderProgram, "sunLight.color");
-    glUniform3f(color, 1.0f, 1.0f, 1.0f);
+    sun.reset(new Sun(glm::vec3(1.0, 1.0, 1.0), Settings::sunPos, Settings::sunSpot, 0.5));
+    return resetSun();
+}
 
-    GLuint intensity = glGetUniformLocation(shaderProgram, "sunLight.ambientIntensity");
-    glUniform1f(intensity, 0.50f);
+bool Engine::resetSun()
+{
+    GLuint color = glGetUniformLocation(shaderProgram, "sunLight.color");
+    glUniform3f(color, sun->getColor().x, sun->getColor().y, sun->getColor().z);
+
+    GLuint intensity = glGetUniformLocation(shaderProgram, "ambientIntensity");
+    glUniform1f(intensity, sun->getIntensity());
 
     GLuint direction = glGetUniformLocation(shaderProgram, "sunLight.direction");
-    glUniform3f(direction, glm::normalize(Settings::sunSpot - Settings::sunPos).x, glm::normalize(Settings::sunSpot - Settings::sunPos).y, glm::normalize(Settings::sunSpot - Settings::sunPos).z);
+    glUniform3f(direction, sun->getDirection().x, sun->getDirection().y, sun->getDirection().z);
 
     GLuint pos = glGetUniformLocation(shaderProgram, "sunLight.pos");
     glUniform3f(pos, Settings::sunPos.x, Settings::sunPos.y, Settings::sunPos.z);
 
-    return (color && intensity && direction);
+    return (color >= 0 && intensity >= 0 && direction >= 0);
 }
 
 void Engine::drawFrame()
@@ -164,6 +212,8 @@ void Engine::draw()
 
     glUseProgram(shaderProgram);
 
+    resetSun();
+
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, depthTexture);
 
@@ -175,7 +225,11 @@ void Engine::draw()
     drawTerrain();
     drawWorldObjects();
     drawPlayer();
+
     drawProjectiles();
+
+    drawEnemies();
+    drawBoss();
     drawSkybox();
 }
 
@@ -221,13 +275,6 @@ void Engine::drawProjectile(Projectile &p){
 //    glEnableVertexAttribArray(1);
 //    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-    // send normal buffer
-    if (p.hasNormals()) {
-        glEnableVertexAttribArray(2);
-        glBindBuffer(GL_ARRAY_BUFFER, p.getNormalBuffer());
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    }
-
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, p.getElementBuffer());
 
     // override texture colors
@@ -238,13 +285,13 @@ void Engine::drawProjectile(Projectile &p){
     //glDrawElements(GL_TRIANGLES, p.getObjectSize(), GL_UNSIGNED_INT, (void*)0);
 
     // texture buffer
-    glEnableVertexAttribArray(1);
-    glBindBuffer(GL_ARRAY_BUFFER, p.getTextureBuffer());
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    //glEnableVertexAttribArray(1);
+    //glBindBuffer(GL_ARRAY_BUFFER, p.getTextureBuffer());
+    //glEnableVertexAttribArray(1);
+    //glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
 
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 12*3);
 /*
     // override texture colors
     GLuint uniColor = glGetUniformLocation(shaderProgram, "overrideColor");
@@ -292,6 +339,8 @@ void Engine::drawShadows()
     glCullFace(GL_FRONT);
 
     drawPlayerShadow();
+    drawEnemyShadow();
+    drawBossShadow();
     drawWorldShadow();
 }
 
@@ -318,6 +367,11 @@ void Engine::drawTerrain()
     glm::mat4 depthBiasMVP = biasMatrix * depthMVP;
     glUniformMatrix4fv(depthBias, 1, GL_FALSE, &depthBiasMVP[0][0]);
 
+    glDisable(GL_TEXTURE_2D);
+
+    GLuint isTerrainID = glGetUniformLocation(shaderProgram, "isTerrain");
+    glUniform1f(isTerrainID, 1);
+
     // send vertex buffer
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, terrain->getVertexBuffer());
@@ -343,8 +397,6 @@ void Engine::drawTerrain()
 
 void Engine::drawObject(WorldObject &w)
 {
-    //glm::mat4 modelMatrix = glm::translate(modelMatrix, wobjs[i].getPos());
-    //modelMatrix = glm::rotate(modelMatrix, w.getRotation().z, glm::vec3(0.0, 0.0, 1.0));
     GLuint modelID = glGetUniformLocation(shaderProgram, "model");
     GLuint viewID = glGetUniformLocation(shaderProgram, "view");
     GLuint projID = glGetUniformLocation(shaderProgram, "proj");
@@ -353,6 +405,10 @@ void Engine::drawObject(WorldObject &w)
     glUniformMatrix4fv(modelID, 1, GL_FALSE, &model[0][0]);
     glUniformMatrix4fv(viewID, 1, GL_FALSE, &viewMatrix[0][0]);
     glUniformMatrix4fv(projID, 1, GL_FALSE, &projMatrix[0][0]);
+
+    // TODO: differen shaders for terrain is maybe a better idea than this!
+    GLuint isTerrainID = glGetUniformLocation(shaderProgram, "isTerrain");
+    glUniform1f(isTerrainID, 0);
 
     // get vertex buffer
     glEnableVertexAttribArray(0);
@@ -371,13 +427,19 @@ void Engine::drawObject(WorldObject &w)
     glUniformMatrix4fv(depthBias, 1, GL_FALSE, &depthBiasMVP[0][0]);
 
     // texture buffer
-//    glEnableVertexAttribArray(1);
-//    glBindBuffer(GL_ARRAY_BUFFER, w.getTextureBuffer());
-//    glEnableVertexAttribArray(1);
-//    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+
+    // necessary but fucking ugly, TODO: FIX FIX FIX
+    if (w.getTexture() >= 0) {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, w.getTexture());
+        glEnableVertexAttribArray(1);
+        glBindBuffer(GL_ARRAY_BUFFER, w.getTextureBuffer());
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    }
 
     // send normal buffer
-    if (w.hasNormals()) {
+    if (w.getNormalBuffer() >= 0) {
         glEnableVertexAttribArray(2);
         glBindBuffer(GL_ARRAY_BUFFER, w.getNormalBuffer());
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
@@ -386,8 +448,8 @@ void Engine::drawObject(WorldObject &w)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, w.getElementBuffer());
 
     // override texture colors
-    GLuint uniColor = glGetUniformLocation(shaderProgram, "overrideColor");
-    glUniform3f(uniColor, 1.0f, 0.3f, 0.3f);
+    //GLuint uniColor = glGetUniformLocation(shaderProgram, "overrideColor");
+    //glUniform3f(uniColor, 1.0f, 0.3f, 0.3f);
 
     glDrawElements(GL_TRIANGLES, w.getObjectSize(), GL_UNSIGNED_INT, (void*)0);
     glDisableVertexAttribArray(0);
@@ -427,6 +489,50 @@ void Engine::drawPlayerShadow()
     glDisableVertexAttribArray(0);
 }
 
+void Engine::drawEnemyShadow()
+{
+    for(auto &e : enemies)
+    {
+        // Only draw shadow when the object is in the scene
+        if(e->getPos().x < slide.getEye().x + 10.0 && e->getPos().x > slide.getEye().x - 10.0)
+        {
+            glm::mat4 model = e->getModel();
+
+            depthMVP = projMatrix * viewMatrix * model;
+            GLuint depthMatrixID = glGetUniformLocation(depthShaderProgram, "depthMVP");
+            glUniformMatrix4fv(depthMatrixID, 1, GL_FALSE, &depthMVP[0][0]);
+
+            glEnableVertexAttribArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER, e->getVertexBuffer());
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, e->getElementBuffer());
+
+            glDrawElements(GL_TRIANGLES, e->getObjectSize(), GL_UNSIGNED_INT, (void*)0);
+            glDisableVertexAttribArray(0);
+        }
+    }
+
+}
+
+void Engine::drawBossShadow()
+{
+    glm::mat4 model = boss->getModel();
+
+    depthMVP = projMatrix * viewMatrix * model;
+    GLuint depthMatrixID = glGetUniformLocation(depthShaderProgram, "depthMVP");
+    glUniformMatrix4fv(depthMatrixID, 1, GL_FALSE, &depthMVP[0][0]);
+
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, boss->getVertexBuffer());
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, boss->getElementBuffer());
+
+    glDrawElements(GL_TRIANGLES, boss->getObjectSize(), GL_UNSIGNED_INT, (void*)0);
+    glDisableVertexAttribArray(0);
+}
+
 void Engine::drawWorldObjects()
 {
     for (auto &w : wobjs) {
@@ -439,10 +545,98 @@ void Engine::drawPlayer()
     drawObject(*player);
 }
 
+void Engine::drawEnemies()
+{
+    for (auto &e : enemies) {
+        drawObject(*e);
+    }
+}
+
+void Engine::drawBoss()
+{
+    drawObject(*boss);
+}
+
+void Engine::update()
+{
+    //set bounding box
+    boundingBox();
+
+    //check collision
+    checkCollision();
+
+    // draw single frame
+    drawFrame();
+
+    // swap buffers
+    window.display();
+}
+
+void Engine::startGame()
+{
+    // Start game
+    glm::vec3 eye = slide.getEye();
+    glm::vec3 center = slide.getCenter();
+
+    slide.setEye(eye + glm::vec3((Settings::playerStart.x-Settings::eye.x)/Settings::startCameraTurnSpeed,
+                                 (Settings::playerStart.y-Settings::eye.y)/Settings::startCameraTurnSpeed,
+                                 ((Settings::playerStart.z+10.0)-Settings::eye.z)/Settings::startCameraTurnSpeed));
+
+    slide.setCenter(player->getPos());
+
+    // draw single frame
+    drawFrame();
+
+    // swap buffers
+    window.display();
+
+    // New gamestate
+    if(eye.x >= 0.5)
+        gameState.currentState = GameState::ST_PLAYING;
+}
+
+void Engine::playGame()
+{
+    // Play game
+
+    update();
+}
+
+void Engine::bossLvl()
+{
+    // enter boss lvl
+
+    glm::vec3 eye = slide.getEye();
+    glm::vec3 center = slide.getCenter();
+
+    if(eye.x > player->getPos().x - 10)
+    {
+        slide.setEye(eye + glm::vec3(-0.1, 0.0, -0.09));
+        slide.setCenter(player->getPos());
+    }
+
+    update();
+}
+
+void Engine::endGame()
+{
+    // End game
+
+
+}
+
 void Engine::mainLoop() {
 
     sf::Clock clock;
     sf::Time accumulator = sf::Time::Zero;
+
+    switch(gameState.currentState)
+    {
+        case GameState::ST_STARTING:
+            std::cout << "gameState: " << gameState.currentState << std::endl;
+    };
+
+    window.setFramerateLimit(60);
 
     while (window.isOpen())
     {
@@ -456,7 +650,8 @@ void Engine::mainLoop() {
                     window.close();
                 break;
                 case sf::Event::KeyPressed:
-                    handleKeyEvent(windowEvent);
+                    if(gameState.currentState != GameState::ST_STARTING && gameState.currentState != GameState::ST_END)
+                        handleKeyEvent(windowEvent);
                 break;
                 default:
                 break;
@@ -466,14 +661,31 @@ void Engine::mainLoop() {
         while (accumulator > Settings::ups)
         {
             accumulator -= Settings::ups;
-            updateWorldObjects();
+
+            if(gameState.currentState != GameState::ST_STARTING)
+                updateWorldObjects();
         }
 
-        // draw single frame
-        drawFrame();
-
-        // swap buffers
-        window.display();
+        // Check gamestate
+        switch(gameState.currentState)
+        {
+            case GameState::ST_STARTING:
+                std::cout << "STARTING" << std::endl;
+                startGame();
+                break;
+            case GameState::ST_PLAYING:
+                std::cout << "PLAYING" << std::endl;
+                playGame();
+                break;
+            case GameState::ST_BOSS:
+                std::cout << "BOSS" << std::endl;
+                bossLvl();
+                break;
+            case GameState::ST_END:
+                std::cout << "GAME ENDED" << std::endl;
+                endGame();
+                break;
+        }
 
         accumulator += clock.restart();
     }
@@ -515,8 +727,12 @@ void Engine::handleKeyEvent(sf::Event event)
     } else if (event.key.code == sf::Keyboard::Space) {
         player->addAcc(glm::vec3(0.0f, 1.0f / 200.0, 0.0f));
         player->startAnimation();
+    } else if (event.key.code == sf::Keyboard::F) {
+        player->destroyObject();
     }
 
+    glm::vec3 pos = player->getPos();
+    std::cout << "pos (" << pos.x << ", " << pos.y << ", " << pos.z << ")" << std::endl;
     std::cout << "eye (" << eye.x << ", " << eye.y << ", " << eye.z << ")" << std::endl;
     std::cout << "Player (" << player->getPos().x << ", " << player->getPos().y << ", " << player->getPos().z << ")" << std::endl;
 
@@ -549,11 +765,163 @@ void Engine::updateWorldObjects()
     }
 
     for (auto &p : projectiles) {
-        p->update();
+            p->update();
     }
 
-    player->update();
-    slide.setCenter(player->getPos());
-    slide.setEye(glm::vec3(player->getPos().x + 1.0, player->getPos().y, Settings::playerStart.z + 10));
+	sun->increaseIntensity(0.005);
+    skybox->update(sun->getIntensity());
+
+    for (auto &e : enemies) {
+        // update the enemy only when the player is in range
+        if(e->getPos().x - player->getPos().x < Settings::startEnemyUpdate) {
+            if(e->isAlive()) {
+                e->update();
+            }
+            else
+            {
+                e->start(player->getPos());
+                e->startAnimation();
+            }
+        }
+    }
+
+    player->update(gameState);
+
+    if(boss->getPos().x - player->getPos().x <= Settings::startBossUpdate)
+    {
+        if(boss->isAlive())
+            boss->update();
+        else {
+            boss->start();
+            boss->startAnimation();
+        }
+    }
+
+    if(gameState.currentState == GameState::ST_PLAYING)
+    {
+        slide.setCenter(player->getPos());
+        slide.setEye(glm::vec3(player->getPos().x + 1.0, player->getPos().y, Settings::playerStart.z + 10));
+    }
+
+    // When in range of the boss, change game state to ST_BOSS
+    if(gameState.currentState == GameState::ST_PLAYING && boss->getPos().x - player->getPos().x <= Settings::startBossStateRange)
+    {
+        gameState.currentState = GameState::ST_BOSS;
+        //Settings::sunPos = glm::vec3(player->getPos().x, 80.0, player->getPos().z + 20);
+    }
+
+	/*glm::vec3 center = glm::vec3(player->getPos().x + 2.0, player->getPos().y, player->getPos().z);
+    glm::vec3 eye = glm::vec3(player->getPos().x + 2.0, player->getPos().y, Settings::playerStart.z + 10);
+
+    center.y = std::max(1.5f, center.y);
+    eye.y = std::max(1.5f, eye.y);
+
+    slide.setCenter(center);
+    slide.setEye(eye);*/
 }
 
+void Engine::boundingBox() {
+    //create/set bounding box for the world objects, such as the enemies
+
+    for (auto &e : enemies) {
+        glm::vec3 pos = e->getPos();
+        glm::vec4 boundingBox = glm::vec4(pos.x - (0.5*e->getWidth()*Settings::enemyScale.z), pos.y - (0.5*e->getHeight()*Settings::enemyScale.y), (e->getWidth()*Settings::enemyScale.z), (e->getHeight()*Settings::enemyScale.y));
+        e->setBoundingBox(boundingBox);
+    }
+
+    for (auto &p : projectiles) {
+        glm::vec3 pos = p->getPos();
+        glm::vec4 boundingBox = glm::vec4(pos.x - (0.5), pos.y - (0.25), (1), (0.5));
+        p->setBoundingBox(boundingBox);
+    }
+
+    //create/set the bounding box for the bird
+    glm::vec3 pos = player->getPos();
+    glm::vec4 boundingBox = glm::vec4(pos.x - (0.5*player->getWidth()*Settings::playerScale.z), pos.y - (0.5*player->getHeight()*Settings::playerScale.y), (player->getHeight()*Settings::playerScale.z), (player->getHeight()*Settings::playerScale.y));
+    player->setBoundingBox(boundingBox);
+}
+
+/**
+  * Code from http://stackoverflow.com/questions/15125631/best-way-to-delete-a-stdunique-ptr-from-a-vector-with-a-raw-pointer
+  */
+void Engine::removeObjectFromVector(std::vector<std::unique_ptr<Enemy>> vec1, std::vector<Enemy*> vec2)
+{
+    vec1.erase(
+        std::remove_if( // Selectively remove elements in the second vector...
+            vec1.begin(),
+            vec1.end(),
+            [&] (std::unique_ptr<Enemy> const& p)
+            {   // This predicate checks whether the element is contained
+                // in the second vector of pointers to be removed...
+                return std::find(
+                    vec2.cbegin(),
+                    vec2.cend(),
+                    p.get()
+                    ) != vec2.end();
+            }),
+        vec1.end()
+        );
+
+    vec2.clear();
+}
+
+void Engine::checkCollision() {
+    glm::vec4 boundingBoxBird = player->getBoundingBox();
+    int counter = 0;
+
+    //check for world object collision with the bird
+    for (auto &e : enemies) {
+
+        // Check collision with bird
+        glm::vec4 boundingBoxWorld = e->getBoundingBox();
+        if (boundingBoxBird.x < boundingBoxWorld.x + boundingBoxWorld.z &&
+            boundingBoxBird.x + boundingBoxBird.z > boundingBoxWorld.x &&
+            boundingBoxBird.y < boundingBoxWorld.y + boundingBoxWorld.w &&
+            boundingBoxBird.y + boundingBoxBird.w > boundingBoxWorld.y)
+        {
+            gameState.currentState = GameState::ST_END;
+        }
+
+        // Check collision with terrain
+        float startEnemy = floor(e->getBoundingBox().x); //the min x-value pos of the bird
+        float endEnemy = floor(e->getBoundingBox().x + e->getBoundingBox().z); //the max x-value pos of the bird
+        float detail = 0.25;
+        std::vector<float> mountain;
+        mountain = SmoothTerrain::getMaxYValues();
+        for(startEnemy; startEnemy < endEnemy; startEnemy += detail) {
+            //initiate the counter with some correction
+            int counter = floor(startEnemy*4+2);
+            //check if the y-value of the mountain at the certain x is higher or equal to the y-value of the bird
+            if(mountain[counter] >= e->getBoundingBox().y) {
+                //e->destroyObject();
+            }
+        }
+        for (auto &p : projectiles) {
+            glm::vec4 boundingBoxProj = p->getBoundingBox();
+            if (boundingBoxProj.x < boundingBoxWorld.x + boundingBoxWorld.z &&
+                boundingBoxProj.x + boundingBoxProj.z > boundingBoxWorld.x &&
+                boundingBoxProj.y < boundingBoxWorld.y + boundingBoxWorld.w &&
+                boundingBoxProj.y + boundingBoxProj.w > boundingBoxWorld.y)
+            {
+                std::cout << "pos (" << "Dead piggy" << ")" << std::endl;
+            }
+        }
+        counter++;
+    }
+    //check for terrain collision
+    float startBird = floor(player->getBoundingBox().x); //the min x-value pos of the bird
+    float endBird = floor(player->getBoundingBox().x + player->getBoundingBox().z); //the max x-value pos of the bird
+    float detail = 0.25;
+    std::vector<float> mountain;
+
+    mountain = SmoothTerrain::getMaxYValues();
+
+    for (startBird; startBird < endBird; startBird += detail) {
+        //initiate the counter with some correction
+        int counter = floor(startBird*4+2);
+        //check if the y-value of the mountain at the certain x is higher or equal to the y-value of the bird
+        if(mountain[counter] >= player->getBoundingBox().y) {
+            gameState.currentState = GameState::ST_END;
+        }
+    }
+}

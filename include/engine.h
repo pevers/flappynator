@@ -11,18 +11,24 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <memory>
+#include <cmath>
 
 #include "settings.h"
 #include "shaderprogram.h"
 #include "slide.h"
 #include "flatterrain.h"
 #include "../src/util/tiny_obj_loader.h"
-#include "worldobject.h"
+#include "staticobject.h"
 #include "animatedobject.h"
 #include "smoothterrain.h"
 #include "player.h"
+#include "enemy.h"
 #include "skybox.h"
+
 #include "projectile.h"
+#include "gamestate.h"
+#include "boss.h"
+#include "sun.h"
 
 class Engine
 {
@@ -41,6 +47,7 @@ class Engine
         // sliding window, eye, center, speed
         Slide slide;
         std::unique_ptr<Terrain> terrain;
+        std::unique_ptr<Sun> sun;
 
         std::unique_ptr<Projectile> projectile;
 
@@ -50,24 +57,34 @@ class Engine
 
         std::unique_ptr<Player> player;
         std::vector<std::unique_ptr<WorldObject>> wobjs;
+        std::vector<std::unique_ptr<Enemy>> enemies;
+        std::unique_ptr<Boss> boss;
 
         std::vector<std::unique_ptr<Projectile>> projectiles;
         std::unique_ptr<Skybox> skybox;
 
+
         void cleanWorldObjectBuffers();
         void draw();
+        void removeObjectFromVector(std::vector<std::unique_ptr<Enemy>> vec1, std::vector<Enemy*> vec2);
+
+        GameState gameState;
     public:
         Engine();
         virtual ~Engine();
 
         bool init();
         bool initSun();
+        bool resetSun();
         bool initShadowMap();
+        bool initEnemies();
+        bool initBoss();
 
-        void drawProjectile();
         void drawFrame();
         void drawTerrain();
         void drawPlayer();
+        void drawEnemies();
+        void drawBoss();
         void drawSkybox();
         void drawWorldObjects();
         void drawObject(WorldObject &w);
@@ -75,14 +92,26 @@ class Engine
         void drawProjectile(Projectile &p);
 
         void drawShadows();
+
         void drawWorldShadow();
         void drawPlayerShadow();
+        void drawEnemyShadow();
+        void drawBossShadow();
+
+        void update();
+        void startGame();
+        void playGame();
+        void bossLvl();
+        void endGame();
 
         void mainLoop();
 
         void updateWorldObjects();
 
         void handleKeyEvent(sf::Event event);
+
+        void boundingBox();
+        void checkCollision();
 };
 
 #endif // ENGINE_H

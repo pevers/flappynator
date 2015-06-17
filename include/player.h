@@ -3,6 +3,7 @@
 
 #include "settings.h"
 #include "animatedobject.h"
+#include "gamestate.h"
 
 class Player : public AnimatedObject
 {
@@ -10,7 +11,7 @@ class Player : public AnimatedObject
         Player();
         virtual ~Player();
 
-        void update();
+        void update(GameState gameState);
 
         void setSpeed(glm::vec3 speed);
         glm::vec3 getSpeed();

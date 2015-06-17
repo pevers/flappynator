@@ -1,12 +1,13 @@
 #include "worldobject.h"
 
-WorldObject::WorldObject()
+WorldObject::WorldObject() : vbo(-1), elementBuffer(-1), normalBuffer(-1), vboTextureBuffer(-1), state(ALIVE), heightMesh(-1), widthMesh(-1)
 {
     //ctor
 }
 
-WorldObject::WorldObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot) : pos(start), scale(scl), rotation(rot), normalsExist(false)
+WorldObject::WorldObject(glm::vec3 start, glm::vec3 scl, glm::vec3 rot) : pos(start), scale(scl), rotation(rot), state(ALIVE)
 {
+
 }
 
 WorldObject::~WorldObject()
@@ -26,6 +27,21 @@ GLuint &WorldObject::getElementBuffer()
 GLuint &WorldObject::getNormalBuffer()
 {
     return normalBuffer;
+}
+
+GLuint &WorldObject::getTextureBuffer()
+{
+    return vboTextureBuffer;
+}
+
+void WorldObject::setBoundingBox(glm::vec4 boundingBox)
+{
+    this->boundingBox = boundingBox;
+}
+
+glm::vec4 WorldObject::getBoundingBox()
+{
+    return boundingBox;
 }
 
 void WorldObject::setPos(glm::vec3 pos)
@@ -58,14 +74,39 @@ glm::vec3 WorldObject::getRotation()
     return rotation;
 }
 
-bool WorldObject::hasNormals()
+OBJECT_STATE WorldObject::getState()
 {
-    return normalsExist;
+    return state;
 }
 
-void WorldObject::setNormalsExist(bool exist)
+void WorldObject::setState(OBJECT_STATE state)
 {
-    normalsExist = exist;
+    this->state = state;
+}
+
+bool WorldObject::isAlive()
+{
+    return state == ALIVE;
+}
+
+void WorldObject::setWidth(float widthMesh)
+{
+    this->widthMesh = widthMesh;
+}
+
+float WorldObject::getWidth()
+{
+    return widthMesh;
+}
+
+void WorldObject::setHeight(float heightMesh)
+{
+    this->heightMesh = heightMesh;
+}
+
+float WorldObject::getHeight()
+{
+    return heightMesh;
 }
 
 glm::mat4 WorldObject::getModel()
