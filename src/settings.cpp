@@ -36,7 +36,7 @@ namespace Settings
     std::string bossPath = "resources/animation/boss/";
     int bossNumFrames = 20;
 
-    int numEnemies = 5;
+    int numEnemies = 2;
     float startEnemyUpdate = 15.0; // When the horizontal distance between the enemy and the player is smaller than this value, update the enemy
     float startBossUpdate = 15.0;
     float startBossStateRange = 11.0;
