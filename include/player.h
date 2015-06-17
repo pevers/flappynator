@@ -1,6 +1,8 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include <algorithm>
+
 #include "settings.h"
 #include "animatedobject.h"
 #include "gamestate.h"

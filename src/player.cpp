@@ -59,8 +59,10 @@ void Player::update(GameState gameState)
             pos.y += speed.y;
             pos.z += speed.z;
         }
-        else
+        else {
             pos += speed;
+            pos.y = std::min(7.0f, pos.y);
+        }
 
         if (speed.y > 0) {
             rotation.z = -acos(glm::dot(glm::normalize(speed), glm::normalize(glm::vec3(1.0, 0.0, 0.0))));

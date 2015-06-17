@@ -894,7 +894,7 @@ void Engine::checkCollision() {
 
         // Check collision with bird
         glm::vec4 boundingBoxWorld = e->getBoundingBox();
-        if (e->getState() != DYING &&
+        if (e->getState() == ALIVE &&
             boundingBoxBird.x < boundingBoxWorld.x + boundingBoxWorld.z &&
             boundingBoxBird.x + boundingBoxBird.z > boundingBoxWorld.x &&
             boundingBoxBird.y < boundingBoxWorld.y + boundingBoxWorld.w &&
@@ -921,7 +921,8 @@ void Engine::checkCollision() {
 
         for (auto &p : projectiles) {
             glm::vec4 boundingBoxProj = p->getBoundingBox();
-            if (p->getState() != DEAD &&
+            if (p->getState() == ALIVE &&
+                e->getState() == ALIVE &&
                 boundingBoxProj.x < boundingBoxWorld.x + boundingBoxWorld.z &&
                 boundingBoxProj.x + boundingBoxProj.z > boundingBoxWorld.x &&
                 boundingBoxProj.y < boundingBoxWorld.y + boundingBoxWorld.w &&
