@@ -19,6 +19,9 @@ bool Engine::init()
 {
     window.create(sf::VideoMode(Settings::screenWidth, Settings::screenHeight, Settings::context.depthBits), Settings::windowTitle.c_str(), sf::Style::Close, Settings::context);
 
+    // Initialize the menu of the game
+    initMenu();
+
     // Initialize GLEW
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK) {
@@ -103,6 +106,55 @@ bool Engine::init()
     initBoss();
 
     return true;
+}
+
+void Engine::initMenu(){
+    //sf::Font font;
+    //font.loadFromFile("C:\\Users\\edward\\Desktop\\ARCADECLASSIC.ttf");
+
+    bool windowOn = true;
+
+    sf::Texture texture;
+    texture.loadFromFile("resources/background.png");
+    sf::Sprite sprite;
+    sprite.setTexture(texture);
+    sprite.setTextureRect(sf::IntRect(0, 0, 1024, 764));
+    sprite.setColor(sf::Color(255, 255, 255, 200));
+    sprite.setPosition(0, 0);
+
+    sf::Texture textureName;
+    textureName.loadFromFile("resources/flappy.png");
+    sf::Sprite spriteName;
+    spriteName.setTexture(textureName);
+    spriteName.setTextureRect(sf::IntRect(0, 0, 1024, 764));
+    spriteName.setPosition(Settings::screenWidth*0.28, Settings::screenHeight*0.1);
+
+    sf::Texture textureControl;
+    textureControl.loadFromFile("resources/control.png");
+    sf::Sprite spriteControl;
+    spriteControl.setTexture(textureControl);
+    spriteControl.setTextureRect(sf::IntRect(0, 0, 1024, 764));
+    spriteControl.setPosition(Settings::screenWidth*0.33, Settings::screenHeight*0.25);
+
+    while (window.isOpen() && windowOn)
+    {
+        // poll window events
+        sf::Event windowEvent;
+        while (window.pollEvent(windowEvent))
+        {
+                if (windowEvent.type == sf::Event::Closed)
+                    window.close();
+                if ((windowEvent.type == sf::Event::KeyPressed) && (windowEvent.key.code == sf::Keyboard::Space)) {
+                    windowOn = false;
+                    std::cerr << "Initialize game" << std::endl;
+                }
+        }
+        window.draw(sprite);
+        window.draw(spriteName);
+        window.draw(spriteControl);
+        window.display();
+        window.clear();
+    }
 }
 
 bool Engine::initEnemies() {
@@ -547,7 +599,6 @@ void Engine::endGame()
 }
 
 void Engine::mainLoop() {
-
     sf::Clock clock;
     sf::Time accumulator = sf::Time::Zero;
 
@@ -608,6 +659,7 @@ void Engine::mainLoop() {
                 break;
         }
 
+        //window.display();
         accumulator += clock.restart();
     }
 }
