@@ -32,7 +32,9 @@
 class Engine
 {
     private:
+        bool windowOn = true;
         sf::RenderWindow window;
+        sf::RenderWindow window2;
         GLuint shaderProgram;
         GLuint depthShaderProgram;
         GLuint elementBuffer;
@@ -65,6 +67,10 @@ class Engine
         void removeObjectFromVector(std::vector<std::unique_ptr<Enemy>> vec1, std::vector<Enemy*> vec2);
 
         GameState gameState;
+
+        sf::Texture textureBackground;
+        sf::Sprite spriteBackground;
+        bool win;
     public:
         Engine();
         virtual ~Engine();
@@ -77,6 +83,7 @@ class Engine
         bool initBoss();
 
         void initMenu();
+        void initEndMenu(bool win);
         void drawShadows();
         void drawFrame();
         void drawTerrain();

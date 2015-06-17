@@ -20,7 +20,7 @@ bool Engine::init()
     window.create(sf::VideoMode(Settings::screenWidth, Settings::screenHeight, Settings::context.depthBits), Settings::windowTitle.c_str(), sf::Style::Close, Settings::context);
 
     // Initialize the menu of the game
-    //initMenu();
+    initMenu();
 
     // Initialize GLEW
     glewExperimental = GL_TRUE;
@@ -109,18 +109,11 @@ bool Engine::init()
 }
 
 void Engine::initMenu(){
-    //sf::Font font;
-    //font.loadFromFile("C:\\Users\\edward\\Desktop\\ARCADECLASSIC.ttf");
-
-    bool windowOn = true;
-
-    sf::Texture texture;
-    texture.loadFromFile("resources/background.png");
-    sf::Sprite sprite;
-    sprite.setTexture(texture);
-    sprite.setTextureRect(sf::IntRect(0, 0, 1024, 764));
-    sprite.setColor(sf::Color(255, 255, 255, 200));
-    sprite.setPosition(0, 0);
+    textureBackground.loadFromFile("resources/background.png");
+    spriteBackground.setTexture(textureBackground);
+    spriteBackground.setTextureRect(sf::IntRect(0, 0, 1024, 764));
+    spriteBackground.setColor(sf::Color(255, 255, 255, 200));
+    spriteBackground.setPosition(0, 0);
 
     sf::Texture textureName;
     textureName.loadFromFile("resources/flappy.png");
@@ -135,9 +128,9 @@ void Engine::initMenu(){
     spriteControl.setTexture(textureControl);
     spriteControl.setTextureRect(sf::IntRect(0, 0, 1024, 764));
     spriteControl.setPosition(Settings::screenWidth*0.33, Settings::screenHeight*0.25);
-
     while (window.isOpen() && windowOn)
     {
+
         // poll window events
         sf::Event windowEvent;
         while (window.pollEvent(windowEvent))
@@ -149,11 +142,47 @@ void Engine::initMenu(){
                     std::cerr << "Initialize game" << std::endl;
                 }
         }
-        window.draw(sprite);
+        window.draw(spriteBackground);
         window.draw(spriteName);
         window.draw(spriteControl);
         window.display();
         window.clear();
+    }
+}
+void Engine::initEndMenu(bool win){
+    window2.create(sf::VideoMode(Settings::screenWidth, Settings::screenHeight, Settings::context.depthBits), Settings::windowTitle.c_str(), sf::Style::Close, Settings::context);
+    window.close();
+
+    sf::Texture textureEnd;
+    sf::Sprite spriteEnd;
+    if (win) {
+        textureEnd.loadFromFile("resources/win.png");
+        spriteEnd.setPosition(Settings::screenWidth*0.01, Settings::screenHeight*0.25);
+    }
+    else {
+        textureEnd.loadFromFile("resources/gameover.png");
+        spriteEnd.setPosition(Settings::screenWidth*0.01, Settings::screenHeight*0.25);
+    }
+    spriteEnd.setTexture(textureEnd);
+    spriteEnd.setTextureRect(sf::IntRect(0, 0, 1024, 550));
+
+
+    while (window2.isOpen() )
+    {
+        // poll window events
+        sf::Event windowEvent;
+        while (window2.pollEvent(windowEvent))
+        {
+                if (windowEvent.type == sf::Event::Closed)
+                    window2.close();
+                if ((windowEvent.type == sf::Event::KeyPressed) && (windowEvent.key.code == sf::Keyboard::Space)) {
+                    window2.close();
+                }
+        }
+        window2.draw(spriteBackground);
+        window2.draw(spriteEnd);
+        window2.display();
+        window2.clear();
     }
 }
 
@@ -615,7 +644,7 @@ void Engine::mainLoop() {
     };
 
     window.setFramerateLimit(60);
-
+    window.setKeyRepeatEnabled(false);
     while (window.isOpen())
     {
         // poll window events
@@ -667,6 +696,7 @@ void Engine::mainLoop() {
 
         //window.display();
         accumulator += clock.restart();
+
     }
 }
 
@@ -798,29 +828,6 @@ void Engine::boundingBox() {
     player->setBoundingBox(boundingBox);
 }
 
-/**
-  * Code from http://stackoverflow.com/questions/15125631/best-way-to-delete-a-stdunique-ptr-from-a-vector-with-a-raw-pointer
-  */
-void Engine::removeObjectFromVector(std::vector<std::unique_ptr<Enemy>> vec1, std::vector<Enemy*> vec2)
-{
-    vec1.erase(
-        std::remove_if( // Selectively remove elements in the second vector...
-            vec1.begin(),
-            vec1.end(),
-            [&] (std::unique_ptr<Enemy> const& p)
-            {   // This predicate checks whether the element is contained
-                // in the second vector of pointers to be removed...
-                return std::find(
-                    vec2.cbegin(),
-                    vec2.cend(),
-                    p.get()
-                    ) != vec2.end();
-            }),
-        vec1.end()
-        );
-
-    vec2.clear();
-}
 
 void Engine::checkCollision() {
     glm::vec4 boundingBoxBird = player->getBoundingBox();
@@ -841,9 +848,12 @@ void Engine::checkCollision() {
             boundingBoxBird.y < boundingBoxWorld.y + boundingBoxWorld.w &&
             boundingBoxBird.y + boundingBoxBird.w > boundingBoxWorld.y)
         {
+            win = false;
+            if(player->getState() != DYING) {
+                initEndMenu(win);
+            }
             player->setState(DYING);
             e->setState(DYING);
-            //gameState.currentState = GameState::ST_END;
         }
 
         // Check collision with terrain
@@ -877,9 +887,11 @@ void Engine::checkCollision() {
         int counter = floor(startBird*4+2);
         //check if the y-value of the mountain at the certain x is higher or equal to the y-value of the bird
         if(mountain[counter] >= player->getBoundingBox().y) {
-            //gameState.currentState = GameState::ST_END;
+            win = false;
+            if(player->getState() != DYING) {
+                initEndMenu(win);
+            }
             player->setState(DYING);
-
         }
     }
 }
