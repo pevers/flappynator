@@ -76,7 +76,7 @@ bool SmoothTerrain::generateTerrain(unsigned int width, unsigned int height)
         float starty = rand() % 10;
 
         // Low mountains near the boss so you don't get a high peak behind the bird
-        if(startx - Settings::bossStart.x <= -1.0*Settings::startBossStateRange - 10.0 || startx - Settings::bossStart.x >= 5.0)
+        if(startx - Settings::bossStart.x >= -1.0*Settings::startBossStateRange - 10.0 && startx - Settings::bossStart.x <= 5.0)
             starty = rand() % 4;
 
         //if(startx - Settings::bossStart.x <= -5.0 || startx - Settings::bossStart.x >= 5.0)

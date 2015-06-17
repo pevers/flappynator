@@ -158,6 +158,9 @@ void Engine::initMenu(){
 }
 
 bool Engine::initEnemies() {
+    std::vector<float> mountain;
+    mountain = SmoothTerrain::getMaxYValues();
+
     glm::vec3 enemyScale = Settings::enemyScale;
     glm::vec3 enemyRotation = Settings::enemyRotation;
 
@@ -165,7 +168,8 @@ bool Engine::initEnemies() {
 
     srand(time(NULL));
     for(int i = 0; i < Settings::numEnemies; i++) {
-        glm::vec3 enemyStart = player->getPos() + glm::vec3(15 + 10.0*i, 0.0, 0.0);
+        glm::vec3 enemyStart = glm::vec3(player->getPos().x + 10.0*i + 15, mountain[Settings::bossStart.x * 4] + 4.0, player->getPos().z);
+        //   player->getPos() + glm::vec3(15 + 10.0*i, 0.0, 0.0);
         glm::vec3 enemyAcc = Settings::enemyAcc;
 
         float speedX = (((rand()%200) / 100.0) + 2.0) * -1.0; // Value between 2.0 and 4.0
@@ -758,8 +762,8 @@ void Engine::updateWorldObjects()
         glm::vec3 center = glm::vec3(player->getPos().x + 2.0, player->getPos().y, player->getPos().z);
         glm::vec3 eye = glm::vec3(player->getPos().x + 2.0, player->getPos().y, Settings::playerStart.z + 10);
 
-        center.y = std::max(1.5f, center.y);
-        eye.y = std::max(1.5f, eye.y);
+        center.y = std::max(3.5f, center.y);
+        eye.y = std::max(3.5f, eye.y);
 
         slide.setCenter(center);
         slide.setEye(eye);
