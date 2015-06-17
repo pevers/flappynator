@@ -33,7 +33,9 @@
 class Engine
 {
     private:
+        bool windowOn = true;
         sf::RenderWindow window;
+        sf::RenderWindow window2;
         GLuint shaderProgram;
         GLuint depthShaderProgram;
         GLuint elementBuffer;
@@ -68,6 +70,9 @@ class Engine
         void draw();
 
         GameState gameState;
+
+        sf::Texture textureBackground;
+        sf::Sprite spriteBackground;
     public:
         Engine();
         virtual ~Engine();
@@ -80,6 +85,7 @@ class Engine
         bool initBoss();
 
         void initMenu();
+        void initEndMenu(bool win);
         void drawShadows();
         void drawFrame();
         void drawTerrain();
